@@ -37,8 +37,11 @@ remove:
 clean:
 	$(RM) -f *.cmo *.cmi *.cmx *.o *~ *.cma *.cmxa *.a a.out *.so ocamlfpu ocamlfpu.exe
 
-doc/index.html: *.mli
-	ocamldoc -d doc -html *.mli
+.PHONY: doc
+doc: doc/index.html
+
+doc/index.html: $(wildcard *.mli)
+	ocamldoc -d doc -html -charset utf-8 $^
 
 depend:
 	ocamldep *.mli *.ml > .depend

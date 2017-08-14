@@ -21,63 +21,63 @@
 
 open Fpu
 
+(* [min] and [max], specialized to floats (faster).
+   NaN do dot need to be handled. *)
+let fmin (a: float) (b: float) = if a <= b then a else b
+let fmax (a: float) (b: float) = if a <= b then b else a
 
+type t = {low: float; high: float}
 
-type interval = {low: float; high: float}
+let zero = {low=0.; high=0.}
+let one = {low=1.; high=1.}
+let v a b = {low=a; high=b }
 
-let zero_I = {low=0.;high=0.}
-let one_I = {low=1.;high=1.}
-
-let print_I x = Printf.printf "[%f, %f] " x.low x.high
-
-let sprintf_I format i =
+let sprintf format i =
   Printf.sprintf "[%s, %s]"
     (Printf.sprintf format i.low) (Printf.sprintf format i.high)
 
-let fprintf_I fp format i =
+let fprintf fp format i =
   Printf.fprintf fp "[%s, %s]"
     (Printf.sprintf format i.low) (Printf.sprintf format i.high)
 
-let printf_I format i =
+let printf format i =
   Printf.fprintf stdout "[%s, %s]"
     (Printf.sprintf format i.low) (Printf.sprintf format i.high)
 
 let is_NaN (x : float) = x <> x
 
-let compare_I_f {low = a; high = b} x =
+let compare_f {low = a; high = b} x =
   if b < x then 1 else if a <= x then 0 else -1
 
-let (<$.) = compare_I_f
+let size x = x.high -. x.low
 
-let size_I x = x.high -. x.low
-
-let abs_I ({low = a; high = b} as x) =
+let abs ({low = a; high = b} as x) =
   if 0. <= a then x
   else if b <= 0. then {low = -.b; high = -.a}
-  else {low = 0.; high = max (-.a) b}
+  else {low = 0.; high = fmax (-.a) b}
 
-let sgn_I {low = a; high = b} =
+let sgn {low = a; high = b} =
   {low = float (compare a 0.); high = float (compare b 0.)}
 
-let truncate_I x =
+let truncate x =
   {low = floor x.low; high = ceil x.high}
 
-let union_I_I x y = {low = min x.low y.low; high = max x.high y.high}
+let union x y = {low = fmin x.low y.low; high = fmax x.high y.high}
 
-let max_I_I x y = {low = max x.low y.low; high = max x.high y.high}
+let max x y = {low = fmax x.low y.low; high = fmax x.high y.high}
 
-let min_I_I x y = {low = min x.low y.low; high = min x.high y.high}
+let min x y = {low = fmin x.low y.low; high = fmin x.high y.high}
 
 
-external (+$) : interval -> interval -> interval = "fadd_I_caml"
-external (-$) : interval -> interval -> interval = "fsub_I_caml"
+external ( + ) : t -> t -> t = "fadd_I_caml"
+external ( - ) : t -> t -> t = "fsub_I_caml"
 
 (*
 let (+$) {low = a; high = b} {low = c; high = d} =
   {low = fadd_low a c; high = fadd_high b d}
 *)
 
-external (+$.) : interval -> float -> interval = "fadd_I_x_caml"
+external (+$.) : t -> float -> t = "fadd_I_x_caml"
 
 let (+.$) x a = a +$. x
 
@@ -91,17 +91,17 @@ let (-$) {low = a; high = b} {low = c; high = d} =
   {low = fsub_low a d; high = fsub_high b c}
 *)
 
-external (-$.) : interval -> float -> interval = "fsub_I_x_caml"
-external (-.$) : float -> interval -> interval = "fsub_x_I_caml"
+external (-$.) : t -> float -> t = "fsub_I_x_caml"
+external (-.$) : float -> t -> t = "fsub_x_I_caml"
 
 (*
 let (-$.) {low = a; high = b} y =
   {low = fsub_low a y; high = fsub_high b y}
 *)
 
-let (~-$) {low = a; high = b} = {low = -.b; high = -.a}
+let ( ~- ) {low = a; high = b} = {low = -.b; high = -.a}
 
-let ( *$) {low = a; high = b} {low = c; high = d} =
+let ( * ) {low = a; high = b} {low = c; high = d} =
   let sa = compare a 0. and sb = compare b 0. in
   let sc = compare c 0. and sd = compare d 0. in
   if (sa = 0 && sb = 0) || (sc = 0 && sd = 0) then {low = 0.; high = 0.}
@@ -116,8 +116,8 @@ let ( *$) {low = a; high = b} {low = c; high = d} =
   else if 0 <= sc then {low = fmul_low a d; high = fmul_high b d}
   else if sd <= 0 then {low = fmul_low b c; high = fmul_high a c}
   else
-    { low = min (fmul_low a d) (fmul_low b c);
-      high = max (fmul_high a c) (fmul_high b d) }
+    { low = fmin (fmul_low a d) (fmul_low b c);
+      high = fmax (fmul_high a c) (fmul_high b d) }
 
 let ( *$.) {low = a; high = b} y =
   let sy = compare y 0. in
@@ -127,7 +127,7 @@ let ( *$.) {low = a; high = b} y =
 
 let ( *.$) y a = a *$. y
 
-let (/$) {low = a; high = b} {low = c; high = d} =
+let ( / ) {low = a; high = b} {low = c; high = d} =
   let sc = compare c 0. and sd = compare d 0. in
   if sd = 0 then
     if sc = 0 then failwith "/$"
@@ -172,7 +172,7 @@ let (/.$) x {low = a; high = b} =
     else {low = fdiv_low x a; high = infinity}
   else {low = neg_infinity; high = infinity}
 
-let mod_I_f {low = a; high = b} y =
+let mod_f {low = a; high = b} y =
   (* assume that the result of fmod is exact *)
   let sy = compare y 0. in
   let y = if sy = 0 then failwith "mod_I_f" else abs_float y in
@@ -190,7 +190,7 @@ let mod_I_f {low = a; high = b} y =
     { low = if a <= -.y then -.y else fmod a y;
       high = if y <= b then y else fmod b y }
 
-let inv_I {low = a; high = b} =
+let inv {low = a; high = b} =
   let sa = compare a 0. and sb = compare b 0. in
   if sa = 0 then
     if sb = 0 then failwith "inv_I"
@@ -199,14 +199,14 @@ let inv_I {low = a; high = b} =
   else if sb = 0 then {low = neg_infinity; high = fdiv_high 1. a}
   else {low =  neg_infinity; high = infinity}
 
-let sqrt_I {low = a; high = b} =
+let sqrt {low = a; high = b} =
   if b < 0. then failwith "sqrt_I"
   else {low = if a < 0. then 0. else fsqrt_low a; high = fsqrt_high b}
 
-let float_i n = {low = ffloat_low n; high = ffloat_high n}
+let of_int n = {low = ffloat_low n; high = ffloat_high n}
 
-let pow_I_i {low = a; high = b} n =
-  let nf = float_i n in
+let pow_i {low = a; high = b} n =
+  let nf = of_int n in
   let pow_l x =
     if x = infinity then 0.
     else flog_pow_low x (if x < 1.0 then nf.high else nf.low) in
@@ -214,7 +214,7 @@ let pow_I_i {low = a; high = b} n =
     if x = infinity then infinity
     else flog_pow_high x (if x < 1.0 then nf.low else nf.high) in
   let sn = compare n 0 and sa = compare a 0. and sb = compare b 0. in
-  if sn = 0 then if a = 0. && b = 0. then failwith "pow_I_i" else one_I
+  if sn = 0 then if a = 0. && b = 0. then failwith "pow_I_i" else one
   else if sb < 0 then
     if n mod 2 = 0 then
       if 0 < sn then {low = pow_l (-.b); high = pow_h (-.a)}
@@ -227,9 +227,9 @@ let pow_I_i {low = a; high = b} n =
   else if n mod 2 = 0 then
     if 0 < sn then
       if sa = sb (* = 0. *) then {low = 0.; high = 0.}
-      else {low = 0.; high = pow_h (max (-.a) b)}
+      else {low = 0.; high = pow_h (fmax (-.a) b)}
     else if sa = sb (* = 0. *) then failwith "pow_I_i"
-    else {low = pow_l (max (-.a) b); high = infinity}
+    else {low = pow_l (fmax (-.a) b); high = infinity}
   else if 0 < sn then
     { low = if sa = 0 then 0. else -.pow_h (-.a);
       high = if sb = 0 then 0. else pow_h b}
@@ -242,7 +242,7 @@ let ( **$.) {low = a; high = b} nf =
   let pow_l x = if x = infinity then 0. else flog_pow_low x nf in
   let pow_h x = if x = infinity then infinity else flog_pow_high x nf in
   let sn = compare nf 0. and sa = compare a 0. and sb = compare b 0. in
-  if sn = 0 then if a = 0. && b = 0. then failwith "**$." else one_I
+  if sn = 0 then if a = 0. && b = 0. then failwith "**$." else one
   else if sb < 0 then
     if floor nf <> nf then failwith "**$."
     else if fmod nf 2. = 0. then
@@ -260,9 +260,9 @@ let ( **$.) {low = a; high = b} nf =
   else if fmod nf 2. = 0. then
     if 0 < sn then
       if sa = sb (* = 0. *) then {low = 0.; high = 0.}
-      else {low = 0.; high = pow_h (max (-.a) b)}
+      else {low = 0.; high = pow_h (fmax (-.a) b)}
     else if sa = sb (* = 0. *) then failwith "**$."
-    else {low = pow_l (max (-.a) b); high = infinity}
+    else {low = pow_l (fmax (-.a) b); high = infinity}
   else if 0 < sn then
     { low = if sa = 0 then 0. else -.pow_h (-.a);
       high = if sb = 0 then 0. else pow_h b}
@@ -272,7 +272,7 @@ let ( **$.) {low = a; high = b} nf =
   else {low = neg_infinity; high = infinity}
 
 let ( **$) {low = a; high = b} {low = c; high = d} =
-  let a = max 0. a in
+  let a = fmax 0. a in
   if b < 0. then failwith "**$"
   else if b = 0. then
     if d <= 0. then failwith "**$" else {low = 0.; high = 0.}
@@ -291,8 +291,8 @@ let ( **$) {low = a; high = b} {low = c; high = d} =
       high = fpow_high a (if a < 1. then c else d) }
   else if b < 1. then {low = fpow_low a d; high = fpow_high a c}
   else if 1. < a then {low = fpow_low b c; high = fpow_high b d}
-  else {low = min (fpow_low a d) (fpow_low b c);
-	high = max (fpow_high a c) (fpow_high b d)}
+  else {low = fmin (fpow_low a d) (fpow_low b c);
+	high = fmax (fpow_high a c) (fpow_high b d)}
 
 let ( **.$) x {low = a; high = b} =
   if x = 0. && 0. < b then {low = 0.; high = 0.}
@@ -310,54 +310,54 @@ let ( **.$) x {low = a; high = b} =
   else if b = infinity then {low = flog_pow_low x a; high = infinity}
   else {low = flog_pow_low x a; high = flog_pow_high x b}
 
-let log_I {low = a; high = b} =
+let log {low = a; high = b} =
   let sb = compare b 0. in
   if sb <= 0 then failwith "log_I"
   else {low = if a <= 0. then neg_infinity else flog_low a; high = flog_high b}
 
-let exp_I {low = a; high = b} =
+let exp {low = a; high = b} =
   { low = if a = neg_infinity then 0. else fexp_low a;
     high = if b = infinity then infinity else fexp_high b}
 
-let pi_I = {low = fatan_low (-1.) 0.; high = fatan_high (-1.) 0.}
-let pi2_I = pi_I *$. 2.0
+let pi = {low = fatan_low (-1.) 0.; high = fatan_high (-1.) 0.}
+let two_pi = pi *$. 2.0
 let pio2_I = {low = fatan_low 0. 1.; high = fatan_high 0. 1.}
 
-let e_I = {low = fexp_low 1.0;high = fexp_high 1.0}
+let e = {low = fexp_low 1.0; high = fexp_high 1.0}
 
-let sgn x =
+let i_sgn x =
   let sgn_low = compare x.low 0. and sgn_high = compare x.high 0. in
   if sgn_low <> sgn_high then 0 else sgn_low
 
 let max_63 = ldexp 1. 63
 
-external cos_I: interval -> interval = "fcos_I_caml"
-external sin_I: interval -> interval = "fsin_I_caml"
+external cos: t -> t = "fcos_I_caml"
+external sin: t -> t = "fsin_I_caml"
 
-let tan_I {low = a; high = b} =
-  if -.max_63 <= a && b <= max_63 && fsub_high b a < pi_I.high then (
+let tan {low = a; high = b} =
+  if -.max_63 <= a && b <= max_63 && fsub_high b a < pi.high then (
     let ta = ftan_low a in
     let tb = ftan_high b in
     if ta <= tb then {low = ta; high = tb}
     else {low = neg_infinity; high = infinity})
   else {low = neg_infinity; high = infinity}
 
-let acos_I {low = a; high = b} =
+let acos {low = a; high = b} =
   if a <= 1. && -1. <= b then
     {low = if b < 1. then facos_low b else 0.;
-     high = if -1. < a then facos_high a else pi_I.high}
+     high = if -1. < a then facos_high a else pi.high}
   else failwith "acos_I"
 
-let asin_I {low = a; high = b} =
+let asin {low = a; high = b} =
   if a <= 1. && -1. <= b then
     { low = if -1. < a then fasin_low a else -.pio2_I.high;
       high = if b < 1. then fasin_high b else pio2_I.high }
   else failwith "asin_I"
 
-let atan_I {low = a; high = b} =
+let atan {low = a; high = b} =
   { low = fatan_low 1. a; high = fatan_high 1. b}
 
-let atan2mod_I_I {low = ya; high = yb} {low = xa; high = xb} =
+let atan2mod {low = ya; high = yb} {low = xa; high = xb} =
   let sya = compare ya 0. and syb = compare yb 0. in
   let sxa = compare xa 0. and sxb = compare xb 0. in
   if syb < 0 then
@@ -370,21 +370,21 @@ let atan2mod_I_I {low = ya; high = yb} {low = xa; high = xb} =
     else {low = fatan_low xb ya; high = fatan_high xa ya}
   else if sya = syb (* = 0. *) then
     if sxa = 0 && sxb = 0 then failwith "atan2mod_I_I"
-    else if 0 <= sxa then zero_I
-    else if sxb <= 0 then pi_I
-    else {low = 0.; high = pi_I.high}
+    else if 0 <= sxa then zero
+    else if sxb <= 0 then pi
+    else {low = 0.; high = pi.high}
   else if sya = 0 then
     { low = if sxb <= 0 then fatan_low xb yb else 0.;
-      high = if 0 <= sxa then fatan_high xa yb else pi_I.high}
+      high = if 0 <= sxa then fatan_high xa yb else pi.high}
   else if syb = 0 then
-    { low = if 0 <= sxa then fatan_low xa ya else -.pi_I.high;
+    { low = if 0 <= sxa then fatan_low xa ya else -.pi.high;
       high = if sxb <= 0 then fatan_high xb ya else 0. }
   else if sxb <= 0 then
-    {low = fatan_low xb yb; high = fadd_high (fatan_high xb ya) pi2_I.high}
+    {low = fatan_low xb yb; high = fadd_high (fatan_high xb ya) two_pi.high}
   else if 0 <= sxa then {low = fatan_low xa ya; high = fatan_high xa yb}
-  else {low = -.pi_I.high; high = pi_I.high}
+  else {low = -.pi.high; high = pi.high}
 
-let atan2_I_I {low = ya; high = yb} {low = xa; high = xb} =
+let atan2 {low = ya; high = yb} {low = xa; high = xb} =
   let sya = compare ya 0. and syb = compare yb 0. in
   let sxa = compare xa 0. and sxb = compare xb 0. in
   if syb < 0 then
@@ -397,51 +397,110 @@ let atan2_I_I {low = ya; high = yb} {low = xa; high = xb} =
     else {low = fatan_low xb ya; high = fatan_high xa ya}
   else if sya = syb then
     if sxb <= 0 then
-      if sxa = 0 then failwith "atan2" else {low = pi_I.low; high = pi_I.high}
+      if sxa = 0 then failwith "atan2" else {low = pi.low; high = pi.high}
     else if 0 <= sxa then {low = 0.; high = 0.}
-    else {low = 0.; high = pi_I.high}
+    else {low = 0.; high = pi.high}
   else if sya = 0 then
     { low = if 0 < sxb then 0. else fatan_low xb yb;
-      high = if sxa < 0 then pi_I.high else fatan_high xa yb }
+      high = if sxa < 0 then pi.high else fatan_high xa yb }
   else if syb = 0 then
-    { low = if sxa < 0 then -.pi_I.high else fatan_low xa ya;
+    { low = if sxa < 0 then -.pi.high else fatan_low xa ya;
       high = if 0 < sxb then 0. else fatan_high xb ya }
   else if 0 <= sxa then {low = fatan_low xa ya; high = fatan_high xa yb}
-  else {low = -.pi_I.high; high = pi_I.high}
+  else {low = -.pi.high; high = pi.high}
 
-let cosh_I {low = a; high = b} =
+let cosh {low = a; high = b} =
   if b < 0. then {low = fcosh_low b; high = fcosh_high a}
-  else if a < 0. then {low = 1.; high = fcosh_high (max (-.a) b)}
+  else if a < 0. then {low = 1.; high = fcosh_high (fmax (-.a) b)}
   else {low = fcosh_low a; high = fcosh_high b}
 
-let sinh_I {low = a; high = b} = {low = fsinh_low a; high = fsinh_high b}
+let sinh {low = a; high = b} = {low = fsinh_low a; high = fsinh_high b}
 
-let tanh_I {low = a; high = b} = {low = ftanh_low a; high = ftanh_high b}
+let tanh {low = a; high = b} = {low = ftanh_low a; high = ftanh_high b}
 
-let size_mean_X v =
-  let add sum {low = a; high = b} = fadd_high sum (fsub_high b a) in
-  Array.fold_left add 0. v /.float (Array.length v)
 
-let size_max_X v =
-  Array.fold_left (fun m {low = a; high = b} -> max m (fsub_high b a)) 0. v
+module Arr = struct
 
-let size_X = size_max_X
-let size2_X = size_mean_X
+  let size_mean v =
+    let add sum {low = a; high = b} = fadd_high sum (fsub_high b a) in
+    Array.fold_left add 0. v /.float (Array.length v)
 
-let size_x v =
-  Array.fold_left (fun m vi -> max m (abs_float vi)) 0. v
+  let size_max v =
+    Array.fold_left (fun m {low = a; high = b} -> fmax m (fsub_high b a)) 0. v
 
-let print_X v = Array.iter print_I v
+  let size v =
+    Array.fold_left (fun m vi -> fmax m (abs_float vi)) 0. v
 
-let fprintf_X fp format v = Array.iter (fprintf_I fp format) v
+  let printf format v = Array.iter (printf format) v
 
-let printf_X format v = Array.iter (printf_I format) v
+  let fprintf fp format v = Array.iter (fprintf fp format) v
 
-let fprintf_X fp format v = Array.iter (fprintf_I fp format) v
+  let sprintf format v =
+    Array.fold_left (fun  s x -> (sprintf format x) ^ s) "" v
+end
 
-let sprintf_X format v =
-  Array.fold_left (fun  s x -> (sprintf_I format x) ^ s) "" v
 
-let pow_I_f = ( **$.)
-
-let pow_I_I = ( **$)
+module Deprecated = struct
+  type interval = t
+  let zero_I = zero
+  let one_I = one
+  let pi_I = pi
+  let e_I = e
+  let printf_I = printf
+  let fprintf_I = fprintf
+  let sprintf_I = sprintf
+  let float_i = of_int
+  let compare_I_f = compare_f
+  let size_I = size
+  let sgn_I = sgn
+  let truncate_I = truncate
+  let abs_I = abs
+  let union_I_I = union
+  let max_I_I = max
+  let min_I_I = min
+  let ( +$ ) = ( + )
+  let ( +$. ) = ( +$. )
+  let ( +.$ ) = ( +.$ )
+  let ( -$ ) = ( - )
+  let ( -$. ) = ( -$. )
+  let ( -.$ ) = ( -.$ )
+  let ( ~-$ ) = ( ~- )
+  let ( *$. ) = ( *$. )
+  let ( *.$ ) = ( *.$ )
+  let ( *$ ) = ( * )
+  let ( /$. ) = ( /$. )
+  let ( /.$ ) = ( /.$ )
+  let ( /$ ) = ( / )
+  let mod_I_f = mod_f
+  let inv_I = inv
+  let sqrt_I = sqrt
+  let pow_I_i = pow_i
+  let ( **$. ) = ( **$. )
+  let ( **.$ ) = ( **.$ )
+  let ( **$ ) = ( **$ )
+  let log_I = log
+  let exp_I = exp
+  let cos_I = cos
+  let sin_I = sin
+  let tan_I = tan
+  let acos_I = acos
+  let asin_I = asin
+  let atan_I = atan
+  let atan2mod_I_I = atan2mod
+  let atan2_I_I = atan2
+  let cosh_I = cosh
+  let sinh_I = sinh
+  let tanh_I = tanh
+  let size_max_X = Arr.size_max
+  let size_mean_X = Arr.size_mean
+  let sprintf_X = Arr.sprintf
+  let fprintf_X = Arr.fprintf
+  let printf_X = Arr.printf
+  let print_I x = Printf.printf "[%f, %f] " x.low x.high
+  let print_X v = Array.iter print_I v
+  let (<$.) = compare_f
+  let size_X = size_max_X
+  let size2_X = size_mean_X
+  let pow_I_I = ( **$ )
+  let pow_I_f = ( **$. )
+end

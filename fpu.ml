@@ -21,9 +21,9 @@
 
 let _ = Callback.register_exception "failure" (Failure "")
 
-external set_low: unit -> unit = "set_low" "noalloc"
-external set_high: unit -> unit = "set_high" "noalloc"
-external set_nearest: unit -> unit = "set_nearest" "noalloc"
+external set_low: unit -> unit = "set_low" [@@noalloc]
+external set_high: unit -> unit = "set_high" [@@noalloc]
+external set_nearest: unit -> unit = "set_nearest" [@@noalloc]
 
 external ffloat: int -> float = "ffloat_caml"
 external ffloat_high: int -> float = "ffloat_high_caml"
