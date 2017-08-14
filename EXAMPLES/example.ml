@@ -1,11 +1,9 @@
-open Interval.Deprecated;;
+open Printf
+module I = Interval
 
 let () =
-  let a = {low=3.0;high=3.0} in
-  let b = 1. /.$ a in
-  printf_I "%f" a;
-  print_newline();
-  printf_I "%f" b;
-  print_newline ();
-  Printf.printf "%e\n" (b.high -. b.low)
+  let a = I.v 3.0 3.0 in
+  let b = I.(1. /: a) in
+  printf ("a = %a\nb = 1/a = " ^^ I.fmt "%.16f" ^^ "\nsize(b) = %e\n")
+    I.pr a b (I.size b)
 

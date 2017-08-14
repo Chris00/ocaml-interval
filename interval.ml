@@ -19,6 +19,25 @@
     If not, see <http://www.gnu.org/licenses/>.
 *)
 
+(* Save original operators *)
+module U = struct
+  external ( ~- ) : int -> int = "%negint"
+  external ( ~+ ) : int -> int = "%identity"
+  external ( + ) : int -> int -> int = "%addint"
+  external ( - ) : int -> int -> int = "%subint"
+  external ( * ) : int -> int -> int = "%mulint"
+  external ( / ) : int -> int -> int = "%divint"
+  external ( ~-. ) : float -> float = "%negfloat"
+  external ( ~+. ) : float -> float = "%identity"
+  external ( +. ) : float -> float -> float = "%addfloat"
+  external ( -. ) : float -> float -> float = "%subfloat"
+  external ( *. ) : float -> float -> float = "%mulfloat"
+  external ( /. ) : float -> float -> float = "%divfloat"
+  external ( ** ) : float -> float -> float = "caml_power_float" "pow"
+                                                [@@unboxed] [@@noalloc]
+  (* FIXME: Do we also want to recover [sin],...? *)
+end
+
 open Fpu
 
 (* [min] and [max], specialized to floats (faster).
@@ -84,9 +103,9 @@ let (+$) {low = a; high = b} {low = c; high = d} =
   {low = fadd_low a c; high = fadd_high b d}
 *)
 
-external (+$.) : t -> float -> t = "fadd_I_x_caml"
+external (+.) : t -> float -> t = "fadd_I_x_caml"
 
-let (+.$) x a = a +$. x
+let (+:) x a = a +. x
 
 (*
 let (+$.) {low = a; high = b} x =
@@ -98,8 +117,8 @@ let (-$) {low = a; high = b} {low = c; high = d} =
   {low = fsub_low a d; high = fsub_high b c}
 *)
 
-external (-$.) : t -> float -> t = "fsub_I_x_caml"
-external (-.$) : float -> t -> t = "fsub_x_I_caml"
+external (-.) : t -> float -> t = "fsub_I_x_caml"
+external (-:) : float -> t -> t = "fsub_x_I_caml"
 
 (*
 let (-$.) {low = a; high = b} y =
@@ -126,13 +145,13 @@ let ( * ) {low = a; high = b} {low = c; high = d} =
     { low = fmin (fmul_low a d) (fmul_low b c);
       high = fmax (fmul_high a c) (fmul_high b d) }
 
-let ( *$.) {low = a; high = b} y =
+let ( *. ) y {low = a; high = b} =
   let sy = compare y 0. in
   if sy = 0 then {low = 0.; high = 0.}
   else if sy < 0 then {low = fmul_low b y; high = fmul_high a y}
   else {low = fmul_low a y; high = fmul_high b y}
 
-let ( *.$) y a = a *$. y
+let ( *: ) a y = y *. a
 
 let ( / ) {low = a; high = b} {low = c; high = d} =
   let sc = compare c 0. and sd = compare d 0. in
@@ -156,13 +175,13 @@ let ( / ) {low = a; high = b} {low = c; high = d} =
   else if a = 0. && b = 0. then {low = 0.; high = 0.}
   else {low = neg_infinity; high = infinity}
 
-let (/$.) {low = a; high = b} y =
+let ( /. ) {low = a; high = b} y =
   let sy = compare y 0. in
   if sy = 0 then failwith "/$."
   else if 0 < sy then {low = fdiv_low a y; high = fdiv_high b y}
   else {low = fdiv_low b y; high = fdiv_high a y}
 
-let (/.$) x {low = a; high = b} =
+let ( /: ) x {low = a; high = b} =
   let sx = compare x 0. and sa = compare a 0. and sb = compare b 0. in
   if sx = 0 then
     if sa = 0 && sb = 0 then failwith "/.$" else {low = 0.; high = 0.}
@@ -212,7 +231,7 @@ let sqrt {low = a; high = b} =
 
 let of_int n = {low = ffloat_low n; high = ffloat_high n}
 
-let pow_i {low = a; high = b} n =
+let ( ** ) {low = a; high = b} n =
   let nf = of_int n in
   let pow_l x =
     if x = infinity then 0.
@@ -245,7 +264,7 @@ let pow_i {low = a; high = b} n =
   else if sb = 0 then {low = neg_infinity; high = -.pow_l (-.a)}
   else {low = neg_infinity; high = infinity}
 
-let ( **$.) {low = a; high = b} nf =
+let ( **. ) {low = a; high = b} nf =
   let pow_l x = if x = infinity then 0. else flog_pow_low x nf in
   let pow_h x = if x = infinity then infinity else flog_pow_high x nf in
   let sn = compare nf 0. and sa = compare a 0. and sb = compare b 0. in
@@ -278,7 +297,7 @@ let ( **$.) {low = a; high = b} nf =
   else if sb = 0 then {low = neg_infinity; high = -.pow_l (-.a)}
   else {low = neg_infinity; high = infinity}
 
-let ( **$) {low = a; high = b} {low = c; high = d} =
+let ( *** ) {low = a; high = b} {low = c; high = d} =
   let a = fmax 0. a in
   if b < 0. then failwith "**$"
   else if b = 0. then
@@ -301,7 +320,7 @@ let ( **$) {low = a; high = b} {low = c; high = d} =
   else {low = fmin (fpow_low a d) (fpow_low b c);
 	high = fmax (fpow_high a c) (fpow_high b d)}
 
-let ( **.$) x {low = a; high = b} =
+let ( **: ) x {low = a; high = b} =
   if x = 0. && 0. < b then {low = 0.; high = 0.}
   else if x <= 0. then failwith "**.$"
   else if x < 1. then
@@ -327,7 +346,7 @@ let exp {low = a; high = b} =
     high = if b = infinity then infinity else fexp_high b}
 
 let pi = {low = fatan_low (-1.) 0.; high = fatan_high (-1.) 0.}
-let two_pi = pi *$. 2.0
+let two_pi = 2.0 *. pi
 let pio2_I = {low = fatan_low 0. 1.; high = fatan_high 0. 1.}
 
 let e = {low = fexp_low 1.0; high = fexp_high 1.0}
@@ -430,7 +449,7 @@ module Arr = struct
 
   let size_mean v =
     let add sum {low = a; high = b} = fadd_high sum (fsub_high b a) in
-    Array.fold_left add 0. v /.float (Array.length v)
+    U.(Array.fold_left add 0. v /. float (Array.length v))
 
   let size_max v =
     Array.fold_left (fun m {low = a; high = b} -> fmax m (fsub_high b a)) 0. v
@@ -442,7 +461,7 @@ module Arr = struct
     if Array.length v = 0 then Printf.fprintf ch "[| |]"
     else (
       Printf.fprintf ch "[| [%g, %g]" (v.(0)).low (v.(0)).high;
-      for i = 1 to Pervasives.( - ) (Array.length v) 1 do
+      for i = 1 to U.(Array.length v - 1) do
         Printf.fprintf ch "; [%g, %g]" (v.(i)).low (v.(i)).high;
       done;
       Printf.fprintf ch " |]";
@@ -452,7 +471,7 @@ module Arr = struct
     if Array.length v = 0 then Format.fprintf ch "[| |]"
     else (
       Format.fprintf ch "[| [%g, %g]" (v.(0)).low (v.(0)).high;
-      for i = 1 to Pervasives.( - ) (Array.length v) 1 do
+      for i = 1 to U.(Array.length v - 1) do
         Format.fprintf ch "; [%g, %g]" (v.(i)).low (v.(i)).high;
       done;
       Format.fprintf ch " |]";
@@ -518,25 +537,25 @@ let float_i = of_int
   let max_I_I = max
   let min_I_I = min
   let ( +$ ) = ( + )
-  let ( +$. ) = ( +$. )
-  let ( +.$ ) = ( +.$ )
+  let ( +$. ) = ( +. )
+  let ( +.$ ) = ( +: )
   let ( -$ ) = ( - )
-  let ( -$. ) = ( -$. )
-  let ( -.$ ) = ( -.$ )
+  let ( -$. ) = ( -. )
+  let ( -.$ ) = ( -: )
   let ( ~-$ ) = ( ~- )
-  let ( *$. ) = ( *$. )
-  let ( *.$ ) = ( *.$ )
+  let ( *$. ) = ( *: )
+  let ( *.$ ) = ( *. )
   let ( *$ ) = ( * )
-  let ( /$. ) = ( /$. )
-  let ( /.$ ) = ( /.$ )
+  let ( /$. ) = ( /. )
+  let ( /.$ ) = ( /: )
   let ( /$ ) = ( / )
   let mod_I_f = mod_f
   let inv_I = inv
   let sqrt_I = sqrt
-  let pow_I_i = pow_i
-  let ( **$. ) = ( **$. )
-  let ( **.$ ) = ( **.$ )
-  let ( **$ ) = ( **$ )
+  let pow_I_i = ( ** )
+  let ( **$. ) = ( **. )
+  let ( **.$ ) = ( **: )
+  let ( **$ ) = ( *** )
   let log_I = log
   let exp_I = exp
   let cos_I = cos

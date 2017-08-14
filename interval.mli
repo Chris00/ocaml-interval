@@ -31,7 +31,29 @@
 let x = I.(v 0.5 1. + sin(v 3. 3.125))
 ]}
    When the module [I] is open, the integer operators ([+], [-],...)
-   are redefined but {i not} the floating point ones.
+   and the floating point ones ([+.], [-.],...) are redefined.  If, in
+   the middle of an expression, you need to use the usual operators,
+   locally open the module {!U} as in [Interval.(x /. U.(float(n + 1)))].
+
+   The names symbols for infix operators have been chosen to try to
+   make the standard cases short and the overall expression readable.
+   The rationale is as follows.
+   - The integer operators [+], [-], [*], [/], [~-] and [~+]
+     act on intervals;
+   - The float operators [+.], [-.], [/.] take an interval to
+     the left and a float to the right, but [*.] does the opposite.
+     This is to match the standard presentation of polynomials.
+     Example: [Interval.(3. *. x**2 + 2. *. x +. 4.)].
+   - New operators [+:], [-:], [*:] and [/:] are as in the previous
+     point bu with the interval and float swapped.  Note that [+:] and
+     [*:] are not really needed because you can always swap arguments.
+   - For exponentiation, [**] has been chosen for integer exponent
+     because they are the more frequent, [**.] when the exponent is a
+     float, [**:] when the base is a float and [***] for exponentiation
+     of two intervals.
+
+   You do not have to worry about remembering these rules.  The type
+   system will enforce them.
 
    An older deprecated interface is still available as the module
    {!Interval.Deprecated}.
@@ -167,61 +189,61 @@ val ( + ) : t -> t -> t
 (** [a + b] returns [{low=a.low +. b.low; high=a.high +. b.high}]
    properly rounded. *)
 
-val ( +$. ): t -> float -> t
+val ( +. ): t -> float -> t
 (** [a +$. x] returns [{low=a.low+.x; high=a.high+.x}] properly rounded. *)
 
-val ( +.$ ): float -> t -> t
+val ( +: ): float -> t -> t
 (** [x +.$ a] returns [{low=a.low+.x; high=a.high+.x}] properly rounded. *)
 
 val ( - ): t -> t -> t
 (** [a - b] returns [{low=a.low-.b.high;high=a.high-.b.low}] properly
    rounded. *)
 
-val ( -$. ): t -> float -> t
+val ( -. ): t -> float -> t
 (** [a -$. x] returns [{low=a.low-.x;high=a.high-.x}] properly rounded. *)
 
-val ( -.$ ): float -> t -> t
+val ( -: ): float -> t -> t
 (** [x -.$ a] returns [{low=x-.a.high; high=x-.a.low}] properly rounded. *)
 
 val ( ~- ): t -> t
 (** [~- a] is the unary negation, it returns [{low=-a.high; high=-a.low}]. *)
-
-val ( *$. ): t -> float -> t
-(** [a *. x] multiplies [a] by [x] according to interval arithmetic
-   and returns the proper result.  If [x=0.] then {!zero} is returned. *)
-
-val ( *.$ ): float -> t -> t
-(** [x *$. a] multiplies [a] by [x] according to interval arithmetic
-   and returns the proper result.  If [x=0.] then [zero_I] is returned. *)
 
 val ( * ): t -> t -> t
 (** [a * b] multiplies [a] by [b] according to interval arithmetic
    and returns the proper result.  If [a=zero] or [b=zero] then
    {!zero} is returned. *)
 
-val ( /$. ): t -> float -> t
-(** [a /$. x] divides [a] by [x] according to interval arithmetic and
-   returns the proper result.  Raise [Failure "/$."] if [x=0.]. *)
-(* FIXME: should we raise Division_by_zero (declared in this module). *)
+val ( *. ): float -> t -> t
+(** [x *$. a] multiplies [a] by [x] according to interval arithmetic
+   and returns the proper result.  If [x=0.] then [zero_I] is returned. *)
 
-val ( /.$ ): float -> t -> t
-(** [x /.$ a] divides [x] by [a] according to interval arithmetic and
-   returns the result.  Raise [Failure "/.$"] if [a=zero]. *)
+val ( *: ): t -> float -> t
+(** [a *. x] multiplies [a] by [x] according to interval arithmetic
+   and returns the proper result.  If [x=0.] then {!zero} is returned. *)
 
 val ( / ): t -> t -> t
 (** [a / b] divides the first interval by the second according to
    interval arithmetic and returns the proper result.
    Raise [Failure "/$"] if [b=zero]. *)
 
-val mod_f: t -> float -> t
-(** [mod_f a f] returns [a] mod [f] according to interval arithmetic
-   et OCaml [mod_float] definition.  Raise [Failure "mod_f"] if [f=0.]. *)
-(* FIXME: Division_by_zero *)
+val ( /. ): t -> float -> t
+(** [a /$. x] divides [a] by [x] according to interval arithmetic and
+   returns the proper result.  Raise [Failure "/$."] if [x=0.]. *)
+(* FIXME: should we raise Division_by_zero (declared in this module). *)
+
+val ( /: ): float -> t -> t
+(** [x /.$ a] divides [x] by [a] according to interval arithmetic and
+   returns the result.  Raise [Failure "/.$"] if [a=zero]. *)
 
 val inv: t -> t
 (** [inv a] returns [1. /.$ a].
     Raise [Failure "inv_I"] if [a=zero_I] *)
 (* FIXME Division_by_zero *)
+
+val mod_f: t -> float -> t
+(** [mod_f a f] returns [a] mod [f] according to interval arithmetic
+   et OCaml [mod_float] definition.  Raise [Failure "mod_f"] if [f=0.]. *)
+(* FIXME: Division_by_zero *)
 
 val sqrt: t -> t
 (** [sqrt a] returns [{low=sqrt a;high=sqrt b}] if [a>=0.],
@@ -229,26 +251,26 @@ val sqrt: t -> t
    Raise [Failure "sqrt_I"] if [b<0.]. *)
 (* FIXME: Domain_error *)
 
-val pow_i: t -> int -> t
+val ( ** ): t -> int -> t
 (** [pow_i a n] returns interval [a] raised to [n]th power according
    to interval arithmetic.  If [n=0] then {!one} is returned.  Raise
    [Failure "pow_f"] if [n<=0] and [a=zero].  Computed with exp-log in
    base2. *)
 
-val ( **$. ): t -> float -> t
+val ( **. ): t -> float -> t
 (** [a **$. f] returns interval [a] raised to f power according to
    interval arithmetic.  If [f=0.] then {!one} is
    returned. Raise [Failure "**$."] if [f<=0. and a=zero_I] or if [f]
    is not an integer value and [a.high < 0.].  Computed with exp-log in
    base2. *)
 
-val ( **.$ ): float -> t -> t
+val ( **: ): float -> t -> t
 (** [x **.$ a] returns float [x] raised to interval [a] power
    according to interval arithmetic, considering the restiction of x
    power y to x >= 0.  Raise [Failure "**.$"] if [x < 0] and [a.high
    <= 0]. *)
 
-val ( **$ ): t -> t -> t
+val ( *** ): t -> t -> t
 (** [a **$ b] returns interval [a] raised to [b] power according to
    interval arithmetic, considering the restriction of x power y to
    x >= 0.  Raise [Failure "**$"] if [a.high < 0] or [(a.high=0. and
@@ -321,6 +343,32 @@ val sinh: t -> t
 
 val tanh: t -> t
 (** tanh is the proper extension of tanh to interval arithmetic. *)
+
+
+(** {2 Usual arithmetic operators} *)
+
+(** Module undoing the redeclaration of usual infix operators [+],
+   [+.], etc. in case it is needed locally, while this module is
+   open.
+
+   Example: [Interval.(x + sin(of_int U.(n + 1)))]. *)
+module U : sig
+  external ( ~- ) : int -> int = "%negint"
+  external ( ~+ ) : int -> int = "%identity"
+  external ( + ) : int -> int -> int = "%addint"
+  external ( - ) : int -> int -> int = "%subint"
+  external ( * ) : int -> int -> int = "%mulint"
+  external ( / ) : int -> int -> int = "%divint"
+
+  external ( ~-. ) : float -> float = "%negfloat"
+  external ( ~+. ) : float -> float = "%identity"
+  external ( +. ) : float -> float -> float = "%addfloat"
+  external ( -. ) : float -> float -> float = "%subfloat"
+  external ( *. ) : float -> float -> float = "%mulfloat"
+  external ( /. ) : float -> float -> float = "%divfloat"
+  external ( ** ) : float -> float -> float = "caml_power_float" "pow"
+                                                [@@unboxed] [@@noalloc]
+end
 
 
 (** {2 Arrays of intervals} *)
@@ -608,7 +656,7 @@ module Deprecated : sig
 end [@@deprecated]
 
 
-(** {2:perf Performace}
+(** {2:perf Performance}
 
 Intel Atom 230 Linux 32 bits:
 {ul
