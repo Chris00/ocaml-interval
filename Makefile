@@ -44,6 +44,7 @@ clean:
 doc: doc/index.html
 
 doc/index.html: $(wildcard *.mli)
+	mkdir -p doc
 	ocamldoc -d doc -html -charset utf-8 $^
 
 depend:
