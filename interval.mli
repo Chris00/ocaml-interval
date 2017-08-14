@@ -106,21 +106,27 @@ val v : float -> float -> t
    the resulting interval may not contain these values because the
    compiler will round them to binary numbers before passing them to [v]. *)
 
-val printf : (float -> string, unit, string) format -> t -> unit
-(** Prints an interval with the same format applied to both endpoints.
-   Formats follow the same specification than the one used for the
-   regular [printf] function. *)
-
-val fprintf : out_channel -> (float -> string, unit, string) format -> t -> unit
-(** Prints an interval into an [out_channel] with the same format
-   applied to both endpoints. *)
-
-val sprintf: (float -> string, unit, string) format -> t -> string
-(** Returns a string holding the interval printed with the same format
-   applied to both endpoints. *)
-
 val of_int : int -> t
 (** Returns the interval containing the float conversion of an integer. *)
+
+val to_string : ?fmt: (float -> 'b, 'a, 'b) format -> t -> string
+(** [to_string i] return a string representation of the interval [i].
+    @param fmt is the format used to print the two bounds of [i].
+               Default: ["%g"]. *)
+
+val pr : out_channel -> t -> unit
+(** Print the interval to the channel.  To be used with [Printf]
+   format "%a". *)
+
+val pp : Format.formatter -> t -> unit
+(** Print the interval to the formatter.  To be used with [Format]
+   format "%a". *)
+
+val fmt : (float -> 'b, 'a, 'b) format -> (t -> 'c, 'd, 'e, 'c) format4
+(** [fmt float_fmt] returns a format to print intervals where each
+   component is printed with [float_fmt].
+
+   Example: [Printf.printf ("%s = " ^^ fmt "%.10f" ^^ "\n") name i]. *)
 
 val compare_f: t -> float -> int
 (** [compare_f a x] returns
@@ -326,18 +332,20 @@ module Arr : sig
   val size_mean: t array -> float
   (** Computes the mean of the size of intervals of the interval vector. *)
 
-  val printf : (float -> string, unit, string) format -> t array -> unit
-  (** Prints an interval vector with the same format applied to all
-     endpoints. *)
+  val to_string : ?fmt: (float -> 'b, 'a, 'b) format -> t array -> string
+  (** [to_string a] returns a string representation of [a].
+      @param fmt is the format used to print the two bounds of [i].
+                 Default: ["%g"]. *)
 
-  val fprintf : out_channel -> (float -> string, unit, string) format ->
-                t array -> unit
-  (** Prints an interval vector into an out_channel with the same
-     format applied to all endpoints. *)
+  val pr : out_channel -> t array -> unit
+  (** Print the interval array to the channel.  To be used with
+     [Printf] format "%a". *)
 
-  val sprintf: (float -> string, unit, string) format -> t array -> string
-  (** Returns a string holding the interval vector printed with the same
-      format applied to all endpoints. *)
+  val pp : Format.formatter -> t array -> unit
+  (** Print the interval array to the formatter.  To be used with
+     [Format] format "%a". *)
+
+  val fmt : (float -> 'b, 'a, 'b) format -> (t array -> 'c, 'd, 'e, 'c) format4
 end
 
 

@@ -32,17 +32,24 @@ let zero = {low=0.; high=0.}
 let one = {low=1.; high=1.}
 let v a b = {low=a; high=b }
 
-let sprintf format i =
-  Printf.sprintf "[%s, %s]"
-    (Printf.sprintf format i.low) (Printf.sprintf format i.high)
+let to_string_fmt fmt i =
+  Printf.sprintf "[%(%f%), %(%f%)]" fmt i.low fmt i.high
 
-let fprintf fp format i =
-  Printf.fprintf fp "[%s, %s]"
-    (Printf.sprintf format i.low) (Printf.sprintf format i.high)
+let to_string ?(fmt=("%g": _ format)) i = to_string_fmt fmt i
 
-let printf format i =
-  Printf.fprintf stdout "[%s, %s]"
-    (Printf.sprintf format i.low) (Printf.sprintf format i.high)
+let pr ch i =
+  Printf.fprintf ch "[%g, %g]" i.low i.high
+
+let pp fmt i =
+  Format.fprintf fmt "[%g, %g]" i.low i.high
+
+let fmt fmt_float =
+  let open CamlinternalFormatBasics in
+  let to_string () i = to_string_fmt fmt_float i in
+  let fmt = Custom(Custom_succ Custom_zero, to_string, End_of_format) in
+  Format(fmt , "Inverval.t")
+
+
 
 let is_NaN (x : float) = x <> x
 
@@ -431,12 +438,53 @@ module Arr = struct
   let size v =
     Array.fold_left (fun m vi -> fmax m (abs_float vi)) 0. v
 
-  let printf format v = Array.iter (printf format) v
+  let pr ch v =
+    if Array.length v = 0 then Printf.fprintf ch "[| |]"
+    else (
+      Printf.fprintf ch "[| [%g, %g]" (v.(0)).low (v.(0)).high;
+      for i = 1 to Pervasives.( - ) (Array.length v) 1 do
+        Printf.fprintf ch "; [%g, %g]" (v.(i)).low (v.(i)).high;
+      done;
+      Printf.fprintf ch " |]";
+    )
 
-  let fprintf fp format v = Array.iter (fprintf fp format) v
+  let pp ch v =
+    if Array.length v = 0 then Format.fprintf ch "[| |]"
+    else (
+      Format.fprintf ch "[| [%g, %g]" (v.(0)).low (v.(0)).high;
+      for i = 1 to Pervasives.( - ) (Array.length v) 1 do
+        Format.fprintf ch "; [%g, %g]" (v.(i)).low (v.(i)).high;
+      done;
+      Format.fprintf ch " |]";
+    )
 
-  let sprintf format v =
-    Array.fold_left (fun  s x -> (sprintf format x) ^ s) "" v
+  let pr_buffer b fmt i =
+    Printf.bprintf b "[%(%f%), %(%f%)]" fmt i.low fmt i.high
+
+  let add_buffer b fmt v =
+    Buffer.add_string b "[| ";
+    pr_buffer b fmt v.(0);
+    for i = 1 to Pervasives.( - ) (Array.length v) 1 do
+      Buffer.add_string b "; ";
+      pr_buffer b fmt v.(i);
+    done;
+    Buffer.add_string b " |]"
+
+  let to_string_fmt fmt v =
+    if Array.length v = 0 then "[| |]"
+    else (
+      let b = Buffer.create 256 in
+      add_buffer b fmt v;
+      Buffer.contents b
+    )
+
+  let to_string ?(fmt=("%g": _ format)) v = to_string_fmt fmt v
+
+  let fmt fmt_float =
+    let open CamlinternalFormatBasics in
+    let to_string () v = to_string_fmt fmt_float v in
+    let fmt = Custom(Custom_succ Custom_zero, to_string, End_of_format) in
+    Format(fmt , "Inverval.Arr.t")
 end
 
 
@@ -447,10 +495,20 @@ module Deprecated = struct
   let one_I = one
   let pi_I = pi
   let e_I = e
-  let printf_I = printf
-  let fprintf_I = fprintf
-  let sprintf_I = sprintf
-  let float_i = of_int
+
+  let sprintf_I format i =
+    Printf.sprintf "[%s, %s]"
+      (Printf.sprintf format i.low) (Printf.sprintf format i.high)
+
+  let fprintf_I fp format i =
+    Printf.fprintf fp "[%s, %s]"
+      (Printf.sprintf format i.low) (Printf.sprintf format i.high)
+
+  let printf_I format i =
+    Printf.fprintf stdout "[%s, %s]"
+      (Printf.sprintf format i.low) (Printf.sprintf format i.high)
+
+let float_i = of_int
   let compare_I_f = compare_f
   let size_I = size
   let sgn_I = sgn
@@ -494,11 +552,15 @@ module Deprecated = struct
   let tanh_I = tanh
   let size_max_X = Arr.size_max
   let size_mean_X = Arr.size_mean
-  let sprintf_X = Arr.sprintf
-  let fprintf_X = Arr.fprintf
-  let printf_X = Arr.printf
+
   let print_I x = Printf.printf "[%f, %f] " x.low x.high
   let print_X v = Array.iter print_I v
+
+  let printf_X format v = Array.iter (printf_I format) v
+  let fprintf_X fp format v = Array.iter (fprintf_I fp format) v
+  let sprintf_X format v =
+    Array.fold_left (fun  s x -> (sprintf_I format x) ^ s) "" v
+
   let (<$.) = compare_f
   let size_X = size_max_X
   let size2_X = size_mean_X
