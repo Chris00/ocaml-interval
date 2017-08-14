@@ -20,88 +20,57 @@
 *)
 
 
-(** Interval library in OCAML. ONLY FOR INTEL PROCESSORS.
+(** Interval library in OCaml.  ONLY FOR INTEL PROCESSORS.
 
-All operations use correct rounding.
+   All operations use correct rounding.
 
-It is not mandatory, but still wise, to read the documentation of the
-[Fpu] module
+   It is {i not} recommended to open this module but to alias it at
+   the beginning of your code and then open it locally:
+{[module I = Interval
 
-WARNING: even if some functions have been associated with operators, such as
-the interval addition which is associated with the [+$] operator, the
-priority order between +, * and functions is not maintained. You HAVE to
-use parenthesis if you want to be sure that [a +$ b *$ c] is properly
-computed as [a +$ (b *$ c)].
+let x = I.(v 0.5 1. + sin(v 3. 3.125))
+]}
+   When the module [I] is open, the integer operators ([+], [-],...)
+   are redefined but {i not} the floating point ones.
 
-This library has been mainly designed to be used in a branch and bound
-optimization algorithm. So, some choices have been made:
-{ul
-{- NaN is never used. We either extend functions by pseudo continuity
-   or raise exceptions. For example, [{low=2.;high=3.} /$
-   {low=0.;high=2.}] returns [{low=1.;high=Inf}], while
-   [{low=2.;high=3.}  /$ {low=0.;high=0.}] or [{low=0.;high=0.} /$
-   {low=0.;high=0.}] raise a failure.}
-{- Intervals \[+Inf,+Inf\] or \[-Inf,-Inf\] are never used and never
-   returned.}
-{- When using a float in the following operations, it must never be
-   equal to +Inf or -Inf or Nan}
-{- Functions such as [log], [sqrt], [acos] or [asin] are restricted to
-   their definition domain but raise an exception rather than
-   returning an empty interval: for example [sqrt_I {low=-4;high=4}]
-   returns [{low=0;high=2}] while [sqrt_I {low=-4;high=-2}] will raise
-   an exception.}
-}
+   An older deprecated interface is still available as the module
+   {!Interval.Deprecated}.
 
-Another design choice was to have non mutable elements in interval
-structure, and to maintain an "ordinary" syntax for operations, such
-as ''let a = b+$c in'' thus mapping interval computation formula on
-airthmetic formula. We could have instead chosen to have mutable
-elements, and to write for example (add_I_I a b c) to perform
-''a=b+$c''. The first choice is, to our point of view, more elegant
-and easier to use. The second is more efficient, especially when
-computing functions with many temporary results, which force the GC to
-create and destroy lot of intervals when using the implementation we
-chose. Nothing's perfect.
+   It is not mandatory, but still wise, to read the documentation of
+   the {!Fpu} module.
 
-The library is implemented in x87 assembly mode and is quite efficient
-(see below).
+   This library has been mainly designed to be used in a branch and
+   bound optimization algorithm. So, some choices have been made:
 
-Intel Atom 230 Linux 32 bits:
-{ul
-{-      ftan speed (10000000 calls):2.528158}
-{-      fcos speed (10000000 calls):2.076129}
-{-      fsin speed (10000000 calls):1.972123}
-{-     tan_I speed (10000000 calls):4.416276}
-{-     cos_I speed (10000000 calls):4.936308}
-{-     sin_I speed (10000000 calls):5.396338}
-{-      fadd speed (10000000 calls):0.980062}
-{-      fsub speed (10000000 calls):0.980061}
-{-      fmul speed (10000000 calls):0.980061}
-{-      fdiv speed (10000000 calls):1.424089}
-{-        +$ speed (10000000 calls):1.656103}
-{-        -$ speed (10000000 calls):1.636103}
-{-        *$ speed (10000000 calls):4.568285}
-{-        /$ speed (10000000 calls):4.552285}
-}
+   - NaN is never used. We either extend functions by pseudo
+     continuity or raise exceptions. For example, [{low=2.;high=3.} /
+     {low=0.;high=2.}] returns [{low=1.;high=Inf}], while
+     [{low=2.;high=3.} / {low=0.;high=0.}] or [{low=0.;high=0.} /
+     {low=0.;high=0.}] raise a failure.
+   - Intervals \[+Inf,+Inf\] or \[-Inf,-Inf\] are never used and never
+     returned.
+   - When using a float in the following operations, it must never be
+     equal to +Inf or -Inf or Nan.
+   - Functions such as [log], [sqrt], [acos] or [asin] are restricted
+     to their definition domain but raise an exception rather than
+     returning an empty interval: for example [sqrt {low=-4;high=4}]
+     returns [{low=0;high=2}] while [sqrt {low=-4;high=-2}] will raise
+     an exception.
 
-Intel 980X Linux 64 bits:
-{ul
-{-      ftan speed (10000000 calls):0.472029}
-{-      fcos speed (10000000 calls):0.400025}
-{-      fsin speed (10000000 calls):0.400025}
-{-     tan_I speed (10000000 calls):0.752047}
-{-     cos_I speed (10000000 calls):1.036065}
-{-     sin_I speed (10000000 calls):1.104069}
-{-      fadd speed (10000000 calls):0.124008}
-{-      fsub speed (10000000 calls):0.120008}
-{-      fmul speed (10000000 calls):0.128008}
-{-      fdiv speed (10000000 calls):0.156010}
-{-        +$ speed (10000000 calls):0.340021}
-{-        -$ speed (10000000 calls):0.332021}
-{-        *$ speed (10000000 calls):0.556035}
-{-        /$ speed (10000000 calls):0.468029}
-}
-*)
+   Another design choice was to have non mutable elements in interval
+   structure, and to maintain an "ordinary" syntax for operations,
+   such as [let a = b+$c in ...] thus mapping interval computation
+   formula on airthmetic formula. We could have instead chosen to have
+   mutable elements, and to write for example ([Interval.add a b c])
+   to perform “a = b + c”.  The first choice is, to our point of view,
+   more elegant and easier to use.  The second is more efficient,
+   especially when computing functions with many temporary results,
+   which force the GC to create and destroy lot of intervals when
+   using the implementation we chose. Nothing's perfect.
+
+   The library is implemented in x87 assembly mode and is quite
+   efficient ({{:#perf}see below}).  *)
+
 
 (** The interval type. Be careful however when creating intervals. For
    example, the following code: [let a = \{low=1./.3.;high=1./.3.\}]
@@ -629,3 +598,46 @@ module Deprecated : sig
   val pow_I_I : interval -> interval -> interval
 
 end [@@deprecated]
+
+
+(** {2:perf Performace}
+
+Intel Atom 230 Linux 32 bits:
+{ul
+{-      ftan speed (10000000 calls):2.528158}
+{-      fcos speed (10000000 calls):2.076129}
+{-      fsin speed (10000000 calls):1.972123}
+{-     tan_I speed (10000000 calls):4.416276}
+{-     cos_I speed (10000000 calls):4.936308}
+{-     sin_I speed (10000000 calls):5.396338}
+{-      fadd speed (10000000 calls):0.980062}
+{-      fsub speed (10000000 calls):0.980061}
+{-      fmul speed (10000000 calls):0.980061}
+{-      fdiv speed (10000000 calls):1.424089}
+{-        +$ speed (10000000 calls):1.656103}
+{-        -$ speed (10000000 calls):1.636103}
+{-        *$ speed (10000000 calls):4.568285}
+{-        /$ speed (10000000 calls):4.552285}
+}
+
+Intel 980X Linux 64 bits:
+{ul
+{-      ftan speed (10000000 calls):0.472029}
+{-      fcos speed (10000000 calls):0.400025}
+{-      fsin speed (10000000 calls):0.400025}
+{-     tan_I speed (10000000 calls):0.752047}
+{-     cos_I speed (10000000 calls):1.036065}
+{-     sin_I speed (10000000 calls):1.104069}
+{-      fadd speed (10000000 calls):0.124008}
+{-      fsub speed (10000000 calls):0.120008}
+{-      fmul speed (10000000 calls):0.128008}
+{-      fdiv speed (10000000 calls):0.156010}
+{-        +$ speed (10000000 calls):0.340021}
+{-        -$ speed (10000000 calls):0.332021}
+{-        *$ speed (10000000 calls):0.556035}
+{-        /$ speed (10000000 calls):0.468029}
+}
+
+
+ *)
+;;
