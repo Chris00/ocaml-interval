@@ -3,42 +3,42 @@
 
     This file is part of the ocaml interval library.
 
-    The ocaml interval library is free software: 
-    you can redistribute it and/or modify it under the terms of 
+    The ocaml interval library is free software:
+    you can redistribute it and/or modify it under the terms of
     the GNU Lesser General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    The ocaml interval library is distributed in the hope that it will be 
+    The ocaml interval library is distributed in the hope that it will be
     useful,but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public 
-    License along with the ocaml interval library.  
+    You should have received a copy of the GNU Lesser General Public
+    License along with the ocaml interval library.
     If not, see <http://www.gnu.org/licenses/>.
 *)
 
 (**
 Access to low level floating point functions.
-THIS LIBRARY ONLY WORKS FOR INTEL PROCESSORS. 
+THIS LIBRARY ONLY WORKS FOR INTEL PROCESSORS.
 
-Almost all low 
+Almost all low
 level functions are implemented using the x87 functions and x87 rounding
-modes. There are unfortunately a few problems to understand. The x87 is 
-supposed to be able to return a nearest value and a upper and a lower bound 
-for each elementary operation it can perform. This is not always true. Some 
-functions such as cos(), sin() or tan() are not properly implemented 
-everywhere. 
+modes. There are unfortunately a few problems to understand. The x87 is
+supposed to be able to return a nearest value and a upper and a lower bound
+for each elementary operation it can perform. This is not always true. Some
+functions such as cos(), sin() or tan() are not properly implemented
+everywhere.
 
 For example, for the angle a=
-1.570 796 326 794 896 557 998 981 734 272 092 580 795 288 085 937 5 
-the following values are computed for cos(a), by 
-(1) the MPFI library (with 128 bits precision), 
+1.570 796 326 794 896 557 998 981 734 272 092 580 795 288 085 937 5
+the following values are computed for cos(a), by
+(1) the MPFI library (with 128 bits precision),
 (2) the x87 in low mode,
-(3) the x87 in nearest mode (default value for the C and Ocaml library on 
-32 bits linux), 
-(4) the x87 in high mode, 
+(3) the x87 in nearest mode (default value for the C and Ocaml library on
+32 bits linux),
+(4) the x87 in high mode,
 (5) the SSE2 implementation (default value for the C and Ocaml library on
 64 bits linux):
 
@@ -56,14 +56,14 @@ The upper bound (4) computed by the x87 is clearly incorrect, as it
  is lower than the correct value computed by the MPFI library.
 
 The value computed by the SSE2 (5) is much more precise than the one
-computed by the x87. Unfortunately, there is no way to get an upper and 
-lower bound value, and we are thus stuck with the x87 for computing these 
+computed by the x87. Unfortunately, there is no way to get an upper and
+lower bound value, and we are thus stuck with the x87 for computing these
 (sometimes incorrect) bounds.
 
 The problem here is that the value computed by the standard, C-lib (or ocaml)
-cos function doesn't always lie in the lower/upper bound interval returned by 
-the x87 functions, and this can be a very serious problem when executing 
-Branch and Bound algorithms which expect the mid-value to be inside the 
+cos function doesn't always lie in the lower/upper bound interval returned by
+the x87 functions, and this can be a very serious problem when executing
+Branch and Bound algorithms which expect the mid-value to be inside the
 lower/upper interval.
 
 
@@ -71,17 +71,17 @@ We solved the problem by rewritting the trigonometric functions in
 order to make them both consistant and correct. We used the following property:
 when -pi/4<=a<=pi/4 the rounding in 64 bits of the 80 bits low/std/high value returned
 by the x87 are correct. Moreover, when 0<a<2**53 then (a mod (2Pi_low)) and
-(a mod (2Pi_high)) are in the same quadrant. 
-Last, (a mod Pi/2_High) <= (a mod Pi/2) <= (a mod Pi/2_Low). With this implementation, the lower and upper bounds are properly set and they are always lower 
-(resp. higher) than the value computed by the standard cos functions on 32 
+(a mod (2Pi_high)) are in the same quadrant.
+Last, (a mod Pi/2_High) <= (a mod Pi/2) <= (a mod Pi/2_Low). With this implementation, the lower and upper bounds are properly set and they are always lower
+(resp. higher) than the value computed by the standard cos functions on 32
 and 64 bits architecture.
 This rewritting has been done in assembly language and is quite efficient.
 
-Keep in mind that values returned by the standard (C-lib or Ocaml) cos(), 
-sin() or tan() functions are still 
-different on 32 and 64 bits architecture. If you want to have a program which 
-behaves exactly in the same way on both architectures, you can use the [Fpu] 
-module [fcos], [fsin] or [ftan] functions which always return the same values on all 
+Keep in mind that values returned by the standard (C-lib or Ocaml) cos(),
+sin() or tan() functions are still
+different on 32 and 64 bits architecture. If you want to have a program which
+behaves exactly in the same way on both architectures, you can use the [Fpu]
+module [fcos], [fsin] or [ftan] functions which always return the same values on all
 architectures, or even use the [Fpu_rename] or [Fpu_rename_all] modules to transparently
 rename the floating point functions.
 
@@ -90,7 +90,7 @@ serious disadvantage compared to their standard counterparts. When
 the compiler compiles instruction ''a+.b'', the code of the
 operation is inlined, while when it compiles ''(fadd a b)'', the
 compiler generates a function call, which is expensive.
- 
+
 Intel Atom 230 Linux 32 bits
 {ul
 {-       tan speed (10000000 calls):2.380149}
@@ -247,24 +247,24 @@ BE VERY CAREFUL: using these functions unwisely can ruin all your
 computations. Remember also that on 64 bits machine these functions won't
 change the behaviour of the SSE instructions.
 
-When setting the rounding mode to UPWARD or DOWNWARD, it is better to set it 
-immediately back to NEAREST. However  we have no guarantee 
-on how the compiler will reorder the instructions generated. 
+When setting the rounding mode to UPWARD or DOWNWARD, it is better to set it
+immediately back to NEAREST. However  we have no guarantee
+on how the compiler will reorder the instructions generated.
 It is ALWAYS better to write:
 
 let a = set_high(); let res = 1./.3. in set_nearest (); res;;
 
-The above code will NOT work on linux-x64 where many floating point 
+The above code will NOT work on linux-x64 where many floating point
 functions are implemented using SSE instructions.
 These three functions should only be used when there is no other
 solution, and you really know what tou are doing, and this should never happen.
-Please use the regular functions of the fpu module for computations. 
+Please use the regular functions of the fpu module for computations.
 For example prefer:
 
 let a = fdiv_high 1. 3.;;
 
-PS: The Interval module and the fpu module functions correctly set and 
-restore the rounding mode 
+PS: The Interval module and the fpu module functions correctly set and
+restore the rounding mode
 for all interval computations, so you don't really need these functions.
 
 PPS: Please, don't use them...

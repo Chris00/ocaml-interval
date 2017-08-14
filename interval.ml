@@ -3,19 +3,19 @@
 
     This file is part of the ocaml interval library.
 
-    The ocaml interval library is free software: 
-    you can redistribute it and/or modify it under the terms of 
+    The ocaml interval library is free software:
+    you can redistribute it and/or modify it under the terms of
     the GNU Lesser General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    The ocaml interval library is distributed in the hope that it will be 
+    The ocaml interval library is distributed in the hope that it will be
     useful,but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public 
-    License along with the ocaml interval library. 
+    You should have received a copy of the GNU Lesser General Public
+    License along with the ocaml interval library.
     If not, see <http://www.gnu.org/licenses/>.
 *)
 
@@ -30,17 +30,17 @@ let one_I = {low=1.;high=1.}
 
 let print_I x = Printf.printf "[%f, %f] " x.low x.high
 
-let sprintf_I format i = 
-  Printf.sprintf "[%s, %s]" 
-    (Printf.sprintf format i.low) (Printf.sprintf format i.high) 
+let sprintf_I format i =
+  Printf.sprintf "[%s, %s]"
+    (Printf.sprintf format i.low) (Printf.sprintf format i.high)
 
-let fprintf_I fp format i = 
-  Printf.fprintf fp "[%s, %s]" 
-    (Printf.sprintf format i.low) (Printf.sprintf format i.high) 
+let fprintf_I fp format i =
+  Printf.fprintf fp "[%s, %s]"
+    (Printf.sprintf format i.low) (Printf.sprintf format i.high)
 
-let printf_I format i = 
-  Printf.fprintf stdout "[%s, %s]" 
-    (Printf.sprintf format i.low) (Printf.sprintf format i.high) 
+let printf_I format i =
+  Printf.fprintf stdout "[%s, %s]"
+    (Printf.sprintf format i.low) (Printf.sprintf format i.high)
 
 let is_NaN (x : float) = x <> x
 
@@ -80,7 +80,7 @@ let (+$) {low = a; high = b} {low = c; high = d} =
 external (+$.) : interval -> float -> interval = "fadd_I_x_caml"
 
 let (+.$) x a = a +$. x
-  
+
 (*
 let (+$.) {low = a; high = b} x =
   {low = fadd_low a x; high = fadd_high b x}
@@ -304,7 +304,7 @@ let ( **.$) x {low = a; high = b} =
     else if b = infinity then {low = 0.; high = flog_pow_high x a}
     else {low = flog_pow_low x b; high = flog_pow_high x a}
   else if x = 1. then {low = 1.; high = 1.}
-  else if a = neg_infinity then 
+  else if a = neg_infinity then
     if b = infinity then {low = 0.; high = infinity}
     else {low = 0.; high = flog_pow_high x b}
   else if b = infinity then {low = flog_pow_low x a; high = infinity}

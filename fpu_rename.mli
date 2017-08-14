@@ -3,19 +3,19 @@
 
     This file is part of the ocaml interval library.
 
-    The ocaml interval library is free software: 
-    you can redistribute it and/or modify it under the terms of 
+    The ocaml interval library is free software:
+    you can redistribute it and/or modify it under the terms of
     the GNU Lesser General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    The ocaml interval library is distributed in the hope that it will be 
+    The ocaml interval library is distributed in the hope that it will be
     useful,but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public 
-    License along with the ocaml interval library.  
+    You should have received a copy of the GNU Lesser General Public
+    License along with the ocaml interval library.
     If not, see <http://www.gnu.org/licenses/>.
 *)
 
@@ -25,13 +25,13 @@ Aliases floating point functions to their "constant" counterparts, except for "o
 As described in the [Fpu] module documentation, there are problems when mixing
 some C-lib or ocaml native functions with interval programming on 64 bits machine.
 
-The standard floating point functions results will always lie in the [low; high] 
-interval computed by the Fpu module, but they are slightly different on 32 and 64 
+The standard floating point functions results will always lie in the [low; high]
+interval computed by the Fpu module, but they are slightly different on 32 and 64
 bits machines.
 
-Using [Open Fpu_rename] at the beginning of your program guarantees that floating 
-computation will give the same results on 32 and 64 bits machines for all transcendantal 
-functions but not for ordinary arithmetic functions. 
+Using [Open Fpu_rename] at the beginning of your program guarantees that floating
+computation will give the same results on 32 and 64 bits machines for all transcendantal
+functions but not for ordinary arithmetic functions.
 
 NB: while most transcendantal function are almost as fast, and sometimes faster than
 their "standard" ocaml counterparts, +. -. *. and /. are much slower (from 50% to 100%
