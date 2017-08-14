@@ -375,7 +375,10 @@ end
 (** Open this module to have the same interface than the older
    versions of [Interval]. *)
 module Deprecated : sig
-  type interval = t
+  type interval = t = {
+    low: float; (** low bound, possibly = -∞ *)
+    high: float (** high bound, possibly = +∞ *)
+  }
 
   (** Neutral element for addition *)
   val zero_I : interval

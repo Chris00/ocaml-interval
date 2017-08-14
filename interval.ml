@@ -441,7 +441,8 @@ end
 
 
 module Deprecated = struct
-  type interval = t
+  type interval = t = { low: float;
+                        high: float }
   let zero_I = zero
   let one_I = one
   let pi_I = pi
