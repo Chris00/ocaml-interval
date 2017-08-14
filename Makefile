@@ -14,6 +14,9 @@ interval.cma interval.cmxa: $(NORM_OBJS) $(OPT_OBJS) chcw.o
 ocamlfpu: interval.cma
 	ocamlmktop -I . -o ocamlfpu interval.cma
 
+examples EXAMPLES:
+	$(MAKE) -C EXAMPLES
+
 install: all
 	ocamlfind install interval $(wildcard META \
 	  *.cmi *.cmti *.cma *.cmx *.cmxa *.mli *.a *.so)
@@ -21,7 +24,7 @@ install: all
 remove:
 	ocamlfind remove interval
 
-.PHONY: install remove
+.PHONY: examples EXAMPLES install remove
 
 .SUFFIXES: .ml .mli .cmo .cmi .cmx
 

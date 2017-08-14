@@ -11,3 +11,5 @@
 *.a
 *.so
 ocamlfpu
+*.norm
+*.opt

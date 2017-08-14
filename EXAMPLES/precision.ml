@@ -1,6 +1,6 @@
 (* Ill conditioned function *)
 
-open Interval;;
+open Interval.Deprecated;;
 
 (* Parenthesis are MANDATORY for interval computation (see documentation) *)
 let f_I x y = 
