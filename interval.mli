@@ -655,6 +655,7 @@ module Deprecated : sig
 
 end [@@deprecated]
 
+type interval = t [@@deprecated]
 
 (** {2:perf Performance}
 

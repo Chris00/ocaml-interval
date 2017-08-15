@@ -1,36 +1,37 @@
-CSLC = ocamlc
-CSLOPT = ocamlopt
-CSLDEP = ocamldep
 INCLUDES= -I ../..
-CSLFLAGS=$(INCLUDES)
-CSLOPTFLAGS=$(INCLUDES)
+OCAMLC_FLAGS=$(INCLUDES)
+OCAMLOPT_FLAGS=$(INCLUDES)
+
+OCAMLC = ocamlc $(OCAMLC_FLAGS)
+OCAMLOPT = ocamlopt $(OCAMLOPT_FLAGS)
+OCAMLDEP = ocamldep
 
 TESTNORM_OBJS= pqueue.cmo b_and_b.cmo main.cmo
 TESTOPT_OBJS=  $(TESTNORM_OBJS:.cmo=.cmx)
 
-all: testnorm testopt
+all: test.norm test.opt
 
-testopt : $(TESTOPT_OBJS)
-	$(CSLOPT) $(CSLOPTFLAGS) -o $@ ../../interval.cmxa $(TESTOPT_OBJS) ../../libinterval.a
+test.opt : $(TESTOPT_OBJS)
+	$(OCAMLOPT) -o $@ ../../interval.cmxa $(TESTOPT_OBJS)
 
-testnorm : $(TESTNORM_OBJS)
-	$(CSLC) $(CSLFLAGS)  -o $@ ../../interval.cma $(TESTNORM_OBJS) ../../libinterval.a  
+test.norm : $(TESTNORM_OBJS)
+	$(OCAMLC)  -o $@ ../../interval.cma $(TESTNORM_OBJS)
 
 
 .SUFFIXES: .ml .mli .cmo .cmi .cmx
 
 .ml.cmo :
-	$(CSLC) $(CSLFLAGS) -c $<
+	$(OCAMLC) -c $<
 .mli.cmi :
-	$(CSLC) $(CSLFLAGS) -c $<
+	$(OCAMLC) -c $<
 .ml.cmx :
-	$(CSLOPT) $(CSLOPTFLAGS) -c $<
+	$(OCAMLOPT) -c $<
 
 clean:
-	\rm -f *.cmo *.cmi *.cmx *.o *.a *.cma *.cmxa testnorm testopt *~
+	$(RM) -f *.cmo *.cmi *.cmx *.o *.a *.cma *.cmxa test.norm test.opt *~
 
 depend:
-	$(CSLDEP) $(INCLUDES) *.mli *.ml >.depend
+	$(OCAMLDEP) $(INCLUDES) *.mli *.ml >.depend
 
 include .depend
 

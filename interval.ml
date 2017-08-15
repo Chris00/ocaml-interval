@@ -586,3 +586,5 @@ let float_i = of_int
   let pow_I_I = ( **$ )
   let pow_I_f = ( **$. )
 end
+
+type interval = t [@@deprecated]
