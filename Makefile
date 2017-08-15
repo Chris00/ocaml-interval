@@ -24,7 +24,10 @@ install: all
 remove:
 	ocamlfind remove interval
 
-.PHONY: examples EXAMPLES install remove
+tests:
+	$(MAKE) -C TESTS
+
+.PHONY: examples EXAMPLES install remove tests
 
 .SUFFIXES: .ml .mli .cmo .cmi .cmx
 
