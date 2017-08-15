@@ -29,66 +29,79 @@ external ffloat: int -> float = "ffloat_caml"
 external ffloat_high: int -> float = "ffloat_high_caml"
 external ffloat_low: int -> float = "ffloat_low_caml"
 
-external fadd: float -> float -> float = "fadd_caml"
-external fadd_low: float -> float -> float = "fadd_low_caml"
-external fadd_high: float -> float -> float = "fadd_high_caml"
-external fsub: float -> float -> float = "fsub_caml"
-external fsub_low: float -> float -> float = "fsub_low_caml"
-external fsub_high: float -> float -> float = "fsub_high_caml"
-external fmul: float -> float -> float = "fmul_caml"
-external fmul_low: float -> float -> float = "fmul_low_caml"
-external fmul_high: float -> float -> float = "fmul_high_caml"
-external fdiv: float -> float -> float = "fdiv_caml"
-external fdiv_low: float -> float -> float = "fdiv_low_caml"
-external fdiv_high: float -> float -> float = "fdiv_high_caml"
+external fadd: float -> float -> float = "fadd_caml" "fadd" [@@unboxed]
+external fadd_low: float -> float -> float
+  = "fadd_low_caml" "fadd_low" [@@unboxed]
+external fadd_high: float -> float -> float
+  = "fadd_high_caml" "fadd_high" [@@unboxed]
+external fsub: float -> float -> float = "fsub_caml" "fsub" [@@unboxed]
+external fsub_low: float -> float -> float
+  = "fsub_low_caml" "fsub_low" [@@unboxed]
+external fsub_high: float -> float -> float
+  = "fsub_high_caml" "fsub_high" [@@unboxed]
+external fmul: float -> float -> float = "fmul_caml" "fmul" [@@unboxed]
+external fmul_low: float -> float -> float
+  = "fmul_low_caml" "fmul_low" [@@unboxed]
+external fmul_high: float -> float -> float
+  = "fmul_high_caml" "fmul_high" [@@unboxed]
+external fdiv: float -> float -> float = "fdiv_caml" "fdiv" [@@unboxed]
+external fdiv_low: float -> float -> float
+  = "fdiv_low_caml" "fdiv_low" [@@unboxed]
+external fdiv_high: float -> float -> float
+  = "fdiv_high_caml" "fdiv_high" [@@unboxed]
 
-external fmod: float -> float -> float = "fprem_caml"
+external fmod: float -> float -> float = "fprem_caml" "fprem" [@@unboxed]
 
-external fsqrt: float -> float = "fsqrt_caml"
-external fsqrt_low: float -> float = "fsqrt_low_caml"
-external fsqrt_high: float -> float = "fsqrt_high_caml"
+external fsqrt: float -> float = "fsqrt_caml" "fsqrt" [@@unboxed]
+external fsqrt_low: float -> float = "fsqrt_low_caml" "fsqrt_low" [@@unboxed]
+external fsqrt_high: float -> float = "fsqrt_high_caml" "fsqrt_high" [@@unboxed]
 
-external flog: float -> float = "flog_caml"
-external flog_low: float -> float = "flog_low_caml"
-external flog_high: float -> float = "flog_high_caml"
+external flog: float -> float = "flog_caml" "flog" [@@unboxed]
+external flog_low: float -> float = "flog_low_caml" "flog_low" [@@unboxed]
+external flog_high: float -> float = "flog_high_caml" "flog_high" [@@unboxed]
 
-external fexp: float -> float = "fexp_caml"
-external fexp_low: float -> float = "fexp_low_caml"
-external fexp_high: float -> float = "fexp_high_caml"
+external fexp: float -> float = "fexp_caml" "fexp" [@@unboxed]
+external fexp_low: float -> float = "fexp_low_caml" "fexp_low" [@@unboxed]
+external fexp_high: float -> float = "fexp_high_caml" "fexp_high" [@@unboxed]
 
-external flog_pow: float -> float -> float = "flog_pow_caml"
-external flog_pow_low: float -> float -> float = "flog_pow_low_caml"
-external flog_pow_high: float -> float -> float = "flog_pow_high_caml"
+external flog_pow: float -> float -> float
+  = "flog_pow_caml" "flog_pow" [@@unboxed]
+external flog_pow_low: float -> float -> float
+  = "flog_pow_low_caml" "flog_pow_low" [@@unboxed]
+external flog_pow_high: float -> float -> float
+  = "flog_pow_high_caml" "flog_pow_high" [@@unboxed]
 
-external fsin: float -> float = "fsin_caml"
-external fsin_low: float -> float = "fsin_low_caml"
-external fsin_high: float -> float = "fsin_high_caml"
-external fcos: float -> float = "fcos_caml"
-external fcos_low: float -> float = "fcos_low_caml"
-external fcos_high: float -> float = "fcos_high_caml"
-external ftan: float -> float = "ftan_caml"
-external ftan_low: float -> float = "ftan_low_caml"
-external ftan_high: float -> float = "ftan_high_caml"
+external fsin: float -> float = "fsin_caml" "fsin" [@@unboxed]
+external fsin_low: float -> float = "fsin_low_caml" "fsin_low" [@@unboxed]
+external fsin_high: float -> float = "fsin_high_caml" "fsin_high" [@@unboxed]
+external fcos: float -> float = "fcos_caml" "fcos" [@@unboxed]
+external fcos_low: float -> float = "fcos_low_caml" "fcos_low" [@@unboxed]
+external fcos_high: float -> float = "fcos_high_caml" "fcos_high" [@@unboxed]
+external ftan: float -> float = "ftan_caml" "ftan" [@@unboxed]
+external ftan_low: float -> float = "ftan_low_caml" "ftan_low" [@@unboxed]
+external ftan_high: float -> float = "ftan_high_caml" "ftan_high" [@@unboxed]
 
-external fasin: float -> float = "fasin_caml"
-external fasin_low: float -> float = "fasin_low_caml"
-external fasin_high: float -> float = "fasin_high_caml"
-external facos: float -> float = "facos_caml"
-external facos_low: float -> float = "facos_low_caml"
-external facos_high: float -> float = "facos_high_caml"
-external fatan: float -> float -> float = "fatan_caml"
-external fatan_low: float -> float -> float = "fatan_low_caml"
-external fatan_high: float -> float -> float = "fatan_high_caml"
+external fasin: float -> float = "fasin_caml" "fasin" [@@unboxed]
+external fasin_low: float -> float = "fasin_low_caml" "fasin_low" [@@unboxed]
+external fasin_high: float -> float = "fasin_high_caml" "fasin_high" [@@unboxed]
+external facos: float -> float = "facos_caml" "facos" [@@unboxed]
+external facos_low: float -> float = "facos_low_caml" "facos_low" [@@unboxed]
+external facos_high: float -> float = "facos_high_caml" "facos_high" [@@unboxed]
+external fatan: float -> float -> float = "fatan_caml" "fatan" [@@unboxed]
+external fatan_low: float -> float -> float
+  = "fatan_low_caml" "fatan_low" [@@unboxed]
+external fatan_high: float -> float -> float
+  = "fatan_high_caml" "fatan_high" [@@unboxed]
 
-external fsinh: float -> float = "fsinh_caml"
-external fsinh_low: float -> float = "fsinh_low_caml"
-external fsinh_high: float -> float = "fsinh_high_caml"
-external fcosh: float -> float = "fcosh_caml"
-external fcosh_low: float -> float = "fcosh_low_caml"
-external fcosh_high: float -> float = "fcosh_high_caml"
-external ftanh: float -> float = "ftanh_caml"
-external ftanh_low: float -> float = "ftanh_low_caml"
-external ftanh_high: float -> float = "ftanh_high_caml"
+external fsinh: float -> float = "fsinh_caml" "fsinh" [@@unboxed]
+external fsinh_low: float -> float = "fsinh_low_caml" "fsinh_low" [@@unboxed]
+external fsinh_high: float -> float = "fsinh_high_caml" "fsinh_high" [@@unboxed]
+external fcosh: float -> float = "fcosh_caml" "fcosh" [@@unboxed]
+external fcosh_low: float -> float = "fcosh_low_caml" "fcosh_low" [@@unboxed]
+external fcosh_high: float -> float = "fcosh_high_caml" "fcosh_high" [@@unboxed]
+external ftanh: float -> float = "ftanh_caml" "ftanh" [@@unboxed]
+external ftanh_low: float -> float = "ftanh_low_caml" "ftanh_low" [@@unboxed]
+external ftanh_high: float -> float = "ftanh_high_caml" "ftanh_high" [@@unboxed]
 
 external is_neg: float -> bool = "is_neg_caml"
 

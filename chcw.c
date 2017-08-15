@@ -68,17 +68,19 @@ Set the processor to use 24+8 bits. IEEE-754 standard for float
 static short int cw;
 static long long int tmp;
 
-
+CAMLexport
 void set_nearest() {
   asm __volatile__(SET_NEAREST(%0)
 		   :"=m"(cw));
 }
 
+CAMLexport
 void set_high() {
   asm __volatile__(SET_HIGH(%0)
 		   :"=m"(cw));
 }
 
+CAMLexport
 void set_low() {
   asm __volatile__(SET_LOW(%0)
 		   :"=m"(cw));
@@ -92,7 +94,7 @@ long double neg_infinity = -1.0/0.0;
 
 #define FILDQ(ref) "fildq "#ref"\n\t"
 
-double ffloat(long int a) {
+static double ffloat(long int a) {
   double res;
 
   tmp = a;
@@ -104,7 +106,7 @@ double ffloat(long int a) {
 }
 
 
-double ffloat_low(long int a) {
+static double ffloat_low(long int a) {
   double res;
   tmp = a;
   asm __volatile__(SET_LOW(%0)
@@ -122,7 +124,7 @@ double ffloat_low(long int a) {
   return(res);
 }
 
-double ffloat_high(long int a) {
+static double ffloat_high(long int a) {
   double res;
 
   tmp = a;
@@ -144,7 +146,7 @@ double ffloat_high(long int a) {
 
 /* long double to double conversions ------------------------------------------ */
 
-double to_low(long double a) {
+static double to_low(long double a) {
   double res;
 
   asm __volatile__(SET_LOW(%0)
@@ -161,7 +163,7 @@ double to_low(long double a) {
   return(res);
 }
 
-double to_high(long double a) {
+static double to_high(long double a) {
   double res;
 
   asm __volatile__(SET_HIGH(%0)
@@ -177,6 +179,7 @@ double to_high(long double a) {
 }
 
 /* fadd_l, fsub_l, fmul_l, fdiv_l --------------------------------------------- */
+CAMLexport
 double fadd(double a, double b) {
 
   volatile double res;
@@ -188,6 +191,7 @@ double fadd(double a, double b) {
   return(res);
 }
 
+CAMLexport
 double fadd_low(double a, double b) {
 
   volatile double res;
@@ -206,6 +210,7 @@ double fadd_low(double a, double b) {
   return(res);
 }
 
+CAMLexport
 double fadd_high(double a, double b) {
 
   volatile double res;
@@ -224,7 +229,7 @@ double fadd_high(double a, double b) {
   return(res);
 }
 
-long double fadd_l(long double a, long double b) {
+static long double fadd_l(long double a, long double b) {
 
   long double res;
 
@@ -236,7 +241,7 @@ long double fadd_l(long double a, long double b) {
   return(res);
 }
 
-long double fadd_low_l(long double a, long double b) {
+static long double fadd_low_l(long double a, long double b) {
 
   long double res;
 
@@ -250,7 +255,7 @@ long double fadd_low_l(long double a, long double b) {
   return(res);
 }
 
-long double fadd_high_l(long double a, long double b) {
+static long double fadd_high_l(long double a, long double b) {
 
   long double res;
 
@@ -264,6 +269,7 @@ long double fadd_high_l(long double a, long double b) {
   return(res);
 }
 
+CAMLexport
 double fsub(double a, double b) {
 
   volatile double res;
@@ -275,8 +281,8 @@ double fsub(double a, double b) {
   return(res);
 }
 
+CAMLexport
 double fsub_low(double a, double b) {
-
   volatile double res;
 
   asm __volatile__(SET_LOW(%3)
@@ -293,6 +299,7 @@ double fsub_low(double a, double b) {
   return(res);
 }
 
+CAMLexport
 double fsub_high(double a, double b) {
 
   volatile double res;
@@ -311,7 +318,7 @@ double fsub_high(double a, double b) {
   return(res);
 }
 
-long double fsub_l(long double a,long double b) {
+static long double fsub_l(long double a,long double b) {
   long double res;
 
   asm __volatile__("fsub %%st(1),%%st(0)"
@@ -322,7 +329,7 @@ long double fsub_l(long double a,long double b) {
   return(res);
 }
 
-long double fsub_low_l(long double a, long double b) {
+static long double fsub_low_l(long double a, long double b) {
 
   long double res;
 
@@ -336,7 +343,7 @@ long double fsub_low_l(long double a, long double b) {
   return(res);
 }
 
-long double fsub_high_l(long double a, long double b) {
+static long double fsub_high_l(long double a, long double b) {
 
   long double res;
 
@@ -350,6 +357,7 @@ long double fsub_high_l(long double a, long double b) {
   return(res);
 }
 
+CAMLexport
 double fmul(double a, double b) {
 
   volatile double res;
@@ -361,6 +369,7 @@ double fmul(double a, double b) {
   return(res);
 }
 
+CAMLexport
 double fmul_low(double a, double b) {
 
   volatile double res;
@@ -379,6 +388,7 @@ double fmul_low(double a, double b) {
   return(res);
 }
 
+CAMLexport
 double fmul_high(double a, double b) {
 
   volatile double res;
@@ -408,7 +418,7 @@ long double fmul_l(long double a, long double b) {
   return(res);
 }
 
-long double fmul_low_l(long double a, long double b) {
+static long double fmul_low_l(long double a, long double b) {
 
   long double res;
 
@@ -422,7 +432,7 @@ long double fmul_low_l(long double a, long double b) {
   return(res);
 }
 
-long double fmul_high_l(long double a, long double b) {
+static long double fmul_high_l(long double a, long double b) {
 
   long double res;
 
@@ -436,6 +446,7 @@ long double fmul_high_l(long double a, long double b) {
   return(res);
 }
 
+CAMLexport
 double fdiv(double a, double b) {
 
   volatile double res;
@@ -447,6 +458,7 @@ double fdiv(double a, double b) {
   return(res);
 }
 
+CAMLexport
 double fdiv_low(double a, double b) {
 
   volatile double res;
@@ -465,6 +477,7 @@ double fdiv_low(double a, double b) {
   return(res);
 }
 
+CAMLexport
 double fdiv_high(double a, double b) {
 
   volatile double res;
@@ -483,7 +496,7 @@ double fdiv_high(double a, double b) {
   return(res);
 }
 
-long double fdiv_l(long double a,long double b) {
+static long double fdiv_l(long double a,long double b) {
   long double res;
 
   asm __volatile__("fdiv %%st(1),%%st(0)"
@@ -494,7 +507,7 @@ long double fdiv_l(long double a,long double b) {
   return(res);
 }
 
-long double fdiv_low_l(long double a, long double b) {
+static long double fdiv_low_l(long double a, long double b) {
 
   long double res;
 
@@ -508,7 +521,7 @@ long double fdiv_low_l(long double a, long double b) {
   return(res);
 }
 
-long double fdiv_high_l(long double a, long double b) {
+static long double fdiv_high_l(long double a, long double b) {
 
   long double res;
 
@@ -524,7 +537,7 @@ long double fdiv_high_l(long double a, long double b) {
 
 /* fprem_l, fprem1_l: exact result of a mod b, with quadrant information ------- */
 
-long double fprem_l(long double a, long double b) {
+static long double fprem_l(long double a, long double b) {
   long double res;
 
   asm ("1: fprem\n\t"
@@ -537,7 +550,13 @@ long double fprem_l(long double a, long double b) {
   return(res);
 }
 
-void fprem1_l(long double a, long double b, long double *r, int *q) {
+CAMLexport
+double fprem(double a, double b) {
+  return fprem_l(a, b);
+}
+
+
+static void fprem1_l(long double a, long double b, long double *r, int *q) {
   long double res;
   short int res2;
 
@@ -554,13 +573,18 @@ void fprem1_l(long double a, long double b, long double *r, int *q) {
 
 /* fsqrt_l --------------------------------------------------------------------- */
 
-long double fsqrt_l(long double a) {
+static long double fsqrt_l(long double a) {
   long double res;
   asm ("fsqrt":"=t"(res):"0"(a));
   return(res);
 }
 
-long double fsqrt_low_l(long double a) {
+CAMLexport
+double fsqrt(double a) {
+  return fsqrt_l(a);
+}
+
+static long double fsqrt_low_l(long double a) {
   long double res;
 
   asm __volatile__(SET_LOW(%2)
@@ -573,7 +597,12 @@ long double fsqrt_low_l(long double a) {
   return(res);
 }
 
-long double fsqrt_high_l(long double a) {
+CAMLexport
+double fsqrt_low(double a) {
+  return to_low(fsqrt_low_l(a));
+}
+
+static long double fsqrt_high_l(long double a) {
   long double res;
 
   asm __volatile__(SET_HIGH(%2)
@@ -586,9 +615,14 @@ long double fsqrt_high_l(long double a) {
   return(res);
 }
 
+CAMLexport
+double fsqrt_high(double a) {
+  return to_high(fsqrt_high_l(a));
+}
+
 /* flog_l ---------------------------------------------------------------------- */
 
-long double flog_l(long double a) {
+static long double flog_l(long double a) {
   long double res;
 
   asm ("fldln2\n\t" /* ln(2) a */
@@ -604,7 +638,12 @@ long double flog_l(long double a) {
   return(res);
 }
 
-long double flog_low_l(long double a) {
+CAMLexport
+double flog(double a) {
+  return flog_l(a);
+}
+
+static long double flog_low_l(long double a) {
   long double res;
 
   asm __volatile__(SET_LOW(%2)
@@ -622,7 +661,12 @@ long double flog_low_l(long double a) {
   return(res);
 }
 
-long double flog_high_l(long double a) {
+CAMLexport
+double flog_low(double a) {
+  return to_low(flog_low_l(a));
+}
+
+static long double flog_high_l(long double a) {
   long double res;
 
   asm __volatile__(SET_HIGH(%2)
@@ -640,10 +684,14 @@ long double flog_high_l(long double a) {
   return(res);
 }
 
+CAMLexport
+double flog_high(double a) {
+  return to_high(flog_high_l(a));
+}
 
 /* fexp_l --------------------------------------------------------------------- */
 
-long double fexp_l(long double a) {
+static long double fexp_l(long double a) {
   long double res;
 
   if (a== infinity) {return infinity;}
@@ -670,7 +718,12 @@ long double fexp_l(long double a) {
   return(res);
 }
 
-long double fexp_low_l(long double a) {
+CAMLexport
+double fexp(double a) {
+  return fexp_l(a);
+}
+
+static long double fexp_low_l(long double a) {
   long double res;
 
   if (a == infinity) {return infinity;}
@@ -721,7 +774,12 @@ long double fexp_low_l(long double a) {
   return(res);
 }
 
-long double fexp_high_l(long double a) {
+CAMLexport
+double fexp_low(double a) {
+  return to_low(fexp_low_l(a));
+}
+
+static long double fexp_high_l(long double a) {
   long double res;
 
   if (a == infinity) {return infinity;}
@@ -772,9 +830,14 @@ long double fexp_high_l(long double a) {
   return(res);
 }
 
+CAMLexport
+double fexp_high(double a) {
+  return to_high(fexp_high_l(a));
+}
+
 /* flog_pow_l ------------------------------------------------------------------ */
 
-long double flog_pow_l(long double a, long double b) {
+static long double flog_pow_l(long double a, long double b) {
   long double res;
 
   asm ("fyl2x\n\t"              /* b*log2(a) */
@@ -796,7 +859,12 @@ long double flog_pow_l(long double a, long double b) {
   return(res);
 }
 
-long double flog_pow_low_l(long double a, long double b) {
+CAMLexport
+double flog_pow(double a, double b) {
+  return flog_pow_l(a, b);
+}
+
+static long double flog_pow_low_l(long double a, long double b) {
 
   long double res;
 
@@ -823,7 +891,12 @@ long double flog_pow_low_l(long double a, long double b) {
   return(res);
 }
 
-long double flog_pow_high_l(long double a, long double b) {
+CAMLexport
+double flog_pow_low(double a, double b) {
+  return to_low(flog_pow_low_l(a, b));
+}
+
+static long double flog_pow_high_l(long double a, long double b) {
   long double res;
 
 
@@ -850,9 +923,14 @@ long double flog_pow_high_l(long double a, long double b) {
   return(res);
 }
 
+CAMLexport
+double flog_pow_high(double a, double b) {
+  return to_high(flog_pow_high_l(a, b));
+}
+
 /* facos, fasin, fatan -------------------------------------------------------- */
 
-long double facos_l(long double a) {
+static long double facos_l(long double a) {
   long double res;
   asm ("fld %%st(0)\n\t"          /* a a */
        "fld1\n\t"                 /* 1 a a */
@@ -878,7 +956,12 @@ long double facos_l(long double a) {
   return(res);
 }
 
-long double facos_low_l(long double a) {
+CAMLexport
+double facos(double a) {
+  return facos_l(a);
+}
+
+static long double facos_low_l(long double a) {
   long double res;
 
  asm __volatile__(SET_LOW(%2)
@@ -909,7 +992,12 @@ long double facos_low_l(long double a) {
  return(res);
 }
 
-long double facos_high_l(long double a) {
+CAMLexport
+double facos_low(double a) {
+  return to_low(facos_low_l(a));
+}
+
+static long double facos_high_l(long double a) {
   long double res;
 
 
@@ -941,7 +1029,12 @@ long double facos_high_l(long double a) {
  return(res);
 }
 
-long double fasin_l(long double a) {
+CAMLexport
+double facos_high(double a) {
+  return to_high(facos_high_l(a));
+}
+
+static long double fasin_l(long double a) {
   long double res;
   asm ("fld %%st(0)\n\t"          /* a a */
        "fmul %%st(1),%%st(0)\n\t" /* a2 a */
@@ -958,7 +1051,12 @@ long double fasin_l(long double a) {
   return(res);
 }
 
-long double fasin_low_l(long double a) {
+CAMLexport
+double fasin(double a) {
+  return fasin_l(a);
+}
+
+static long double fasin_low_l(long double a) {
   long double res;
 
   if (a>0) {
@@ -1000,7 +1098,12 @@ long double fasin_low_l(long double a) {
   }
 }
 
-long double fasin_high_l(long double a) {
+CAMLexport
+double fasin_low(double a) {
+  return to_low(fasin_low_l(a));
+}
+
+static long double fasin_high_l(long double a) {
   long double res;
 
   if (a>0)  {
@@ -1042,13 +1145,23 @@ long double fasin_high_l(long double a) {
   }
 }
 
-long double fatan_l(long double a, long double b) {
+CAMLexport
+double fasin_high(double a) {
+  return to_high(fasin_high_l(a));
+}
+
+static long double fatan_l(long double a, long double b) {
   long double res;
   asm ("fpatan":"=t"(res):"0"(a),"u"(b));
   return(res);
 }
 
-long double fatan_low_l(long double a, long double b) {
+CAMLexport
+double fatan(double a, double b) {
+  return fatan_l(a, b);
+}
+
+static long double fatan_low_l(long double a, long double b) {
   long double res;
 
   asm __volatile__(SET_LOW(%3)
@@ -1060,7 +1173,12 @@ long double fatan_low_l(long double a, long double b) {
   return(res);
 }
 
-long double fatan_high_l(long double a, long double b) {
+CAMLexport
+double fatan_low(double a, double b) {
+  return to_low(fatan_low_l(a, b));
+}
+
+static long double fatan_high_l(long double a, long double b) {
   long double res;
 
   asm __volatile__(SET_HIGH(%3)
@@ -1071,6 +1189,11 @@ long double fatan_high_l(long double a, long double b) {
 		   :"memory");
 
   return(res);
+}
+
+CAMLexport
+double fatan_high(double a, double b) {
+  return to_high(fatan_high_l(a, b));
 }
 
 /* fcos_l, fsin_l, ftan_l ------------------------------------------------------ */
@@ -1092,7 +1215,7 @@ long double fatan_high_l(long double a, long double b) {
 
 /* fcos, fsin, ftan in nearest mode */
 
-long double fcos_l(long double a) {
+static long double fcos_l(long double a) {
   long double res;
 
   asm __volatile__("fcos\n\t"
@@ -1103,7 +1226,12 @@ long double fcos_l(long double a) {
   return(res);
 }
 
-long double fsin_l(long double a) {
+CAMLexport
+double fcos(double a) {
+  return fcos_l(a);
+}
+
+static long double fsin_l(long double a) {
   long double res;
 
   asm __volatile__("fsin\n\t"
@@ -1114,7 +1242,12 @@ long double fsin_l(long double a) {
   return(res);
 }
 
-long double ftan_l(long double a) {
+CAMLexport
+double fsin(double a) {
+  return fsin_l(a);
+}
+
+static long double ftan_l(long double a) {
   long double res;
 
   asm __volatile__ ("fptan\n\t"
@@ -1130,9 +1263,14 @@ long double ftan_l(long double a) {
   return(res);
 }
 
+CAMLexport
+double ftan(double a) {
+  return ftan_l(a);
+}
+
 /* reductions to [-pi/4; pi/4] */
 
-long double fcos_reduction(long double ra, int qa) {
+static long double fcos_reduction(long double ra, int qa) {
   switch(qa) {
   case 0: {return(fcos_l(ra));}
   case 1: {return(-fsin_l(ra));}
@@ -1142,7 +1280,7 @@ long double fcos_reduction(long double ra, int qa) {
   caml_failwith("fcos_reduction");
 }
 
-long double fsin_reduction(long double ra, int qa) {
+static long double fsin_reduction(long double ra, int qa) {
   switch(qa) {
   case 0: {return(fsin_l(ra));}
   case 1: {return(fcos_l(ra));}
@@ -1154,7 +1292,7 @@ long double fsin_reduction(long double ra, int qa) {
 
 /* fcos, fsin, ftan in low / high modes --------------------------------------- */
 
-long double fcos_low_l(long double la) {
+static long double fcos_low_l(long double la) {
   long double ra;
   int qa;
 
@@ -1168,7 +1306,12 @@ long double fcos_low_l(long double la) {
   return(fcos_reduction(ra, qa));
 }
 
-long double fcos_high_l(long double la) {
+CAMLexport
+double fcos_low(double a) {
+  return to_low(fcos_low_l(a));
+}
+
+static long double fcos_high_l(long double la) {
   long double ra;
   int qa;
 
@@ -1182,9 +1325,14 @@ long double fcos_high_l(long double la) {
   return(fcos_reduction(ra, qa));
 }
 
-long double fsin_high_l(long double la);
+CAMLexport
+double fcos_high(double a) {
+  return to_high(fcos_high_l(a));
+}
 
-long double fsin_low_l(long double la) {
+static long double fsin_high_l(long double la);
+
+static long double fsin_low_l(long double la) {
   long double ra;
   int qa;
 
@@ -1198,7 +1346,12 @@ long double fsin_low_l(long double la) {
   return(fsin_reduction(ra, qa));
 }
 
-long double fsin_high_l(long double la) {
+CAMLexport
+double fsin_low(double a) {
+  return to_low(fsin_low_l(a));
+}
+
+static long double fsin_high_l(long double la) {
   long double ra;
   int qa;
 
@@ -1212,9 +1365,14 @@ long double fsin_high_l(long double la) {
   return(fsin_reduction(ra, qa));
 }
 
-long double ftan_high_l(long double a);
+CAMLexport
+double fsin_high(double a) {
+  return to_high(fsin_high_l(a));
+}
 
-long double ftan_low_l(long double a) {
+static long double ftan_high_l(long double a);
+
+static long double ftan_low_l(long double a) {
   long double r;
   int q;
 
@@ -1224,7 +1382,12 @@ long double ftan_low_l(long double a) {
   else {return(fdiv_low_l(1.0, ftan_l(-r)));}
 }
 
-long double ftan_high_l(long double a) {
+CAMLexport
+double ftan_low(double a) {
+  return to_low(ftan_low_l(a));
+}
+
+static long double ftan_high_l(long double a) {
   long double r;
   int q;
 
@@ -1234,9 +1397,14 @@ long double ftan_high_l(long double a) {
   else {return(fdiv_high_l(1.0, ftan_l(-r)));}
 }
 
+CAMLexport
+double ftan_high(double a) {
+  return to_high(ftan_high_l(a));
+}
+
 /* fcos_I, fsin_I - with computation optimization ------------------------------ */
 
-long double fcos_low_aux(long double la, long double ra) {
+static long double fcos_low_aux(long double la, long double ra) {
   int qa;
   if (la < 0.0) {la = -la; ra = -ra;}
   if (0.0 < ra) {fprem1_l(la, Pio2_low, &ra, &qa);}
@@ -1245,7 +1413,7 @@ long double fcos_low_aux(long double la, long double ra) {
   return(fcos_reduction(ra, qa));
 }
 
-long double fcos_high_aux(long double la, long double ra) {
+static long double fcos_high_aux(long double la, long double ra) {
   int qa;
 
   if (la < 0.0) {la = -la; ra = -ra;}
@@ -1255,9 +1423,9 @@ long double fcos_high_aux(long double la, long double ra) {
   return(fcos_reduction(ra, qa));
 }
 
-long double fsin_high_aux(long double la, long double ra);
+static long double fsin_high_aux(long double la, long double ra);
 
-long double fsin_low_aux(long double la, long double ra) {
+static long double fsin_low_aux(long double la, long double ra) {
   int qa;
   if (la < 0.0) {return(-fsin_high_aux(-la, -ra));}
   if ((-Pio2_high < ra) && (ra < Pio2_high)) {fprem1_l(la, Pio2_high, &ra, &qa);}
@@ -1266,7 +1434,7 @@ long double fsin_low_aux(long double la, long double ra) {
   return(fsin_reduction(ra, qa));
 }
 
-long double fsin_high_aux(long double la, long double ra) {
+static long double fsin_high_aux(long double la, long double ra) {
   int qa;
 
   if (la < 0.0) {return(-fsin_low_aux(-la, -ra));}
@@ -1276,7 +1444,7 @@ long double fsin_high_aux(long double la, long double ra) {
   return(fsin_reduction(ra, qa));
 }
 
-void fcos_I(long double a, long double b, double *rra, double *rrb) {
+static void fcos_I(long double a, long double b, double *rra, double *rrb) {
   long double ra, rb;
   int qa, qb;
 
@@ -1316,7 +1484,7 @@ void fcos_I(long double a, long double b, double *rra, double *rrb) {
   *rrb = 1.0;
 }
 
-void fsin_I(long double a, long double b, double *rra, double *rrb) {
+static void fsin_I(long double a, long double b, double *rra, double *rrb) {
   long double ra, rb;
   int qa, qb;
 
@@ -1458,12 +1626,17 @@ long double fexm1_high_l(long double a) {
   }
 }
 
-long double fcosh_l(long double a) {
+static long double fcosh_l(long double a) {
   if ((a == infinity) || (a == neg_infinity)) {return(infinity);}
   else {return(fdiv_l(fadd_l(fexp_l(a), fexp_l(-a)), 2.0));}
 }
 
-long double fcosh_low_l(long double a) {
+CAMLexport
+double fcosh(double a) {
+  return fcosh_l(a);
+}
+
+static long double fcosh_low_l(long double a) {
   long double res;
   if ((a == infinity) || (a == neg_infinity)) {return(infinity);}
   else {
@@ -1472,18 +1645,33 @@ long double fcosh_low_l(long double a) {
   }
 }
 
-long double fcosh_high_l(long double a) {
+CAMLexport
+double fcosh_low(double a) {
+  return to_low(fcosh_low_l(a));
+}
+
+static long double fcosh_high_l(long double a) {
   if ((a == infinity) || (a == neg_infinity)) {return(infinity);}
   else {return(fdiv_high_l(fadd_high_l(fexp_high_l(a), fexp_high_l(-a)), 2.0));}
 }
 
-long double fsinh_l(long double a) {
+CAMLexport
+double fcosh_high(double a) {
+  return to_high(fcosh_high_l(a));
+}
+
+static long double fsinh_l(long double a) {
   if (a == infinity || (a == neg_infinity)) {return(a);}
   else if (a < 0.0) {return(-fdiv_l(-fexm1_l(2.0 * a), 2.0 * fexp_l(a)));}
   else {return(fdiv_l(-fexm1_l(-2.0 * a), 2.0 * fexp_l(-a)));}
 }
 
-long double fsinh_low_l(long double a) {
+CAMLexport
+double fsinh(double a) {
+  return fsinh_l(a);
+}
+
+static long double fsinh_low_l(long double a) {
   if (a == infinity || (a == neg_infinity)) {return(a);}
   else if (a < 0.) {
     return(-fdiv_high_l(-fexm1_low_l(fmul_low_l(2.0, a)),
@@ -1495,7 +1683,12 @@ long double fsinh_low_l(long double a) {
   }
 }
 
-long double fsinh_high_l(long double a) {
+CAMLexport
+double fsinh_low(double a) {
+  return to_low(fsinh_low_l(a));
+}
+
+static long double fsinh_high_l(long double a) {
   if (a == infinity || (a == neg_infinity)) {return(a);}
   else if (a == neg_infinity) {return(neg_infinity);}
   else if (a < 0.) {
@@ -1508,7 +1701,12 @@ long double fsinh_high_l(long double a) {
   }
 }
 
-long double ftanh_l(long double a) {
+CAMLexport
+double fsinh_high(double a) {
+  return to_high(fsinh_high_l(a));
+}
+
+static long double ftanh_l(long double a) {
   long double em2xm1;
 
   if (a == infinity) {return(1.0);}
@@ -1521,7 +1719,12 @@ long double ftanh_l(long double a) {
   }
 }
 
-long double ftanh_low_l(long double a) {
+CAMLexport
+double ftanh(double a) {
+  return ftanh_l(a);
+}
+
+static long double ftanh_low_l(long double a) {
   long double em2xm1_high;
 
   if (a == infinity) {return(1.0);}
@@ -1534,7 +1737,12 @@ long double ftanh_low_l(long double a) {
   }
 }
 
-long double ftanh_high_l(long double a) {
+CAMLexport
+double ftanh_low(double a) {
+  return to_low(ftanh_low_l(a));
+}
+
+static long double ftanh_high_l(long double a) {
   long double em2xm1_high;
 
   /* return -ftanh_low_l(-a);*/
@@ -1546,6 +1754,11 @@ long double ftanh_high_l(long double a) {
     else if (em2xm1_high == neg_infinity) {return(-1.0);}
     return(-fdiv_low_l(-em2xm1_high, fadd_high_l(em2xm1_high, 2.0)));
   }
+}
+
+CAMLexport
+double ftanh_high(double a) {
+  return to_high(ftanh_high_l(a));
 }
 
 /* CAML ---------------------------------------------------------------------- */
