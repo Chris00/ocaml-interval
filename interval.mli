@@ -55,9 +55,6 @@ let x = I.(v 0.5 1. + sin(v 3. 3.125))
    You do not have to worry about remembering these rules.  The type
    system will enforce them.
 
-   An older deprecated interface is still available as the module
-   {!Interval.Deprecated}.
-
    It is not mandatory, but still wise, to read the documentation of
    the {!Fpu} module.
 
@@ -89,6 +86,9 @@ let x = I.(v 0.5 1. + sin(v 3. 3.125))
    especially when computing functions with many temporary results,
    which force the GC to create and destroy lot of intervals when
    using the implementation we chose. Nothing's perfect.
+
+   An older deprecated interface is still available as the module
+   {!Interval.Deprecated}.
 
    The library is implemented in x87 assembly mode and is quite
    efficient ({{:#perf}see below}).  *)
@@ -373,6 +373,7 @@ end
 
 (** {2 Arrays of intervals} *)
 
+(** Operations on arrays of intervals. *)
 module Arr : sig
   val size_max: t array -> float
   (** Computes the size of the largest interval of the interval vector. *)
@@ -656,6 +657,7 @@ module Deprecated : sig
 end [@@deprecated "Make an alias module I = Interval"]
 
 type interval = t [@@deprecated "Use Interval.t instead"]
+(** Deprecated version of {!Interval.t}. *)
 
 (** {2:perf Performance}
 
