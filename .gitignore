@@ -13,4 +13,5 @@
 ocamlfpu
 *.norm
 *.opt
+TESTS/tests
 doc/

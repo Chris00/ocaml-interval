@@ -3,24 +3,24 @@
 
     This file is part of the ocaml interval library.
 
-    The ocaml interval library is free software: 
-    you can redistribute it and/or modify it under the terms of 
+    The ocaml interval library is free software:
+    you can redistribute it and/or modify it under the terms of
     the GNU Lesser General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    The ocaml interval library is distributed in the hope that it will be 
+    The ocaml interval library is distributed in the hope that it will be
     useful,but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public 
-    License along with the ocaml interval library.  
+    You should have received a copy of the GNU Lesser General Public
+    License along with the ocaml interval library.
     If not, see <http://www.gnu.org/licenses/>.
 *)
 
 open Fpu
-open Interval
+open Interval.Deprecated
 
 type test_mode = Exact | In | Mod2pi
 
@@ -69,10 +69,10 @@ let add_result infos args res =
       infos.args_low <- args)
     else (
       if resm < infos.res_low then (
-	infos.res_low <- resm; 
+	infos.res_low <- resm;
 	infos.args_low <- args);
       if infos.res_high < resm then (
-	infos.res_high <- resm; 
+	infos.res_high <- resm;
 	infos.args_high <- args)))
 
 let print_test infos =
@@ -94,7 +94,7 @@ let print_test infos =
   if infos.msg = "" then (
     if infos.res_low <= infos.res_high then (
       if not (test_I infos.res_I) then error "Interval not valid.\nShould be"
-      else if infos.res_low < infos.res_I.low || 
+      else if infos.res_low < infos.res_I.low ||
       infos.res_I.high < infos.res_high then error "Should_contain"
       else if infos.mode = Exact &&
 	(infos.res_low <> infos.res_I.low ||
@@ -111,7 +111,7 @@ let rec iter f = function
 
 let iter_in x_I f values =
   List.iter (fun x ->
-    if x_I.low <= x && x <= x_I.high then 
+    if x_I.low <= x && x <= x_I.high then
       if x = 0. then (
 	if x_I.low < 0. then f (-0.);
 	if 0. < x_I.high || x_I.low = 0. then f 0.)
@@ -134,7 +134,7 @@ let check_I_f mode values bounds (name, f_list, f_I_f) =
     let infos = create_test mode (f_I_f x_I) y in
     iter_in x_I (fun x ->
       if name = "pow" && x = 0. then (
-	Printf.printf "%e ^ %e = %e\n" x y (List.hd f_list x y); 
+	Printf.printf "%e ^ %e = %e\n" x y (List.hd f_list x y);
 	flush stdout);
       List.iter (fun f -> add_result infos [x; y] (f x y)) f_list) values;
     print_test infos) bounds) bounds
@@ -179,13 +179,13 @@ let speed_cmp2 loops (name, f) =
   let l = Array.length rnd_values in
   Printf.printf "%10s speed (%d calls):" name loops; flush stdout;
   let top = (Unix.times ()).Unix.tms_utime in
-  for n = 1 to loops / l do 
+  for n = 1 to loops / l do
     Array.iteri (fun i x -> ignore (f x x)) rnd_values;
   done;
   let dt = (Unix.times ()).Unix.tms_utime -. top in
   Printf.printf "%f\n" dt; flush stdout
 
-let rnd_values_I = Array.init 1000 (fun i-> 
+let rnd_values_I = Array.init 1000 (fun i->
   let x1 = 1000.-.Random.float 2000. and x2 = Random.float 10. in
   {low=x1;high=x1+.x2})
 
@@ -241,7 +241,7 @@ let _ =
     add_mul pio2_I.low pio2_I.high 0. (-1010) (-990) (
     add_mul pio2_I.low pio2_I.high 0. (-10) 10 (
     add_mul pio2_I.low pio2_I.high 0. 990 1010 [])) in
-  let angles = 
+  let angles =
     neg_infinity::
     add_mul pio2_I.low pio2_I.high da (-1006) (-994) (
     add_mul pio2_I.low pio2_I.high da (-6) 6 (
@@ -276,14 +276,14 @@ let _ =
   check_I_i Exact values bounds valuesi
     ("powi", [fpow; fpow_low; fpow_high], pow_I_i);
 
-  List.iter (check_f_I Exact values bounds) 
+  List.iter (check_f_I Exact values bounds)
     [ ("+.$", [(+.); fadd_low; fadd_high], ( +.$));
       ("-.$", [(+.); fadd_low; fadd_high], ( +.$));
-      ("*.$", [(+.); fadd_low; fadd_high], ( +.$)); 
+      ("*.$", [(+.); fadd_low; fadd_high], ( +.$));
       ("/.$", [(/.); fdiv_low; fdiv_high], ( /.$));
       ("**.$", [pospow; flog_pow_low; flog_pow_high], ( **.$)) ];
 
-  List.iter (check_I_I Exact values bounds) 
+  List.iter (check_I_I Exact values bounds)
     [ ("+", [(+.); fadd_low; fadd_high], ( +$));
       ("-", [(-.); fsub_low; fsub_high], ( -$));
       ("*", [( *.); fmul_low; fmul_high], ( *$));
@@ -295,9 +295,9 @@ let _ =
     [ ("atan2", [myatan2; myatan2_low; myatan2_high], atan2_I_I);
       ("**$", [pospow; flog_pow_low; flog_pow_high], ( **$) ) ];
 
-  check_I_I Mod2pi values bounds 
+  check_I_I Mod2pi values bounds
     ("atan2mod", [myatan2; myatan2_low; myatan2_high], atan2mod_I_I);
-  
+
   Printf.printf "%f seconds.\n" (Sys.time () -. top);
   flush stdout;
 
@@ -313,7 +313,5 @@ let _ =
   ("**", ( ** )); ("pow", fpow); ("mod_float", mod_float); ("fmod", fmod)];
 
   List.iter (speed_cmp2_I 10000000) [
-  ("+$", (+$)); ("-$", (-$)); 
+  ("+$", (+$)); ("-$", (-$));
   ("*$", ( *$)); ("/$", (/$))];
-
-    
