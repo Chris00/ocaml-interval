@@ -1,21 +1,21 @@
 (*
     Copyright 2011 Jean-Marc Alliot / Jean-Baptiste Gotteland
 
-    This file is part of the ocaml interval library.
+    This file is part of the OCaml interval library.
 
-    The ocaml interval library is free software:
+    The OCaml interval library is free software:
     you can redistribute it and/or modify it under the terms of
     the GNU Lesser General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    The ocaml interval library is distributed in the hope that it will be
+    The OCaml interval library is distributed in the hope that it will be
     useful,but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Lesser General Public License for more details.
 
     You should have received a copy of the GNU Lesser General Public
-    License along with the ocaml interval library.
+    License along with the OCaml interval library.
     If not, see <http://www.gnu.org/licenses/>.
 *)
 
@@ -513,7 +513,7 @@ module Deprecated : sig
   val (/$): interval -> interval -> interval
 
   (** [mod_I_f a f] returns [a] mod [f] according to interval
-     arithmetic et ocaml mod_float definition.  Raise [Failure
+     arithmetic et OCaml mod_float definition.  Raise [Failure
      "mod_I_f"] if [f=0.] *)
   val mod_I_f: interval -> float -> interval
 

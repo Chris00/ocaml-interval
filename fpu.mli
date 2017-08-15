@@ -1,21 +1,21 @@
 (*
     Copyright 2011 Jean-Marc Alliot / Jean-Baptiste Gotteland
 
-    This file is part of the ocaml interval library.
+    This file is part of the OCaml interval library.
 
-    The ocaml interval library is free software:
+    The OCaml interval library is free software:
     you can redistribute it and/or modify it under the terms of
     the GNU Lesser General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    The ocaml interval library is distributed in the hope that it will be
+    The OCaml interval library is distributed in the hope that it will be
     useful,but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Lesser General Public License for more details.
 
     You should have received a copy of the GNU Lesser General Public
-    License along with the ocaml interval library.
+    License along with the OCaml interval library.
     If not, see <http://www.gnu.org/licenses/>.
 *)
 
@@ -36,10 +36,10 @@ For example, for the angle a=
 the following values are computed for cos(a), by
 (1) the MPFI library (with 128 bits precision),
 (2) the x87 in low mode,
-(3) the x87 in nearest mode (default value for the C and Ocaml library on
+(3) the x87 in nearest mode (default value for the C and OCaml library on
 32 bits linux),
 (4) the x87 in high mode,
-(5) the SSE2 implementation (default value for the C and Ocaml library on
+(5) the SSE2 implementation (default value for the C and OCaml library on
 64 bits linux):
 
 (1) 6.123 233 995 736 765 886 130 329 661 375 001 464 640 377 798 836e-17
@@ -60,7 +60,7 @@ computed by the x87. Unfortunately, there is no way to get an upper and
 lower bound value, and we are thus stuck with the x87 for computing these
 (sometimes incorrect) bounds.
 
-The problem here is that the value computed by the standard, C-lib (or ocaml)
+The problem here is that the value computed by the standard, C-lib (or OCaml)
 cos function doesn't always lie in the lower/upper bound interval returned by
 the x87 functions, and this can be a very serious problem when executing
 Branch and Bound algorithms which expect the mid-value to be inside the
@@ -77,7 +77,7 @@ Last, (a mod Pi/2_High) <= (a mod Pi/2) <= (a mod Pi/2_Low). With this implement
 and 64 bits architecture.
 This rewritting has been done in assembly language and is quite efficient.
 
-Keep in mind that values returned by the standard (C-lib or Ocaml) cos(),
+Keep in mind that values returned by the standard (C-lib or OCaml) cos(),
 sin() or tan() functions are still
 different on 32 and 64 bits architecture. If you want to have a program which
 behaves exactly in the same way on both architectures, you can use the [Fpu]
