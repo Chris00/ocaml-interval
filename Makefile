@@ -42,6 +42,9 @@ tests:
 
 clean:
 	$(RM) -f *.cmo *.cmi *.cmx *.o *~ *.cma *.cmxa *.a a.out *.so ocamlfpu ocamlfpu.exe
+	$(MAKE) -C TESTS $@
+	$(MAKE) -C EXAMPLES $@
+	$(MAKE) -C EXAMPLES/B_AND_B $@
 
 .PHONY: doc
 doc: doc/index.html
