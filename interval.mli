@@ -653,9 +653,9 @@ module Deprecated : sig
   (** Deprecated *)
   val pow_I_I : interval -> interval -> interval
 
-end [@@deprecated]
+end [@@deprecated "Make an alias module I = Interval"]
 
-type interval = t [@@deprecated]
+type interval = t [@@deprecated "Use Interval.t instead"]
 
 (** {2:perf Performance}
 
