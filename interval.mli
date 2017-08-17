@@ -158,8 +158,17 @@ module I : sig
       - [0] if [a.low <= x <= a.high], i.e., if [x] ∈ [a], and
       - [-1] if [x < a.low].  *)
 
-  val size: t -> float
-  (** [size a] returns the length of the interval [a.high - a.low]. *)
+  val size: t -> t
+  (** [size a] returns an interval containing the true length of the
+     interval [a.high - a.low]. *)
+
+  val size_high : t -> float
+  (** [size_high a] returns the length of the interval [a.high - a.low]
+     rounded up. *)
+
+  val size_low : t -> float
+  (** [size_low a] returns the length of the interval [a.high - a.low]
+     rounded down. *)
 
   val sgn: t -> t
   (** [sgn a] returns the sign of each bound, i.e.,
@@ -446,7 +455,7 @@ val float_i: int -> t  [@@deprecated "Use I.of_int instead"]
 val compare_I_f: t -> float -> int  [@@deprecated "Use I.compare_f instead"]
 
 (** [size_I a] returns [a.high-a.low] *)
-val size_I: t -> float  [@@deprecated "Use I.size instead"]
+val size_I: t -> float  [@@deprecated "Use I.size_high instead"]
 
 (** [sgn a] returns [{low=float (compare a.low 0.);high=float
    (compare a.high 0.)}] *)

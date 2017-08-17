@@ -77,7 +77,11 @@ module I = struct
   let compare_f {low = a; high = b} x =
     if b < x then 1 else if a <= x then 0 else -1
 
-  let size x = x.high -. x.low
+  let size x =
+    { low = fsub_low x.high x.low;  high = fsub_high x.high x.low }
+
+  let size_low x = fsub_low x.high x.low
+  let size_high x = fsub_high x.high x.low
 
   let abs ({low = a; high = b} as x) =
     if 0. <= a then x
@@ -529,7 +533,7 @@ let printf_I format i =
 
 let float_i = I.of_int
 let compare_I_f = I.compare_f
-let size_I = I.size
+let size_I x = x.high -. x.low
 let sgn_I = I.sgn
 let truncate_I = I.truncate
 let abs_I = I.abs
