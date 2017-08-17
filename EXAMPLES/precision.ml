@@ -1,6 +1,6 @@
 (* Ill conditioned function *)
 
-module I = Interval
+open Interval
 
 let f_I x y =
   I.(333.75 *. y**6

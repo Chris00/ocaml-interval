@@ -9,13 +9,14 @@ all : interval.cma interval.cmxa doc/index.html ocamlfpu
 
 
 interval.cma interval.cmxa: $(NORM_OBJS) $(OPT_OBJS) chcw.o
-	ocamlmklib -o interval -oc interval_ocaml $^
+	ocamlmklib -o interval -oc interval_stubs $^
 
 ocamlfpu: interval.cma
 	ocamlmktop -I . -o ocamlfpu interval.cma
 
-examples EXAMPLES:
+examples EXAMPLES: all
 	$(MAKE) -C EXAMPLES
+	$(MAKE) -C EXAMPLES/B_AND_B
 
 install: all
 	ocamlfind install interval $(wildcard META \
@@ -24,7 +25,7 @@ install: all
 remove:
 	ocamlfind remove interval
 
-tests:
+tests: all
 	$(MAKE) -C TESTS
 
 .PHONY: examples EXAMPLES install remove tests

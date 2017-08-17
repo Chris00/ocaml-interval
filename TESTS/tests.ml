@@ -21,7 +21,7 @@
 
 open Printf
 open Fpu
-module I = Interval
+open Interval
 
 type test_mode = Exact | In | Mod2pi
 
@@ -52,7 +52,7 @@ let create_test mode f x =
     inf = false;
     neg_inf = false; }
 
-let test_I {I.low = a; high = b} =
+let test_I {low = a; high = b} =
   a = a && b = b && a <= b && a <> infinity && b <> neg_infinity
 
 let twopi = 2. *. I.(pi.high)
@@ -60,7 +60,7 @@ let twopi = 2. *. I.(pi.high)
 let add_result infos args res =
   if res = res then (
     let resm =
-      if infos.mode <> Mod2pi || infos.msg <> "" || infos.res_I.I.low <= res then
+      if infos.mode <> Mod2pi || infos.msg <> "" || infos.res_I.low <= res then
         res
       else (res +. twopi) in
     if resm = infinity then (
@@ -96,11 +96,11 @@ let print_test infos =
   if infos.msg = "" then (
     if infos.res_low <= infos.res_high then (
       if not (test_I infos.res_I) then error "Interval not valid.\nShould be"
-      else if infos.res_low < infos.res_I.I.low ||
-      infos.res_I.I.high < infos.res_high then error "Should_contain"
+      else if infos.res_low < infos.res_I.low ||
+      infos.res_I.high < infos.res_high then error "Should_contain"
       else if infos.mode = Exact &&
-                (infos.res_low <> infos.res_I.I.low ||
-                   infos.res_high <> infos.res_I.I.high) then error "Should be")
+                (infos.res_low <> infos.res_I.low ||
+                   infos.res_high <> infos.res_I.high) then error "Should be")
     else error "Should fail.")
   else if infos.res_low <= infos.res_high then error "Should be"
 
@@ -113,12 +113,12 @@ let rec iter f = function
 
 let iter_in x_I f values =
   List.iter (fun x ->
-      if x_I.I.low <= x && x <= x_I.I.high then
+      if x_I.low <= x && x <= x_I.high then
         if x = 0. then (
-          if x_I.I.low < 0. then f (-0.);
-          if 0. < x_I.I.high || x_I.I.low = 0. then f 0.)
+          if x_I.low < 0. then f (-0.);
+          if 0. < x_I.high || x_I.low = 0. then f 0.)
         else f x)
-    (x_I.I.low :: x_I.I.high :: values)
+    (x_I.low :: x_I.high :: values)
 
 let iter_finite f values =
   List.iter (fun x -> if classify_float x <> FP_infinite then f x) values
@@ -256,14 +256,14 @@ let () =
                   :: add_mul al ah da (i + 1) j l0
     else l0 in
   let pio2s =
-    add_mul pio2.I.low pio2.I.high 0. (-1010) (-990) (
-    add_mul pio2.I.low pio2.I.high 0. (-10) 10 (
-    add_mul pio2.I.low pio2.I.high 0. 990 1010 [])) in
+    add_mul pio2.low pio2.high 0. (-1010) (-990) (
+    add_mul pio2.low pio2.high 0. (-10) 10 (
+    add_mul pio2.low pio2.high 0. 990 1010 [])) in
   let angles =
     neg_infinity::
-    add_mul pio2.I.low pio2.I.high da (-1006) (-994) (
-    add_mul pio2.I.low pio2.I.high da (-6) 6 (
-    add_mul pio2.I.low pio2.I.high da 994 1006 [infinity])) in
+    add_mul pio2.low pio2.high da (-1006) (-994) (
+    add_mul pio2.low pio2.high da (-6) 6 (
+    add_mul pio2.low pio2.high da 994 1006 [infinity])) in
 
   List.iter (check_I_f Exact values bounds)
     [ ("I + f", [(+.); fadd_low; fadd_high], I.( +. ));

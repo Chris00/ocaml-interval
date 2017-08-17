@@ -1,5 +1,5 @@
 open Printf
-module I = Interval
+open Interval
 
 let () =
   let a = I.v 3.0 3.0 in

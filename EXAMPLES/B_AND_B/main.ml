@@ -1,4 +1,4 @@
-open Interval.Deprecated
+open Interval
 
 (* Standard Griewank function without rotation matrix, very easy to maximize *)
 let dim = 7
