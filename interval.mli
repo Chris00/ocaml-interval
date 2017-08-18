@@ -87,8 +87,7 @@ let x = I.(v 0.5 1. + sin(v 3. 3.125))
    which force the GC to create and destroy lot of intervals when
    using the implementation we chose. Nothing's perfect.
 
-   An older deprecated interface is still available as the module
-   {!Interval.Deprecated}.
+   The older deprecated interface is still available.
 
    The library is implemented in x87 assembly mode and is quite
    efficient ({{:#perf}see below}).  *)
@@ -107,7 +106,11 @@ type t = {
     high: float (** high bound, possibly = +∞ *)
   }
 
-(** *)
+
+
+(** Interval operations.  Locally open this module — using
+   e.g. [I.(...)] to redefine classical arithmetic operators for
+   interval arithmetic. *)
 module I : sig
   val zero : t
   (** Neutral element for addition. *)
