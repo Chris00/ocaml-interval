@@ -106,6 +106,13 @@ type t = {
     high: float (** high bound, possibly = +∞ *)
   }
 
+exception Division_by_zero
+(** Exception raised when a division by 0 occurs. *)
+
+exception Domain_error of string [@@warn_on_literal_pattern]
+(** Exception raised when an interval is completely outside the domain
+   of a function.  The string is the name of the function and is meant
+   to help when running code in the REPL (aka toploop). *)
 
 
 (** Interval operations.  Locally open this module — using
@@ -238,56 +245,52 @@ module I : sig
   val ( / ): t -> t -> t
   (** [a / b] divides the first interval by the second according to
      interval arithmetic and returns the proper result.
-     Raise [Failure "/$"] if [b=zero]. *)
+     Raise [Division_by_zero] if [b=zero]. *)
 
   val ( /. ): t -> float -> t
   (** [a /$. x] divides [a] by [x] according to interval arithmetic and
-     returns the proper result.  Raise [Failure "/$."] if [x=0.]. *)
-  (* FIXME: should we raise Division_by_zero (declared in this module). *)
+     returns the proper result.  Raise [Division_by_zero] if [x=0.]. *)
 
   val ( /: ): float -> t -> t
   (** [x /.$ a] divides [x] by [a] according to interval arithmetic and
-     returns the result.  Raise [Failure "/.$"] if [a=zero]. *)
+     returns the result.  Raise [Division_by_zero] if [a=zero]. *)
 
   val inv: t -> t
   (** [inv a] returns [1. /.$ a].
-      Raise [Failure "inv_I"] if [a=zero_I] *)
-  (* FIXME Division_by_zero *)
+      Raise [Division_by_zero] if [a=zero_I] *)
 
   val mod_f: t -> float -> t
   (** [mod_f a f] returns [a] mod [f] according to interval arithmetic
-     et OCaml [mod_float] definition.  Raise [Failure "mod_f"] if [f=0.]. *)
-  (* FIXME: Division_by_zero *)
+     et OCaml [mod_float] definition.  Raise [Division_by_zero] if [f=0.]. *)
 
   val sqrt: t -> t
   (** [sqrt a] returns [{low=sqrt a;high=sqrt b}] if [a>=0.],
      [{low=0.;high=sqrt b}] if [a<0.<=b].
-     Raise [Failure "sqrt_I"] if [b<0.]. *)
-  (* FIXME: Domain_error *)
+     Raise [Domain_error] if [b<0.]. *)
 
   val ( ** ): t -> int -> t
   (** [pow_i a n] returns interval [a] raised to [n]th power according
      to interval arithmetic.  If [n=0] then {!one} is returned.  Raise
-     [Failure "pow_f"] if [n<=0] and [a=zero].  Computed with exp-log in
+     [Domain_error] if [n<=0] and [a=zero].  Computed with exp-log in
      base2. *)
 
   val ( **. ): t -> float -> t
   (** [a **$. f] returns interval [a] raised to f power according to
      interval arithmetic.  If [f=0.] then {!one} is
-     returned. Raise [Failure "**$."] if [f<=0. and a=zero_I] or if [f]
+     returned. Raise [Domain_error] if [f<=0. and a=zero_I] or if [f]
      is not an integer value and [a.high < 0.].  Computed with exp-log in
      base2. *)
 
   val ( **: ): float -> t -> t
   (** [x **.$ a] returns float [x] raised to interval [a] power
      according to interval arithmetic, considering the restiction of x
-     power y to x >= 0.  Raise [Failure "**.$"] if [x < 0] and [a.high
+     power y to x >= 0.  Raise [Domain_error] if [x < 0] and [a.high
      <= 0]. *)
 
   val ( *** ): t -> t -> t
   (** [a **$ b] returns interval [a] raised to [b] power according to
      interval arithmetic, considering the restriction of x power y to
-     x >= 0.  Raise [Failure "**$"] if [a.high < 0] or [(a.high=0. and
+     x >= 0.  Raise [Domain_error] if [a.high < 0] or [(a.high=0. and
      b.high<=0.)] *)
 
 
@@ -298,7 +301,7 @@ module I : sig
       - [{low=log a.low; high=log a.high}] if [a.low>0.], and
       - [{low=neg_infinity; high=log a.high}] if [a.low<0<=a.high].
 
-      Raise [Failure "log_I"] if [a.high<=0.]. *)
+      Raise [Domain_error] if [a.high<=0.]. *)
 
   val exp: t -> t
   (** [exp a] returns [{low=exp a.high; high=exp b.high}], properly rounded. *)
@@ -319,19 +322,18 @@ module I : sig
       Returns \[-∞,∞\] if one of the bounds is greater or lower than +/-2**53. *)
 
   val acos: t -> t
-  (** [acos a] raise [Failure "acos_I"] if [a.low>1. or a.high<-1.],
+  (** [acos a] raise [Domain_error] if [a.low>1. or a.high<-1.],
      else returns [{low=if a.high<1. then acos a.high else 0; high=if
      a.low>-1. then acos a.low else pi}].  All values are in \[0,π\].*)
-  (* FIXME: Domain_error *)
 
   val asin: t -> t
-  (** [asin a] raise [Failure "asin_I"] if [a.low>1. or a.high<-1.]
-     else returns [{low=if a.low>-1. then asin a.low else -pi/2; high=if
-     a.low<1. then asin a.high else pi/2}].  All values are in
+  (** [asin a] raise [Domain_error] if [a.low > 1.] or [a.high < -1.],
+     else returns [{low=if a.low > -1. then asin a.low else -pi/2; high=if
+     a.low < 1. then asin a.high else pi/2}].  All values are in
      \[-π/2,π/2\]. *)
 
   val atan: t -> t
-  (** [atan a] returns [{low=atan a.low; high=atan a.high}] proprly
+  (** [atan a] returns [{low=atan a.low; high=atan a.high}] properly
      rounded. *)
 
   val atan2mod: t -> t -> t

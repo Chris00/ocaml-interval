@@ -29,6 +29,9 @@ let fmax (a: float) (b: float) = if a <= b then b else a
 
 type t = {low: float; high: float}
 
+exception Division_by_zero
+exception Domain_error of string
+
 module I = struct
   (* Save original operators *)
   module U = struct
@@ -162,7 +165,7 @@ module I = struct
   let ( / ) {low = a; high = b} {low = c; high = d} =
     let sc = compare c 0. and sd = compare d 0. in
     if sd = 0 then
-      if sc = 0 then failwith "/$"
+      if sc = 0 then raise Division_by_zero
       else if b <= 0. then
         {low = fdiv_low b c; high = if a = 0. then 0. else infinity}
       else if 0. <= a then {low = neg_infinity; high = fdiv_high a c}
@@ -183,19 +186,20 @@ module I = struct
 
   let ( /. ) {low = a; high = b} y =
     let sy = compare y 0. in
-    if sy = 0 then failwith "/$."
+    if sy = 0 then raise Division_by_zero
     else if 0 < sy then {low = fdiv_low a y; high = fdiv_high b y}
     else {low = fdiv_low b y; high = fdiv_high a y}
 
   let ( /: ) x {low = a; high = b} =
     let sx = compare x 0. and sa = compare a 0. and sb = compare b 0. in
     if sx = 0 then
-      if sa = 0 && sb = 0 then failwith "/.$" else {low = 0.; high = 0.}
+      if sa = 0 && sb = 0 then raise Division_by_zero
+      else {low = 0.; high = 0.}
     else if 0 < sa || sb < 0 then
       if 0 < sx then {low = fdiv_low x b; high = fdiv_high x a}
       else {low = fdiv_low x a; high = fdiv_high x b}
     else if sa = 0 then
-      if sb = 0 then failwith "/.$"
+      if sb = 0 then raise Division_by_zero
       else if 0 <= sx then {low = fdiv_low x b; high = infinity}
       else {low = neg_infinity; high = fdiv_high x b}
     else if sb = 0 then
@@ -207,7 +211,7 @@ module I = struct
   let mod_f {low = a; high = b} y =
     (* assume that the result of fmod is exact *)
     let sy = compare y 0. in
-    let y = if sy = 0 then failwith "mod_I_f" else abs_float y in
+    let y = if sy = 0 then raise Division_by_zero else abs_float y in
     if 0. <= a then
       if fsub_high b a < y then (
         let ma = fmod a y and mb = fmod b y in
@@ -225,14 +229,14 @@ module I = struct
   let inv {low = a; high = b} =
     let sa = compare a 0. and sb = compare b 0. in
     if sa = 0 then
-      if sb = 0 then failwith "inv_I"
+      if sb = 0 then raise Division_by_zero
       else {low = fdiv_low 1. b; high = infinity}
     else if 0 < sa || sb < 0 then {low = fdiv_low 1. b; high = fdiv_high 1. a}
     else if sb = 0 then {low = neg_infinity; high = fdiv_high 1. a}
     else {low =  neg_infinity; high = infinity}
 
   let sqrt {low = a; high = b} =
-    if b < 0. then failwith "sqrt_I"
+    if b < 0. then raise(Domain_error "sqrt")
     else {low = if a < 0. then 0. else fsqrt_low a; high = fsqrt_high b}
 
   let of_int n = {low = ffloat_low n; high = ffloat_high n}
@@ -246,7 +250,7 @@ module I = struct
       if x = infinity then infinity
       else flog_pow_high x (if x < 1.0 then nf.low else nf.high) in
     let sn = compare n 0 and sa = compare a 0. and sb = compare b 0. in
-    if sn = 0 then if a = 0. && b = 0. then failwith "pow_I_i" else one
+    if sn = 0 then if a = 0. && b = 0. then raise(Domain_error "**") else one
     else if sb < 0 then
       if n mod 2 = 0 then
         if 0 < sn then {low = pow_l (-.b); high = pow_h (-.a)}
@@ -260,13 +264,13 @@ module I = struct
       if 0 < sn then
         if sa = sb (* = 0. *) then {low = 0.; high = 0.}
         else {low = 0.; high = pow_h (fmax (-.a) b)}
-      else if sa = sb (* = 0. *) then failwith "pow_I_i"
+      else if sa = sb (* = 0. *) then raise(Domain_error "**")
       else {low = pow_l (fmax (-.a) b); high = infinity}
     else if 0 < sn then
       { low = if sa = 0 then 0. else -.pow_h (-.a);
         high = if sb = 0 then 0. else pow_h b}
     else if sa = 0 then
-      if sb = 0 then failwith "pow_I_i" else {low = pow_l b; high = infinity}
+      if sb = 0 then raise(Domain_error "**") else {low = pow_l b; high = infinity}
     else if sb = 0 then {low = neg_infinity; high = -.pow_l (-.a)}
     else {low = neg_infinity; high = infinity}
 
@@ -274,9 +278,10 @@ module I = struct
     let pow_l x = if x = infinity then 0. else flog_pow_low x nf in
     let pow_h x = if x = infinity then infinity else flog_pow_high x nf in
     let sn = compare nf 0. and sa = compare a 0. and sb = compare b 0. in
-    if sn = 0 then if a = 0. && b = 0. then failwith "**$." else one
+    if sn = 0 then if a = 0. && b = 0. then raise(Domain_error "**.")
+                   else one
     else if sb < 0 then
-      if floor nf <> nf then failwith "**$."
+      if floor nf <> nf then raise(Domain_error "**.")
       else if fmod nf 2. = 0. then
         if 0 < sn then {low = flog_pow_low (-.b) nf; high = pow_h (-.a)}
         else {low = pow_l (-.a); high = flog_pow_high (-.b) nf}
@@ -287,27 +292,27 @@ module I = struct
       else {low = pow_l b; high = flog_pow_high a nf}
     else if floor nf <> nf then
       if 0 < sn then {low = 0.; high = if sb = 0 then 0. else pow_h b}
-      else if sb = 0 then failwith "**$."
+      else if sb = 0 then raise(Domain_error "**.")
       else {low = pow_l b; high = infinity}
     else if fmod nf 2. = 0. then
       if 0 < sn then
         if sa = sb (* = 0. *) then {low = 0.; high = 0.}
         else {low = 0.; high = pow_h (fmax (-.a) b)}
-      else if sa = sb (* = 0. *) then failwith "**$."
+      else if sa = sb (* = 0. *) then raise(Domain_error "**.")
       else {low = pow_l (fmax (-.a) b); high = infinity}
     else if 0 < sn then
       { low = if sa = 0 then 0. else -.pow_h (-.a);
         high = if sb = 0 then 0. else pow_h b}
     else if sa = 0 then
-      if sb = 0 then failwith "**$." else {low = pow_l b; high = infinity}
+      if sb = 0 then raise(Domain_error "**.") else {low = pow_l b; high = infinity}
     else if sb = 0 then {low = neg_infinity; high = -.pow_l (-.a)}
     else {low = neg_infinity; high = infinity}
 
   let ( *** ) {low = a; high = b} {low = c; high = d} =
     let a = fmax 0. a in
-    if b < 0. then failwith "**$"
+    if b < 0. then raise(Domain_error "***")
     else if b = 0. then
-      if d <= 0. then failwith "**$" else {low = 0.; high = 0.}
+      if d <= 0. then raise(Domain_error "***") else {low = 0.; high = 0.}
     else if a = 0. then
       if 0. <= c then
         {low = if d = 0. then 1. else 0.;
@@ -328,7 +333,7 @@ module I = struct
 
   let ( **: ) x {low = a; high = b} =
     if x = 0. && 0. < b then {low = 0.; high = 0.}
-    else if x <= 0. then failwith "**.$"
+    else if x <= 0. then raise(Domain_error "**:")
     else if x < 1. then
       if a = neg_infinity then
         if b = infinity then {low = 0.; high = infinity}
@@ -344,7 +349,7 @@ module I = struct
 
   let log {low = a; high = b} =
     let sb = compare b 0. in
-    if sb <= 0 then failwith "log_I"
+    if sb <= 0 then raise(Domain_error "log")
     else {low = if a <= 0. then neg_infinity else flog_low a; high = flog_high b}
 
   let exp {low = a; high = b} =
@@ -378,13 +383,13 @@ module I = struct
     if a <= 1. && -1. <= b then
       {low = if b < 1. then facos_low b else 0.;
        high = if -1. < a then facos_high a else pi.high}
-    else failwith "acos_I"
+    else raise(Domain_error "acos")
 
   let asin {low = a; high = b} =
     if a <= 1. && -1. <= b then
       { low = if -1. < a then fasin_low a else -.pio2_I.high;
         high = if b < 1. then fasin_high b else pio2_I.high }
-    else failwith "asin_I"
+    else raise(Domain_error "asin")
 
   let atan {low = a; high = b} =
     { low = fatan_low 1. a; high = fatan_high 1. b}
@@ -401,7 +406,7 @@ module I = struct
       else if 0 <= sxa then {low = fatan_low xb ya; high = fatan_high xa yb}
       else {low = fatan_low xb ya; high = fatan_high xa ya}
     else if sya = syb (* = 0. *) then
-      if sxa = 0 && sxb = 0 then failwith "atan2mod_I_I"
+      if sxa = 0 && sxb = 0 then raise(Domain_error "atan2mod")
       else if 0 <= sxa then zero
       else if sxb <= 0 then pi
       else {low = 0.; high = pi.high}
@@ -429,7 +434,8 @@ module I = struct
       else {low = fatan_low xb ya; high = fatan_high xa ya}
     else if sya = syb then
       if sxb <= 0 then
-        if sxa = 0 then failwith "atan2" else {low = pi.low; high = pi.high}
+        if sxa = 0 then raise(Domain_error "atan2")
+        else {low = pi.low; high = pi.high}
       else if 0 <= sxa then {low = 0.; high = 0.}
       else {low = 0.; high = pi.high}
     else if sya = 0 then
@@ -550,26 +556,27 @@ let ( ~-$ ) = I.( ~- )
 let ( *$. ) = I.( *: )
 let ( *.$ ) = I.( *. )
 let ( *$ ) = I.( * )
-let ( /$. ) = I.( /. )
-let ( /.$ ) = I.( /: )
-let ( /$ ) = I.( / )
-let mod_I_f = I.mod_f
-let inv_I = I.inv
-let sqrt_I = I.sqrt
-let pow_I_i = I.( ** )
-let ( **$. ) = I.( **. )
-let ( **.$ ) = I.( **: )
-let ( **$ ) = I.( *** )
-let log_I = I.log
+let ( /$. ) x y = try I.(x /. y) with Division_by_zero -> failwith "/$."
+let ( /.$ ) x y = try I.(x /: y) with Division_by_zero -> failwith "/.$"
+let ( /$ ) x y = try I.(x / y) with Division_by_zero -> failwith "/$"
+let mod_I_f x y = try I.mod_f x y with Division_by_zero -> failwith "mod_I_f"
+let inv_I x = try I.inv x with Division_by_zero -> failwith "inv_I"
+let sqrt_I x = try I.sqrt x with Domain_error _ -> failwith "sqrt_I"
+let pow_I_i x y = try I.(x ** y) with Domain_error _ -> failwith "pow_I_i"
+let ( **$. ) x y = try I.(x **. y) with Domain_error _ -> failwith "**$."
+let ( **.$ ) x y = try I.(x **: y) with Domain_error _ -> failwith "**.$"
+let ( **$ ) x y = try I.(x *** y) with Domain_error _ -> failwith "**$"
+let log_I x = try I.log x with Domain_error _ -> failwith "log_I"
 let exp_I = I.exp
 let cos_I = I.cos
 let sin_I = I.sin
 let tan_I = I.tan
-let acos_I = I.acos
-let asin_I = I.asin
+let acos_I x = try I.acos x with Domain_error _ -> failwith "acos_I"
+let asin_I x = try I.asin x with Domain_error _ -> failwith "asin_I"
 let atan_I = I.atan
-let atan2mod_I_I = I.atan2mod
-let atan2_I_I = I.atan2
+let atan2mod_I_I x y = try I.atan2mod x y
+                       with Domain_error _ -> failwith "atan2mod_I_I"
+let atan2_I_I x y = try I.atan2 x y with Domain_error _ -> failwith "atan2_I_I"
 let cosh_I = I.cosh
 let sinh_I = I.sinh
 let tanh_I = I.tanh
