@@ -521,60 +521,63 @@ val ( *$): t -> t -> t  [@@deprecated "Use I.( * ) instead"]
 
 (** [a /$. x] divides [a] by [x] according to interval arithmetic
    and returns the proper result.  Raise [Failure "/$."] if [x=0.] *)
-val (/$.): t -> float -> t  [@@deprecated "Use I.( /. ) instead"]
+val (/$.): t -> float -> t  [@@deprecated "Use I.( /. ) instead and adjust exn"]
 
 (** [x /.$ a] divides [x] by [a] according to interval arithmetic
    and returns the result.  Raise [Failure "/.$"] if [a=zero_I] *)
-val (/.$): float -> t -> t  [@@deprecated "Use I.( /: ) instead"]
+val (/.$): float -> t -> t  [@@deprecated "Use I.( /: ) instead and adjust exn"]
 
 (** [a /$ b] divides the first interval by the second according to
    interval arithmetic and returns the proper result.  Raise
    [Failure "/$"] if [b=zero_I] *)
-val (/$): t -> t -> t  [@@deprecated "Use I.( / ) instead"]
+val (/$): t -> t -> t  [@@deprecated "Use I.( / ) instead and adjust exn"]
 
 (** [mod_I_f a f] returns [a] mod [f] according to interval
    arithmetic et OCaml mod_float definition.  Raise [Failure
    "mod_I_f"] if [f=0.] *)
-val mod_I_f: t -> float -> t  [@@deprecated "Use I.mod_f instead"]
+val mod_I_f: t -> float -> t
+  [@@deprecated "Use I.mod_f instead and adjust exn"]
 
 (** [inv_I a] returns [1. /.$ a].
     Raise [Failure "inv_I"] if [a=zero_I] *)
-val inv_I: t -> t  [@@deprecated "Use I.inv instead"]
+val inv_I: t -> t  [@@deprecated "Use I.inv instead and adjust exn"]
 
 (** [sqrt_I a] returns [{low=sqrt a;high=sqrt b}] if [a>=0.],
     [{low=0.;high=sqrt b}] if [a<0.<=b].
     Raise [Failure "sqrt_I"] if [b<0.] *)
-val sqrt_I: t -> t  [@@deprecated "Use I.sqrt instead"]
+val sqrt_I: t -> t  [@@deprecated "Use I.sqrt instead and adjust exn"]
 
 (** [Pow_I_i a n] with [n] integer returns interval [a] raised to
    nth power according to interval arithmetic.  If [n=0] then
    [{low=1.;high=1.}] is returned. Raise [Failure "pow_I_f"] if
    [n<=0] and [a=zero_I].  Computed with exp-log in base2. *)
-val pow_I_i: t -> int -> t  [@@deprecated "Use I.( ** ) instead"]
+val pow_I_i: t -> int -> t  [@@deprecated "Use I.( ** ) instead and adjust exn"]
 
 (** [a **$. f] returns interval [a] raised to f power according to
     interval arithmetic.  If [f=0.] then [{low=1.;high=1.}] is returned.
     Raise [Failure "**$."] if [f<=0. and a=zero_I]
     or if [f is not an integer value and a.high<0.].
     Computed with exp-log in base2. *)
-val ( **$.): t -> float -> t  [@@deprecated "Use I.( **. ) instead"]
+val ( **$.): t -> float -> t
+  [@@deprecated "Use I.( **. ) instead and adjust exn"]
 
 (** [a **$ b] returns interval [a] raised to [b] power according to
    interval arithmetic, considering the restriction of x power y to
    x >= 0.  Raise [Failure "**$"] if [a.high < 0] or [(a.high=0. and
    b.high<=0.)] *)
-val ( **$): t -> t -> t  [@@deprecated "Use I.( *** ) instead"]
+val ( **$): t -> t -> t  [@@deprecated "Use I.( *** ) instead and adjust exn"]
 
 (** [x **.$ a] returns float [x] raised to interval [a] power
    according to interval arithmetic, considering the restiction of x
    power y to x >= 0.
    Raise [Failure "**.$"] if [x < 0] and [a.high <= 0]*)
-val ( **.$): float -> t -> t  [@@deprecated "Use I.( **: ) instead"]
+val ( **.$): float -> t -> t
+  [@@deprecated "Use I.( **: ) instead and adjust exn"]
 
 (** [log_I a] returns [{low=log a.low; high=log a.high}] if [a.low>0.],
     [{low=neg_infinity; high=log a.high}] if [a.low<0<=a.high].
     Raise [Failure "log_I"] if [a.high<=0.] *)
-val log_I: t -> t  [@@deprecated "Use I.log instead"]
+val log_I: t -> t  [@@deprecated "Use I.log instead and adjust exn"]
 
 (** [exp_I a] returns [{low=exp a.high;high=exp b.high}] *)
 val exp_I: t -> t  [@@deprecated "Use I.exp instead"]
@@ -596,13 +599,13 @@ val tan_I: t -> t  [@@deprecated "Use I.tan instead"]
     else returns [{low=if a.high<1. then acos a.high else 0;
     high=if a.low>-1. then acos a.low else pi}].
     All values are in \[0,pi\].*)
-val acos_I: t -> t  [@@deprecated "Use I.acos instead"]
+val acos_I: t -> t  [@@deprecated "Use I.acos instead and adjust exn"]
 
 (** [asin_I a] raise [Failure "asin_I"] if [a.low>1. or a.high<-1.]
     else returns [{low=if a.low>-1. then asin a.low else -pi/2;
     high=if a.low<1. then asin a.high else pi/2}].
     All values are in \[-pi/2,pi/2\]. *)
-val asin_I: t -> t  [@@deprecated "Use I.asin instead"]
+val asin_I: t -> t  [@@deprecated "Use I.asin instead and adjust exn"]
 
 (** [atan_I a]  returns [{low=atan a.low;high=atan a.high}] *)
 val atan_I: t -> t  [@@deprecated "Use I.atan instead"]
