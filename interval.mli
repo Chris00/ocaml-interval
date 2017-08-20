@@ -25,7 +25,8 @@
    All operations use correct rounding.
 
    It is recommended to open this module.  It will being into scope
-   the interval type and a module [I] containing interval operations:
+   the interval type and a module [I] (see {!Interval.I})
+   containing interval operations:
 {[open Interval
 
 let x = I.(v 0.5 1. + sin(v 3. 3.125))
@@ -33,7 +34,7 @@ let x = I.(v 0.5 1. + sin(v 3. 3.125))
    When the module [I] is open, the integer operators ([+], [-],...)
    and the floating point ones ([+.], [-.],...) are redefined.  If, in
    the middle of an expression, you need to use the usual operators,
-   locally open the module {!U} as in [Interval.(x /. U.(float(n + 1)))].
+   locally open the module {!I.U} as in [I.(x /. U.(float(n + 1)))].
 
    The names symbols for infix operators have been chosen to try to
    make the standard cases short and the overall expression readable.
@@ -65,7 +66,7 @@ let x = I.(v 0.5 1. + sin(v 3. 3.125))
      continuity or raise exceptions. For example, [{low=2.;high=3.} /
      {low=0.;high=2.}] returns [{low=1.;high=Inf}], while
      [{low=2.;high=3.} / {low=0.;high=0.}] or [{low=0.;high=0.} /
-     {low=0.;high=0.}] raise a failure.
+     {low=0.;high=0.}] raises [Division_by_zero].
    - Intervals \[+Inf,+Inf\] or \[-Inf,-Inf\] are never used and never
      returned.
    - When using a float in the following operations, it must never be
