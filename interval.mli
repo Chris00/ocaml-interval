@@ -139,7 +139,11 @@ module I : sig
   (** [v a b] returns [{low=a; high=b}].  BEWARE that, unless you take
      care, if you use [v a b] with litteral values for [a] and/or [b],
      the resulting interval may not contain these values because the
-     compiler will round them to binary numbers before passing them to [v]. *)
+     compiler will round them to binary numbers before passing them to
+     [v].
+
+     @raise Invalid_argument if the interval \[[a], [b]\] is equal to
+     \[-∞,-∞\] or \[+∞,+∞\] or one of the bounds is NaN. *)
 
   val of_int : int -> t
   (** Returns the interval containing the float conversion of an integer. *)

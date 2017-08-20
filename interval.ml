@@ -54,7 +54,19 @@ module I = struct
 
   let zero = {low=0.; high=0.}
   let one = {low=1.; high=1.}
-  let v a b = {low=a; high=b }
+
+  let v (a: float) (b: float) =
+    if a < b (* ⇒ a, b not NaN; most frequent case *) then
+      { low=a; high=b }
+    else if a = b then
+      if a = neg_infinity then
+        invalid_arg "Interval.I.v: [-∞,-∞] is not allowed"
+      else if a = infinity then
+        invalid_arg "Interval.I.v: [+∞,+∞] is not allowed"
+      else { low=a; high=b }
+    else (* a > b or one of them is NaN *)
+      invalid_arg("Interval.I.v: [" ^ string_of_float a ^ ", "
+                  ^ string_of_float b ^ "] not allowed")
 
   let to_string_fmt fmt i =
     Printf.sprintf "[%(%f%), %(%f%)]" fmt i.low fmt i.high
