@@ -60,9 +60,9 @@ module I = struct
       { low=a; high=b }
     else if a = b then
       if a = neg_infinity then
-        invalid_arg "Interval.I.v: [-∞,-∞] is not allowed"
+        invalid_arg "Interval.I.v: [-inf, -inf] is not allowed"
       else if a = infinity then
-        invalid_arg "Interval.I.v: [+∞,+∞] is not allowed"
+        invalid_arg "Interval.I.v: [+inf, +inf] is not allowed"
       else { low=a; high=b }
     else (* a > b or one of them is NaN *)
       invalid_arg("Interval.I.v: [" ^ string_of_float a ^ ", "
