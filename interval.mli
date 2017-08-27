@@ -137,7 +137,7 @@ module I : sig
 
   val v : float -> float -> t
   (** [v a b] returns [{low=a; high=b}].  BEWARE that, unless you take
-     care, if you use [v a b] with litteral values for [a] and/or [b],
+     care, if you use [v a b] with literal values for [a] and/or [b],
      the resulting interval may not contain these values because the
      compiler will round them to binary numbers before passing them to
      [v].
