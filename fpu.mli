@@ -23,6 +23,13 @@
 Access to low level floating point functions.
 THIS LIBRARY ONLY WORKS FOR INTEL PROCESSORS.
 
+Every function, say cos, come in three flavors:
+- [fcos] which is an implementation of cos that is correct (contrary to
+  the standard functions, see below) and which result lies inside
+  the interval defined by the following two funtions.
+- [Low.cos] a lower bound on the (true) value of cos.
+- [High.cos] an upper bound on the (true) value of cos.
+
 Almost all low
 level functions are implemented using the x87 functions and x87 rounding
 modes. There are unfortunately a few problems to understand. The x87 is
@@ -137,107 +144,224 @@ Intel 980X Linux 64 bits
 
 *)
 
+
+(** Functions rounding down their results. *)
+module Low : sig
+  val float: int -> float
+  (** The float function is exact on 32 bits machine but not on 64
+     bits machine with ints larger than 53 bits. *)
+
+  val ( +. ) : float -> float -> float
+  val ( -. ) : float -> float -> float
+  val ( *. ) : float -> float -> float
+  val ( /. ) : float -> float -> float
+
+  val ( ** ) : float -> float -> float
+  (** [x**y] computes [x] at power [y], rounded down, expanded to its
+     mathematical limit when it exists. *)
+
+  val pow : float -> float -> float
+  (** [pow x y] computes [x] at power [y], rounded down, for [0 < x < ∞]
+      and [-∞ < y < ∞]. *)
+
+  val sqrt : float -> float
+  (** Floating point square root, rounded down. *)
+
+  val exp : float -> float
+  (** Floating point exponential, rounded down. *)
+
+  val log : float -> float
+  (** Floating point log rounded down. *)
+
+  val sin: float -> float
+  (** Computes sin(x) for x ∈ \]-2⁶³, 2⁶³\[. *)
+
+  val cos: float -> float
+  (** Computes cos(x) for x in \]-2⁶³, 2⁶³\[. *)
+
+  val tan: float -> float
+  (** Computes tan(x) for x in \]-2⁶³, 2⁶³\[. *)
+
+  val asin: float -> float
+  (** Arc-sine function. *)
+
+  val acos: float -> float
+  (** Arc-cosine function. *)
+
+  val atan: float -> float -> float
+  (** [atan x y] computes [atan2 y x]. *)
+
+  val sinh: float -> float
+  (** Computes the hyperbolic sine, sinh(x). *)
+
+  val cosh: float -> float
+  (** Computes the hyperbolic cosine, cosh(x). *)
+
+  val tanh: float -> float
+  (** Computes the hyperbolic tangent, tanh(x). *)
+end
+
+(** Functions rounding up their results. *)
+module High : sig
+  val float: int -> float
+  (** The float function is exact on 32 bits machine but not on 64
+     bits machine with ints larger than 53 bits. *)
+
+  val ( +. ) : float -> float -> float
+  val ( -. ) : float -> float -> float
+  val ( *. ) : float -> float -> float
+  val ( /. ) : float -> float -> float
+
+  val ( ** ) : float -> float -> float
+  (** [x**y] computes [x] at power [y], rounded up, expanded to its
+     mathematical limit when it exists. *)
+
+  val pow : float -> float -> float
+  (** [pow x y] computes [x] at power [y], rounded up, for [0 < x < ∞]
+      and [-∞ < y < infty]. *)
+
+  val sqrt : float -> float
+  (** Floating point square root, rounded up. *)
+
+  val exp : float -> float
+  (** Floating point exponential, rounded up. *)
+
+  val log : float -> float
+  (** Floating point log, rounded up. *)
+
+  val sin: float -> float
+  (** Computes sin(x) for x ∈ \]-2⁶³, 2⁶³\[. *)
+
+  val cos: float -> float
+  (** Computes cos(x) for x in \]-2⁶³, 2⁶³\[. *)
+
+  val tan: float -> float
+  (** Computes tan(x) for x in \]-2⁶³, 2⁶³\[. *)
+
+  val asin: float -> float
+  (** Arc-sine function. *)
+
+  val acos: float -> float
+  (** Arc-cosine function. *)
+
+  val atan: float -> float -> float
+  (** [atan x y] computes [atan2 y x]. *)
+
+  val sinh: float -> float
+  (** Computes the hyperbolic sine, sinh(x). *)
+
+  val cosh: float -> float
+  (** Computes the hyperbolic cosine, cosh(x). *)
+
+  val tanh: float -> float
+  (** Computes the hyperbolic tangent, tanh(x). *)
+end
+
+
 val ffloat: int -> float
-val ffloat_high: int -> float
-val ffloat_low: int -> float
+val ffloat_high: int -> float [@@deprecated "Use High.float"]
+val ffloat_low: int -> float  [@@deprecated "Use Low.float"]
 (** float() functions. The float function is exact on 32 bits machine
 but not on 64 bits machine with ints larger than 53 bits *)
 
 val fadd: float -> float -> float
-val fadd_low: float -> float -> float
-val fadd_high: float -> float -> float
+val fadd_low: float -> float -> float  [@@deprecated "Use Low.( +. )"]
+val fadd_high: float -> float -> float [@@deprecated "Use High.( +. )"]
 (** Floating point addition in nearest, low and high mode *)
 
 val fsub: float -> float -> float
-val fsub_low: float -> float -> float
-val fsub_high: float -> float -> float
+val fsub_low: float -> float -> float  [@@deprecated "Use Low.( -. )"]
+val fsub_high: float -> float -> float [@@deprecated "Use High.( -. )"]
 (** Floating point substraction in nearest, low and high mode *)
 
 val fmul: float -> float -> float
-val fmul_low: float -> float -> float
-val fmul_high: float -> float -> float
+val fmul_low: float -> float -> float  [@@deprecated "Use Low.( *. )"]
+val fmul_high: float -> float -> float [@@deprecated "Use High.( *. )"]
 (** Floating point multiplication in nearest, low and high mode *)
 
 val fdiv: float -> float -> float
-val fdiv_low: float -> float -> float
-val fdiv_high: float -> float -> float
+val fdiv_low: float -> float -> float  [@@deprecated "Use Low.( /. )"]
+val fdiv_high: float -> float -> float [@@deprecated "Use High.( /. )"]
 (** Floating point division in nearest, low and high mode *)
 
 val fmod: float -> float -> float
 (** Modulo (result is supposed to be exact) *)
 
 val fsqrt: float -> float
-val fsqrt_low: float -> float
-val fsqrt_high: float -> float
+val fsqrt_low: float -> float  [@@deprecated "Use Low.sqrt"]
+val fsqrt_high: float -> float [@@deprecated "Use High.sqrt"]
 (** Floating point square root in nearest, low and high mode *)
 
 val fexp: float -> float
-val fexp_low: float -> float
-val fexp_high: float -> float
+val fexp_low: float -> float  [@@deprecated "Use Low.exp"]
+val fexp_high: float -> float [@@deprecated "Use High.exp"]
 (** Floating point exponential in nearest, low and high mode *)
 
 val flog: float -> float
-val flog_low: float -> float
-val flog_high: float -> float
+val flog_low: float -> float  [@@deprecated "Use Low.log"]
+val flog_high: float -> float [@@deprecated "Use High.log"]
 (** Floating point log in nearest, low and high mode *)
 
 val flog_pow: float -> float -> float
-val flog_pow_low: float -> float -> float
-val flog_pow_high: float -> float -> float
+val flog_pow_low: float -> float -> float  [@@deprecated "Use Low.pow"]
+val flog_pow_high: float -> float -> float [@@deprecated "Use High.pow"]
 (** Computes x^y for 0 < x < infinity and neg_infinity < y < infinity *)
 
 val fpow: float -> float -> float
-val fpow_low: float -> float -> float
-val fpow_high: float -> float -> float
+val fpow_low: float -> float -> float  [@@deprecated "Use Low.( ** )"]
+val fpow_high: float -> float -> float [@@deprecated "Use High.( ** )"]
 (** Computes x^y expanded to its mathematical limit when it exists *)
 
 val fsin: float -> float
-val fsin_low: float -> float
-val fsin_high: float -> float
+val fsin_low: float -> float  [@@deprecated "Use Low.sin"]
+val fsin_high: float -> float [@@deprecated "Use High.sin"]
 (** Computes sin(x) for x in \]-2^63, 2^63\[ *)
 
 val fcos: float -> float
-val fcos_low: float -> float
-val fcos_high: float -> float
+val fcos_low: float -> float  [@@deprecated "Use Low.cos"]
+val fcos_high: float -> float [@@deprecated "Use High.cos"]
 (** Computes cos(x) for x in \]-2^63, 2^63\[ *)
 
 val ftan: float -> float
-val ftan_low: float -> float
-val ftan_high: float -> float
+val ftan_low: float -> float  [@@deprecated "Use Low.tan"]
+val ftan_high: float -> float [@@deprecated "Use High.tan"]
 (** Computes tan(x) for x in \]-2^63, 2^63\[ *)
 
 val fatan: float -> float -> float
-val fatan_low: float -> float -> float
-val fatan_high: float -> float -> float
+val fatan_low: float -> float -> float  [@@deprecated "Use Low.atan"]
+val fatan_high: float -> float -> float [@@deprecated "Use High.atan"]
 (** fatan x y computes atan2 y x *)
 
 val facos: float -> float
-val facos_low: float -> float
-val facos_high: float -> float
+val facos_low: float -> float  [@@deprecated "Use Low.acos"]
+val facos_high: float -> float [@@deprecated "Use High.acos"]
 (** arc-cosine functions *)
 
 val fasin: float -> float
-val fasin_low: float -> float
-val fasin_high: float -> float
+val fasin_low: float -> float  [@@deprecated "Use Low.asin"]
+val fasin_high: float -> float [@@deprecated "Use High.asin"]
 (** arc-sinus functions *)
 
 val fsinh: float -> float
-val fsinh_low: float -> float
-val fsinh_high: float -> float
+val fsinh_low: float -> float  [@@deprecated "Use Low.sinh"]
+val fsinh_high: float -> float [@@deprecated "Use High.sinh"]
 (** Computes sinh(x) *)
 
 val fcosh: float -> float
-val fcosh_low: float -> float
-val fcosh_high: float -> float
+val fcosh_low: float -> float  [@@deprecated "Use Low.cosh"]
+val fcosh_high: float -> float [@@deprecated "Use High.cosh"]
 (** Computes cosh(x) *)
 
 val ftanh: float -> float
-val ftanh_low: float -> float
-val ftanh_high: float -> float
+val ftanh_low: float -> float  [@@deprecated "Use Low.tanh"]
+val ftanh_high: float -> float [@@deprecated "Use High.tanh"]
 (** Computes tanh(x) *)
 
 val is_neg: float -> bool
 (** is_neg x returns if x has its sign bit set (true for -0.) *)
+
+
+
 
 (**
 Below, we have functions for changing the rounding mode.
