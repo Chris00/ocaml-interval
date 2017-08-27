@@ -93,10 +93,10 @@ module I = struct
     if b < x then 1 else if a <= x then 0 else -1
 
   let size x =
-    { low = fsub_low x.high x.low;  high = fsub_high x.high x.low }
+    { low = Low.(x.high -. x.low);  high = High.(x.high -. x.low) }
 
-  let size_low x = fsub_low x.high x.low
-  let size_high x = fsub_high x.high x.low
+  let size_low x = Low.(x.high -. x.low)
+  let size_high x = High.(x.high -. x.low)
 
   let abs ({low = a; high = b} as x) =
     if 0. <= a then x
@@ -153,24 +153,24 @@ module I = struct
     let sc = compare c 0. and sd = compare d 0. in
     if (sa = 0 && sb = 0) || (sc = 0 && sd = 0) then {low = 0.; high = 0.}
     else if sb <= 0 then
-      if sd <= 0 then {low = fmul_low b d; high = fmul_high a c}
-      else if 0 <= sc then {low = fmul_low a d; high = fmul_high b c}
-      else {low = fmul_low a d; high = fmul_high a c}
+      if sd <= 0 then {low = Low.(b *. d); high = High.(a *. c)}
+      else if 0 <= sc then {low = Low.(a *. d); high = High.(b *. c)}
+      else {low = Low.(a *. d); high = High.(a *. c)}
     else if 0 <= sa then
-      if sd <= 0 then {low = fmul_low b c; high = fmul_high a d}
-      else if 0 <= sc then {low = fmul_low a c; high = fmul_high b d}
-      else {low = fmul_low b c; high = fmul_high b d}
-    else if 0 <= sc then {low = fmul_low a d; high = fmul_high b d}
-    else if sd <= 0 then {low = fmul_low b c; high = fmul_high a c}
+      if sd <= 0 then {low = Low.(b *. c); high = High.(a *. d)}
+      else if 0 <= sc then {low = Low.(a *. c); high = High.(b *. d)}
+      else {low = Low.(b *. c); high = High.(b *. d)}
+    else if 0 <= sc then {low = Low.(a *. d); high = High.(b *. d)}
+    else if sd <= 0 then {low = Low.(b *. c); high = High.(a *. c)}
     else
-      { low = fmin (fmul_low a d) (fmul_low b c);
-        high = fmax (fmul_high a c) (fmul_high b d) }
+      { low = fmin Low.(a *. d) Low.(b *. c);
+        high = fmax High.(a *. c) High.(b *. d) }
 
   let ( *. ) y {low = a; high = b} =
     let sy = compare y 0. in
     if sy = 0 then {low = 0.; high = 0.}
-    else if sy < 0 then {low = fmul_low b y; high = fmul_high a y}
-    else {low = fmul_low a y; high = fmul_high b y}
+    else if sy < 0 then {low = Low.(b *. y); high = High.(a *. y)}
+    else {low = Low.(a *. y); high = High.(b *. y)}
 
   let ( *: ) a y = y *. a
 
@@ -179,28 +179,28 @@ module I = struct
     if sd = 0 then
       if sc = 0 then raise Division_by_zero
       else if b <= 0. then
-        {low = fdiv_low b c; high = if a = 0. then 0. else infinity}
-      else if 0. <= a then {low = neg_infinity; high = fdiv_high a c}
+        {low = Low.(b /. c); high = if a = 0. then 0. else infinity}
+      else if 0. <= a then {low = neg_infinity; high = High.(a /. c)}
       else {low = neg_infinity; high = infinity}
     else if sd < 0 then
-      { low = if b <= 0. then fdiv_low b c else fdiv_low b d;
-        high = if 0. <= a then fdiv_high a c else fdiv_high a d }
+      { low = if b <= 0. then Low.(b /. c) else Low.(b /. d);
+        high = if 0. <= a then High.(a /. c) else High.(a /. d) }
     else if sc = 0 then
       if b <= 0. then
-        {low = if a = 0. then 0. else neg_infinity; high = fdiv_high b d}
-      else if 0. <= a then {low = fdiv_low a d; high = infinity}
+        {low = if a = 0. then 0. else neg_infinity; high = High.(b /. d)}
+      else if 0. <= a then {low = Low.(a /. d); high = infinity}
       else {low = neg_infinity; high = infinity}
     else if 0 < sc then
-      { low = if a <= 0. then fdiv_low a c else fdiv_low a d;
-        high = if b <= 0. then fdiv_high b d else fdiv_high b c }
+      { low = if a <= 0. then Low.(a /. c) else Low.(a /. d);
+        high = if b <= 0. then High.(b /. d) else High.(b /. c) }
     else if a = 0. && b = 0. then {low = 0.; high = 0.}
     else {low = neg_infinity; high = infinity}
 
   let ( /. ) {low = a; high = b} y =
     let sy = compare y 0. in
     if sy = 0 then raise Division_by_zero
-    else if 0 < sy then {low = fdiv_low a y; high = fdiv_high b y}
-    else {low = fdiv_low b y; high = fdiv_high a y}
+    else if 0 < sy then {low = Low.(a /. y); high = High.(b /. y)}
+    else {low = Low.(b /. y); high = High.(a /. y)}
 
   let ( /: ) x {low = a; high = b} =
     let sx = compare x 0. and sa = compare a 0. and sb = compare b 0. in
@@ -208,16 +208,16 @@ module I = struct
       if sa = 0 && sb = 0 then raise Division_by_zero
       else {low = 0.; high = 0.}
     else if 0 < sa || sb < 0 then
-      if 0 < sx then {low = fdiv_low x b; high = fdiv_high x a}
-      else {low = fdiv_low x a; high = fdiv_high x b}
+      if 0 < sx then {low = Low.(x /. b); high = High.(x /. a)}
+      else {low = Low.(x /. a); high = High.(x /. b)}
     else if sa = 0 then
       if sb = 0 then raise Division_by_zero
-      else if 0 <= sx then {low = fdiv_low x b; high = infinity}
-      else {low = neg_infinity; high = fdiv_high x b}
+      else if 0 <= sx then {low = Low.(x /. b); high = infinity}
+      else {low = neg_infinity; high = High.(x /. b)}
     else if sb = 0 then
       if sx = 0 then {low = 0.; high = 0.}
-      else if 0 <= sx then {low = neg_infinity; high = fdiv_high x a}
-      else {low = fdiv_low x a; high = infinity}
+      else if 0 <= sx then {low = neg_infinity; high = High.(x /. a)}
+      else {low = Low.(x /. a); high = infinity}
     else {low = neg_infinity; high = infinity}
 
   let mod_f {low = a; high = b} y =
@@ -225,12 +225,12 @@ module I = struct
     let sy = compare y 0. in
     let y = if sy = 0 then raise Division_by_zero else abs_float y in
     if 0. <= a then
-      if fsub_high b a < y then (
+      if High.(b -. a) < y then (
         let ma = fmod a y and mb = fmod b y in
         if ma <= mb then {low = ma; high = mb} else {low = 0.; high = y})
       else {low = 0.; high = y}
     else if b <= 0. then
-      if fsub_high b a < y then (
+      if High.(b -. a) < y then (
         let ma = fmod a y and mb = fmod b y in
         if ma <= mb then {low = ma; high = mb} else {low = -.y; high = 0.})
       else {low = -.y; high = 0.}
@@ -242,25 +242,25 @@ module I = struct
     let sa = compare a 0. and sb = compare b 0. in
     if sa = 0 then
       if sb = 0 then raise Division_by_zero
-      else {low = fdiv_low 1. b; high = infinity}
-    else if 0 < sa || sb < 0 then {low = fdiv_low 1. b; high = fdiv_high 1. a}
-    else if sb = 0 then {low = neg_infinity; high = fdiv_high 1. a}
+      else {low = Low.(1. /. b); high = infinity}
+    else if 0 < sa || sb < 0 then {low = Low.(1. /. b); high = High.(1. /. a)}
+    else if sb = 0 then {low = neg_infinity; high = High.(1. /. a)}
     else {low =  neg_infinity; high = infinity}
 
   let sqrt {low = a; high = b} =
     if b < 0. then raise(Domain_error "sqrt")
-    else {low = if a < 0. then 0. else fsqrt_low a; high = fsqrt_high b}
+    else {low = if a < 0. then 0. else Low.sqrt a; high = High.sqrt b}
 
-  let of_int n = {low = ffloat_low n; high = ffloat_high n}
+  let of_int n = {low = Low.float n; high = High.float n}
 
   let ( ** ) {low = a; high = b} n =
     let nf = of_int n in
     let pow_l x =
       if x = infinity then 0.
-      else flog_pow_low x (if x < 1.0 then nf.high else nf.low) in
+      else Low.pow x (if x < 1.0 then nf.high else nf.low) in
     let pow_h x =
       if x = infinity then infinity
-      else flog_pow_high x (if x < 1.0 then nf.low else nf.high) in
+      else High.pow x (if x < 1.0 then nf.low else nf.high) in
     let sn = compare n 0 and sa = compare a 0. and sb = compare b 0. in
     if sn = 0 then if a = 0. && b = 0. then raise(Domain_error "**") else one
     else if sb < 0 then
@@ -287,21 +287,21 @@ module I = struct
     else {low = neg_infinity; high = infinity}
 
   let ( **. ) {low = a; high = b} nf =
-    let pow_l x = if x = infinity then 0. else flog_pow_low x nf in
-    let pow_h x = if x = infinity then infinity else flog_pow_high x nf in
+    let pow_l x = if x = infinity then 0. else Low.pow x nf in
+    let pow_h x = if x = infinity then infinity else High.pow x nf in
     let sn = compare nf 0. and sa = compare a 0. and sb = compare b 0. in
     if sn = 0 then if a = 0. && b = 0. then raise(Domain_error "**.")
                    else one
     else if sb < 0 then
       if floor nf <> nf then raise(Domain_error "**.")
       else if fmod nf 2. = 0. then
-        if 0 < sn then {low = flog_pow_low (-.b) nf; high = pow_h (-.a)}
-        else {low = pow_l (-.a); high = flog_pow_high (-.b) nf}
-      else if 0 < sn then {low = -.pow_h (-.a); high = -.flog_pow_low (-.b) nf}
-      else {low = -.flog_pow_high (-.b) nf; high = -.pow_l (-.a)}
+        if 0 < sn then {low = Low.pow (-.b) nf; high = pow_h (-.a)}
+        else {low = pow_l (-.a); high = High.pow (-.b) nf}
+      else if 0 < sn then {low = -.pow_h (-.a); high = -. Low.pow (-.b) nf}
+      else {low = -. High.pow (-.b) nf; high = -.pow_l (-.a)}
     else if 0 < sa then
-      if 0 < sn then {low = flog_pow_low a nf; high = pow_h b}
-      else {low = pow_l b; high = flog_pow_high a nf}
+      if 0 < sn then {low = Low.pow a nf; high = pow_h b}
+      else {low = pow_l b; high = High.pow a nf}
     else if floor nf <> nf then
       if 0 < sn then {low = 0.; high = if sb = 0 then 0. else pow_h b}
       else if sb = 0 then raise(Domain_error "**.")
@@ -328,20 +328,20 @@ module I = struct
     else if a = 0. then
       if 0. <= c then
         {low = if d = 0. then 1. else 0.;
-         high = fpow_high b (if b < 1. then c else d)}
+         high = High.(b**(if b < 1. then c else d))}
       else if d <= 0. then
-        {low = fpow_low b (if b < 1. then d else c); high = infinity}
+        {low = Low.(b**(if b < 1. then d else c)); high = infinity}
       else {low = 0.; high = infinity}
     else if 0. <= c then
-      { low = fpow_low a (if a < 1. then d else c);
-        high = fpow_high b (if b < 1. then c else d) }
+      { low = Low.(a**(if a < 1. then d else c));
+        high = High.(b**(if b < 1. then c else d)) }
     else if d <= 0. then
-      { low = fpow_low b (if b < 1. then d else c);
-        high = fpow_high a (if a < 1. then c else d) }
-    else if b < 1. then {low = fpow_low a d; high = fpow_high a c}
-    else if 1. < a then {low = fpow_low b c; high = fpow_high b d}
-    else {low = fmin (fpow_low a d) (fpow_low b c);
-  	high = fmax (fpow_high a c) (fpow_high b d)}
+      { low = Low.(b**(if b < 1. then d else c));
+        high = High.(a**(if a < 1. then c else d)) }
+    else if b < 1. then {low = Low.(a**d); high = High.(a**c)}
+    else if 1. < a then {low = Low.(b**c); high = High.(b**d)}
+    else { low = fmin Low.(a**d) Low.(b**c);
+           high = fmax High.(a**c) High.(b**d)}
 
   let ( **: ) x {low = a; high = b} =
     if x = 0. && 0. < b then {low = 0.; high = 0.}
@@ -349,30 +349,30 @@ module I = struct
     else if x < 1. then
       if a = neg_infinity then
         if b = infinity then {low = 0.; high = infinity}
-        else {low = flog_pow_low x b; high = infinity}
-      else if b = infinity then {low = 0.; high = flog_pow_high x a}
-      else {low = flog_pow_low x b; high = flog_pow_high x a}
+        else {low = Low.pow x b; high = infinity}
+      else if b = infinity then {low = 0.; high = High.pow x a}
+      else {low = Low.pow x b; high = High.pow x a}
     else if x = 1. then {low = 1.; high = 1.}
     else if a = neg_infinity then
       if b = infinity then {low = 0.; high = infinity}
-      else {low = 0.; high = flog_pow_high x b}
-    else if b = infinity then {low = flog_pow_low x a; high = infinity}
-    else {low = flog_pow_low x a; high = flog_pow_high x b}
+      else {low = 0.; high = High.pow x b}
+    else if b = infinity then {low = Low.pow x a; high = infinity}
+    else {low = Low.pow x a; high = High.pow x b}
 
   let log {low = a; high = b} =
     let sb = compare b 0. in
     if sb <= 0 then raise(Domain_error "log")
-    else {low = if a <= 0. then neg_infinity else flog_low a; high = flog_high b}
+    else {low = if a <= 0. then neg_infinity else Low.log a; high = High.log b}
 
   let exp {low = a; high = b} =
-    { low = if a = neg_infinity then 0. else fexp_low a;
-      high = if b = infinity then infinity else fexp_high b}
+    { low = if a = neg_infinity then 0. else Low.exp a;
+      high = if b = infinity then infinity else High.exp b}
 
-  let pi = {low = fatan_low (-1.) 0.; high = fatan_high (-1.) 0.}
+  let pi = {low = Low.atan (-1.) 0.; high = High.atan (-1.) 0.}
   let two_pi = 2.0 *. pi
-  let pio2_I = {low = fatan_low 0. 1.; high = fatan_high 0. 1.}
+  let pio2_I = {low = Low.atan 0. 1.; high = High.atan 0. 1.}
 
-  let e = {low = fexp_low 1.0; high = fexp_high 1.0}
+  let e = {low = Low.exp 1.0; high = High.exp 1.0}
 
   let i_sgn x =
     let sgn_low = compare x.low 0. and sgn_high = compare x.high 0. in
@@ -384,66 +384,66 @@ module I = struct
   external sin: t -> t = "fsin_I_caml"
 
   let tan {low = a; high = b} =
-    if -.max_63 <= a && b <= max_63 && fsub_high b a < pi.high then (
-      let ta = ftan_low a in
-      let tb = ftan_high b in
+    if -.max_63 <= a && b <= max_63 && High.(b -. a) < pi.high then (
+      let ta = Low.tan a in
+      let tb = High.tan b in
       if ta <= tb then {low = ta; high = tb}
       else {low = neg_infinity; high = infinity})
     else {low = neg_infinity; high = infinity}
 
   let acos {low = a; high = b} =
     if a <= 1. && -1. <= b then
-      {low = if b < 1. then facos_low b else 0.;
-       high = if -1. < a then facos_high a else pi.high}
+      {low = if b < 1. then Low.acos b else 0.;
+       high = if -1. < a then High.acos a else pi.high}
     else raise(Domain_error "acos")
 
   let asin {low = a; high = b} =
     if a <= 1. && -1. <= b then
-      { low = if -1. < a then fasin_low a else -.pio2_I.high;
-        high = if b < 1. then fasin_high b else pio2_I.high }
+      { low = if -1. < a then Low.asin a else -.pio2_I.high;
+        high = if b < 1. then High.asin b else pio2_I.high }
     else raise(Domain_error "asin")
 
   let atan {low = a; high = b} =
-    { low = fatan_low 1. a; high = fatan_high 1. b}
+    { low = Low.atan 1. a; high = High.atan 1. b}
 
   let atan2mod {low = ya; high = yb} {low = xa; high = xb} =
     let sya = compare ya 0. and syb = compare yb 0. in
     let sxa = compare xa 0. and sxb = compare xb 0. in
     if syb < 0 then
-      if sxb <= 0 then {low = fatan_low xa yb; high = fatan_high xb ya}
-      else if 0 <= sxa then {low = fatan_low xa ya; high = fatan_high xb yb}
-      else {low = fatan_low xa yb; high = fatan_high xb yb}
+      if sxb <= 0 then {low = Low.atan xa yb; high = High.atan xb ya}
+      else if 0 <= sxa then {low = Low.atan xa ya; high = High.atan xb yb}
+      else {low = Low.atan xa yb; high = High.atan xb yb}
     else if 0 < sya then
-      if sxb <= 0 then {low = fatan_low xb yb; high = fatan_high xa ya}
-      else if 0 <= sxa then {low = fatan_low xb ya; high = fatan_high xa yb}
-      else {low = fatan_low xb ya; high = fatan_high xa ya}
+      if sxb <= 0 then {low = Low.atan xb yb; high = High.atan xa ya}
+      else if 0 <= sxa then {low = Low.atan xb ya; high = High.atan xa yb}
+      else {low = Low.atan xb ya; high = High.atan xa ya}
     else if sya = syb (* = 0. *) then
       if sxa = 0 && sxb = 0 then raise(Domain_error "atan2mod")
       else if 0 <= sxa then zero
       else if sxb <= 0 then pi
       else {low = 0.; high = pi.high}
     else if sya = 0 then
-      { low = if sxb <= 0 then fatan_low xb yb else 0.;
-        high = if 0 <= sxa then fatan_high xa yb else pi.high}
+      { low = if sxb <= 0 then Low.atan xb yb else 0.;
+        high = if 0 <= sxa then High.atan xa yb else pi.high}
     else if syb = 0 then
-      { low = if 0 <= sxa then fatan_low xa ya else -.pi.high;
-        high = if sxb <= 0 then fatan_high xb ya else 0. }
+      { low = if 0 <= sxa then Low.atan xa ya else -.pi.high;
+        high = if sxb <= 0 then High.atan xb ya else 0. }
     else if sxb <= 0 then
-      {low = fatan_low xb yb; high = fadd_high (fatan_high xb ya) two_pi.high}
-    else if 0 <= sxa then {low = fatan_low xa ya; high = fatan_high xa yb}
+      {low = Low.atan xb yb; high = High.(atan xb ya +. two_pi.high)}
+    else if 0 <= sxa then {low = Low.atan xa ya; high = High.atan xa yb}
     else {low = -.pi.high; high = pi.high}
 
   let atan2 {low = ya; high = yb} {low = xa; high = xb} =
     let sya = compare ya 0. and syb = compare yb 0. in
     let sxa = compare xa 0. and sxb = compare xb 0. in
     if syb < 0 then
-      if sxb <= 0 then {low = fatan_low xa yb; high = fatan_high xb ya}
-      else if 0 <= sxa then {low = fatan_low xa ya; high = fatan_high xb yb}
-      else {low = fatan_low xa yb; high = fatan_high xb yb}
+      if sxb <= 0 then {low = Low.atan xa yb; high = High.atan xb ya}
+      else if 0 <= sxa then {low = Low.atan xa ya; high = High.atan xb yb}
+      else {low = Low.atan xa yb; high = High.atan xb yb}
     else if 0 < sya then
-      if sxb <= 0 then {low = fatan_low xb yb; high = fatan_high xa ya}
-      else if 0 <= sxa then {low = fatan_low xb ya; high = fatan_high xa yb}
-      else {low = fatan_low xb ya; high = fatan_high xa ya}
+      if sxb <= 0 then {low = Low.atan xb yb; high = High.atan xa ya}
+      else if 0 <= sxa then {low = Low.atan xb ya; high = High.atan xa yb}
+      else {low = Low.atan xb ya; high = High.atan xa ya}
     else if sya = syb then
       if sxb <= 0 then
         if sxa = 0 then raise(Domain_error "atan2")
@@ -451,32 +451,32 @@ module I = struct
       else if 0 <= sxa then {low = 0.; high = 0.}
       else {low = 0.; high = pi.high}
     else if sya = 0 then
-      { low = if 0 < sxb then 0. else fatan_low xb yb;
-        high = if sxa < 0 then pi.high else fatan_high xa yb }
+      { low = if 0 < sxb then 0. else Low.atan xb yb;
+        high = if sxa < 0 then pi.high else High.atan xa yb }
     else if syb = 0 then
-      { low = if sxa < 0 then -.pi.high else fatan_low xa ya;
-        high = if 0 < sxb then 0. else fatan_high xb ya }
-    else if 0 <= sxa then {low = fatan_low xa ya; high = fatan_high xa yb}
+      { low = if sxa < 0 then -.pi.high else Low.atan xa ya;
+        high = if 0 < sxb then 0. else High.atan xb ya }
+    else if 0 <= sxa then {low = Low.atan xa ya; high = High.atan xa yb}
     else {low = -.pi.high; high = pi.high}
 
   let cosh {low = a; high = b} =
-    if b < 0. then {low = fcosh_low b; high = fcosh_high a}
-    else if a < 0. then {low = 1.; high = fcosh_high (fmax (-.a) b)}
-    else {low = fcosh_low a; high = fcosh_high b}
+    if b < 0. then {low = Low.cosh b; high = High.cosh a}
+    else if a < 0. then {low = 1.; high = High.cosh (fmax (-.a) b)}
+    else {low = Low.cosh a; high = High.cosh b}
 
-  let sinh {low = a; high = b} = {low = fsinh_low a; high = fsinh_high b}
+  let sinh {low = a; high = b} = {low = Low.sinh a; high = High.sinh b}
 
-  let tanh {low = a; high = b} = {low = ftanh_low a; high = ftanh_high b}
+  let tanh {low = a; high = b} = {low = Low.tanh a; high = High.tanh b}
 
 
   module Arr = struct
 
     let size_mean v =
-      let add sum {low = a; high = b} = fadd_high sum (fsub_high b a) in
+      let add sum {low = a; high = b} = High.(sum +. (b -. a)) in
       U.(Array.fold_left add 0. v /. float (Array.length v))
 
     let size_max v =
-      Array.fold_left (fun m {low = a; high = b} -> fmax m (fsub_high b a)) 0. v
+      Array.fold_left (fun m {low = a; high = b} -> fmax m High.(b -. a)) 0. v
 
     let size v =
       Array.fold_left (fun m vi -> fmax m (abs_float vi)) 0. v
