@@ -42,7 +42,7 @@ tests: all
 	$(CC) -W -Wall -O3 -I $(OCAMLDIR)/caml -fPIC -c  $<
 
 clean:
-	$(RM) -f *.cmo *.cmi *.cmx *.o *~ *.cma *.cmxa *.a a.out *.so ocamlfpu ocamlfpu.exe
+	$(RM) -f *.annot *.cmo *.cmi *.cmt *.cmx *.o *~ *.cma *.cmxa *.a a.out *.so ocamlfpu ocamlfpu.exe
 	$(MAKE) -C TESTS $@
 	$(MAKE) -C EXAMPLES $@
 	$(MAKE) -C EXAMPLES/B_AND_B $@
