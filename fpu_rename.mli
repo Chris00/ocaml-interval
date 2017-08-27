@@ -19,25 +19,29 @@
     If not, see <http://www.gnu.org/licenses/>.
 *)
 
-(**
-Aliases floating point functions to their "constant" counterparts, except for "ordinary functions"
+[@@@deprecated "Use Fpu.Rename"]
 
-As described in the [Fpu] module documentation, there are problems when mixing
-some C-lib or ocaml native functions with interval programming on 64 bits machine.
+(** Aliases floating point functions to their "constant" counterparts,
+   except for "ordinary functions".
 
-The standard floating point functions results will always lie in the [low; high]
-interval computed by the Fpu module, but they are slightly different on 32 and 64
-bits machines.
+   As described in the [Fpu] module documentation, there are problems
+   when mixing some C-lib or ocaml native functions with interval
+   programming on 64 bits machine.
 
-Using [Open Fpu_rename] at the beginning of your program guarantees that floating
-computation will give the same results on 32 and 64 bits machines for all transcendantal
-functions but not for ordinary arithmetic functions.
+   The standard floating point functions results will always lie in
+   the [low; high] interval computed by the Fpu module, but they are
+   slightly different on 32 and 64 bits machines.
 
-NB: while most transcendantal function are almost as fast, and sometimes faster than
-their "standard" ocaml counterparts, +. -. *. and /. are much slower (from 50% to 100%
-depending on the processor). If you want to rename also
-+. -. *. and /. then use the [Fpu_rename_all] module.
-*)
+   Using [Open Fpu.Rename] at the beginning of your program guarantees
+   that floating computation will give the same results on 32 and 64
+   bits machines for all transcendantal functions but not for ordinary
+   arithmetic functions.
+
+   NB: while most transcendantal function are almost as fast, and
+   sometimes faster than their "standard" ocaml counterparts, [+.],
+   [-.], [*.] and [/.] are much slower (from 50% to 100% depending on
+   the processor).  If you want to rename also [+.], [-.], [*.] and
+   [/.] then use the [Fpu.Rename_all] module.  *)
 
 val mod_float : float -> float -> float
 (** Computes x mod y *)

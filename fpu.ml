@@ -212,3 +212,44 @@ let fpow x y =
 
 let fpow_low = Low.( ** )
 let fpow_high = High.( ** )
+
+
+module Rename = struct
+  let mod_float = fmod
+  let sqrt = fsqrt
+  let log = flog
+  let exp = fexp
+  let ( ** ) = fpow
+  let cos = fcos
+  let sin = fsin
+  let tan = ftan
+  let asin = fasin
+  let acos = facos
+  let atan x = fatan 1.0 x
+  let atan2 x y = fatan y x
+  let cosh = fcosh
+  let sinh = fsinh
+  let tanh = ftanh
+end
+
+module Rename_all = struct
+  let ( +. ) = fadd
+  let ( -. ) = fsub
+  let ( *. ) = fmul
+  let ( /. ) = fdiv
+  let mod_float = fmod
+  let sqrt = fsqrt
+  let log = flog
+  let exp = fexp
+  let ( ** ) = fpow
+  let cos = fcos
+  let sin = fsin
+  let tan = ftan
+  let asin = fasin
+  let acos = facos
+  let atan x = fatan 1.0 x
+  let atan2 x y = fatan y x
+  let cosh = fcosh
+  let sinh = fsinh
+  let tanh = ftanh
+end

@@ -144,6 +144,7 @@ Intel 980X Linux 64 bits
 
 *)
 
+(** {2 Rounding down and up standard functions} *)
 
 (** Functions rounding down their results. *)
 module Low : sig
@@ -258,6 +259,8 @@ module High : sig
 end
 
 
+(** {2 Improving standard functions} *)
+
 val ffloat: int -> float
 val ffloat_high: int -> float [@@deprecated "Use High.float"]
 val ffloat_low: int -> float  [@@deprecated "Use Low.float"]
@@ -361,7 +364,158 @@ val is_neg: float -> bool
 (** is_neg x returns if x has its sign bit set (true for -0.) *)
 
 
+(** {2 Overriding standard functions} *)
 
+
+(** Aliases floating point functions to their "constant" counterparts,
+   except for "ordinary functions".
+
+   As described in the [Fpu] module documentation, there are problems
+   when mixing some C-lib or ocaml native functions with interval
+   programming on 64 bits machine.
+
+   The standard floating point functions results will always lie in
+   the [low; high] interval computed by the Fpu module, but they are
+   slightly different on 32 and 64 bits machines.
+
+   Using [Open Fpu.Rename] at the beginning of your program guarantees
+   that floating computation will give the same results on 32 and 64
+   bits machines for all transcendantal functions but not for ordinary
+   arithmetic functions.
+
+   NB: while most transcendantal function are almost as fast, and
+   sometimes faster than their "standard" ocaml counterparts, [+.],
+   [-.], [*.] and [/.] are much slower (from 50% to 100% depending on
+   the processor).  If you want to rename also [+.], [-.], [*.] and
+   [/.] then use the [Fpu.Rename_all] module.  *)
+module Rename : sig
+  val mod_float : float -> float -> float
+  (** Alias for {!Fpu.fmod}. *)
+
+  val sqrt : float -> float
+  (** Alias for {!Fpu.fsqrt}. *)
+
+  val exp : float -> float
+  (** Alias for {!Fpu.fexp}. *)
+
+  val log : float -> float
+  (** Alias for {!Fpu.flog}. *)
+
+  val ( ** ) : float -> float -> float
+  (** Alias for {!Fpu.fpow}. *)
+
+  val sin : float -> float
+  (** Alias for {!Fpu.fsin}.  Computes sin(x) for x ∈ \[-2⁶³, 2⁶³\]. *)
+
+  val cos : float -> float
+  (** Alias for {!Fpu.fcos}.  Computes cos(x) for x ∈ \[-2⁶³, 2⁶³\]. *)
+
+  val tan : float -> float
+  (** Alias for {!Fpu.ftan}.  Computes tan(x) for x ∈ \[-2⁶³, 2⁶³\]. *)
+
+  val asin : float -> float
+  (** Alias for {!Fpu.fasin}. *)
+
+  val acos : float -> float
+  (** Alias for {!Fpu.facos}. *)
+
+  val atan : float -> float
+  (** Arc-tangent function using {!Fpu.fatan}. *)
+
+  val atan2 : float -> float -> float
+  (** atan2 function using {!Fpu.fatan}. *)
+
+  val cosh: float -> float
+  (** Alias for {!Fpu.fcosh}. *)
+
+  val sinh: float -> float
+  (** Alias for {!Fpu.sinh}. *)
+
+  val tanh: float -> float
+  (** Alias for {!Fpu.ftanh}. *)
+end
+
+(** Aliases floating point functions to their "constant" counterparts,
+   including [+.], [-.], [*.] and [/.].
+
+   As described in the [Fpu] module documentation, there are problems
+   when mixing some C-lib or ocaml native functions with interval
+   programming on 64 bits machine.
+
+   The standard floating point functions results will always lie in
+   the \[low; high\] interval computed by the Fpu module, but they are
+   slightly different on 32 and 64 bits machines.
+
+   Using [open Fpu.Rename_all] at the beginning of your program
+   guarantees that floating computation will give the same results on
+   32 and 64 bits machines. This is not mandatory but might help.
+
+   NB: while most transcendantal function are almost as fast, and
+   sometimes faster than their "standard" ocaml counterparts, [+.],
+   [-.], [*.] and [/.] are much slower (from 50% to 100% depending on
+   the processor. If you want to rename transcendantal functions but
+   not [+.], [-.], [*.] and [/.] then use the [Fpu.Rename] module.  *)
+module Rename_all : sig
+  val ( +. ) : float -> float -> float
+  (** Alias for {!Fpu.fadd}. *)
+
+  val ( -. ) : float -> float -> float
+  (** Alias for {!Fpu.fsub}. *)
+
+  val ( *. ) : float -> float -> float
+  (** Alias for {!Fpu.fmul}. *)
+
+  val ( /. ) : float -> float -> float
+  (** Alias for {!Fpu.fdiv}. *)
+
+  val mod_float : float -> float -> float
+  (** Alias for {!Fpu.fmod}. *)
+
+  val sqrt : float -> float
+  (** Alias for {!Fpu.fsqrt}. *)
+
+  val exp : float -> float
+  (** Alias for {!Fpu.fexp}. *)
+
+  val log : float -> float
+  (** Alias for {!Fpu.flog}. *)
+
+  val ( ** ) : float -> float -> float
+  (** Alias for {!Fpu.fpow}. *)
+
+  val sin : float -> float
+  (** Alias for {!Fpu.fsin}.  Computes sin(x) for x ∈ \[-2⁶³, 2⁶³\]. *)
+
+  val cos : float -> float
+  (** Alias for {!Fpu.fcos}.  Computes cos(x) for x ∈ \[-2⁶³, 2⁶³\]. *)
+
+  val tan : float -> float
+  (** Alias for {!Fpu.ftan}.  Computes tan(x) for x ∈ \[-2⁶³, 2⁶³\]. *)
+
+  val asin : float -> float
+  (** Alias for {!Fpu.fasin}. *)
+
+  val acos : float -> float
+  (** Alias for {!Fpu.facos}. *)
+
+  val atan : float -> float
+  (** Arc-tangent function using {!Fpu.fatan}. *)
+
+  val atan2 : float -> float -> float
+  (** atan2 function using {!Fpu.fatan}. *)
+
+  val cosh: float -> float
+  (** Alias for {!Fpu.fcosh}. *)
+
+  val sinh: float -> float
+  (** Alias for {!Fpu.sinh}. *)
+
+  val tanh: float -> float
+  (** Alias for {!Fpu.ftanh}. *)
+end
+
+
+(** {2 Changing the rounding mode (DANGEROUS)} *)
 
 (**
 Below, we have functions for changing the rounding mode.

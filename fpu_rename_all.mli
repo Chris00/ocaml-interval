@@ -19,25 +19,27 @@
     If not, see <http://www.gnu.org/licenses/>.
 *)
 
-(**
-Aliases floating point functions to their "constant" counterparts.
+[@@@deprecated "Use Fpu.Rename_all"]
 
-As described in the [Fpu] module documentation, there are problems when mixing
-some C-lib or ocaml native functions with interval programming on 64 bits machine.
+(** Aliases floating point functions to their "constant" counterparts.
 
-The standard floating point functions results will always lie in the [low; high]
-interval computed by the Fpu module, but they are slightly different on 32 and 64
-bits machines.
+   As described in the [Fpu] module documentation, there are problems
+   when mixing some C-lib or ocaml native functions with interval
+   programming on 64 bits machine.
 
-Using [Open Fpu_rename_all] at the beginning of your program guarantees that floating
-computation will give the same results on 32 and 64 bits machines. This is not
-mandatory but might help.
+   The standard floating point functions results will always lie in
+   the \[low; high\] interval computed by the Fpu module, but they are
+   slightly different on 32 and 64 bits machines.
 
-NB: while most transcendantal function are almost as fast, and sometimes faster than
-their "standard" ocaml counterparts, +. -. *. and /. are much slower (from 50% to 100%
-depending on the processor. If you want to rename transcendantal functions but not
-+. -. *. and /. then use the [Fpu_rename] module.
-*)
+   Using [open Fpu.Rename_all] at the beginning of your program
+   guarantees that floating computation will give the same results on
+   32 and 64 bits machines. This is not mandatory but might help.
+
+   NB: while most transcendantal function are almost as fast, and
+   sometimes faster than their "standard" ocaml counterparts, [+.],
+   [-.], [*.] and [/.] are much slower (from 50% to 100% depending on
+   the processor. If you want to rename transcendantal functions but
+   not [+.], [-.], [*.] and [/.] then use the [Fpu.Rename] module.  *)
 
 val (+.) : float -> float -> float
 (** Computes x + y *)
