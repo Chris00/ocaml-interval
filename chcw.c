@@ -1174,8 +1174,8 @@ static long double fatan_low_l(long double a, long double b) {
 }
 
 CAMLexport
-double fatan_low(double a, double b) {
-  return to_low(fatan_low_l(a, b));
+double fatan2_low(double y, double x) {
+  return to_low(fatan_low_l(x, y));
 }
 
 static long double fatan_high_l(long double a, long double b) {
@@ -1192,8 +1192,8 @@ static long double fatan_high_l(long double a, long double b) {
 }
 
 CAMLexport
-double fatan_high(double a, double b) {
-  return to_high(fatan_high_l(a, b));
+double fatan2_high(double y, double x) {
+  return to_high(fatan_high_l(x, y));
 }
 
 /* fcos_l, fsin_l, ftan_l ------------------------------------------------------ */
@@ -1903,12 +1903,12 @@ value fatan_caml(value a, value b) {
   return(caml_copy_double(fatan_l(Double_val(a), Double_val(b))));
 }
 
-value fatan_low_caml(value a, value b) {
-  return(caml_copy_double(to_low(fatan_low_l(Double_val(a), Double_val(b)))));
+value fatan2_low_caml(value y, value x) {
+  return(caml_copy_double(to_low(fatan_low_l(Double_val(x), Double_val(y)))));
 }
 
-value fatan_high_caml(value a, value b) {
-  return(caml_copy_double(to_high(fatan_high_l(Double_val(a), Double_val(b)))));
+value fatan2_high_caml(value y, value x) {
+  return(caml_copy_double(to_high(fatan_high_l(Double_val(x), Double_val(y)))));
 }
 
 value fcos_caml(value a) {

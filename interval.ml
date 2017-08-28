@@ -352,9 +352,9 @@ module I = struct
     { low = if a = neg_infinity then 0. else Low.exp a;
       high = if b = infinity then infinity else High.exp b}
 
-  let pi = {low = Low.atan (-1.) 0.; high = High.atan (-1.) 0.}
+  let pi = {low = Low.atan2 0. (-1.); high = High.atan2 0. (-1.)}
   let two_pi = 2.0 *. pi
-  let pio2_I = {low = Low.atan 0. 1.; high = High.atan 0. 1.}
+  let pio2_I = {low = Low.atan2 1. 0.; high = High.atan2 1. 0.}
 
   let e = {low = Low.exp 1.0; high = High.exp 1.0}
 
@@ -388,46 +388,46 @@ module I = struct
     else raise(Domain_error "asin")
 
   let atan {low = a; high = b} =
-    { low = Low.atan 1. a; high = High.atan 1. b}
+    { low = Low.atan2 a 1.; high = High.atan2 b 1.}
 
   let atan2mod {low = ya; high = yb} {low = xa; high = xb} =
     let sya = compare ya 0. and syb = compare yb 0. in
     let sxa = compare xa 0. and sxb = compare xb 0. in
     if syb < 0 then
-      if sxb <= 0 then {low = Low.atan xa yb; high = High.atan xb ya}
-      else if 0 <= sxa then {low = Low.atan xa ya; high = High.atan xb yb}
-      else {low = Low.atan xa yb; high = High.atan xb yb}
+      if sxb <= 0 then {low = Low.atan2 yb xa; high = High.atan2 ya xb}
+      else if 0 <= sxa then {low = Low.atan2 ya xa; high = High.atan2 yb xb}
+      else {low = Low.atan2 yb xa; high = High.atan2 yb xb}
     else if 0 < sya then
-      if sxb <= 0 then {low = Low.atan xb yb; high = High.atan xa ya}
-      else if 0 <= sxa then {low = Low.atan xb ya; high = High.atan xa yb}
-      else {low = Low.atan xb ya; high = High.atan xa ya}
+      if sxb <= 0 then {low = Low.atan2 yb xb; high = High.atan2 ya xa}
+      else if 0 <= sxa then {low = Low.atan2 ya xb; high = High.atan2 yb xa}
+      else {low = Low.atan2 ya xb; high = High.atan2 ya xa}
     else if sya = syb (* = 0. *) then
       if sxa = 0 && sxb = 0 then raise(Domain_error "atan2mod")
       else if 0 <= sxa then zero
       else if sxb <= 0 then pi
       else {low = 0.; high = pi.high}
     else if sya = 0 then
-      { low = if sxb <= 0 then Low.atan xb yb else 0.;
-        high = if 0 <= sxa then High.atan xa yb else pi.high}
+      { low = if sxb <= 0 then Low.atan2 yb xb else 0.;
+        high = if 0 <= sxa then High.atan2 yb xa else pi.high}
     else if syb = 0 then
-      { low = if 0 <= sxa then Low.atan xa ya else -.pi.high;
-        high = if sxb <= 0 then High.atan xb ya else 0. }
+      { low = if 0 <= sxa then Low.atan2 ya xa else -.pi.high;
+        high = if sxb <= 0 then High.atan2 ya xb else 0. }
     else if sxb <= 0 then
-      {low = Low.atan xb yb; high = High.(atan xb ya +. two_pi.high)}
-    else if 0 <= sxa then {low = Low.atan xa ya; high = High.atan xa yb}
+      {low = Low.atan2 yb xb; high = High.(atan2 ya xb +. two_pi.high)}
+    else if 0 <= sxa then {low = Low.atan2 ya xa; high = High.atan2 yb xa}
     else {low = -.pi.high; high = pi.high}
 
   let atan2 {low = ya; high = yb} {low = xa; high = xb} =
     let sya = compare ya 0. and syb = compare yb 0. in
     let sxa = compare xa 0. and sxb = compare xb 0. in
     if syb < 0 then
-      if sxb <= 0 then {low = Low.atan xa yb; high = High.atan xb ya}
-      else if 0 <= sxa then {low = Low.atan xa ya; high = High.atan xb yb}
-      else {low = Low.atan xa yb; high = High.atan xb yb}
+      if sxb <= 0 then {low = Low.atan2 yb xa; high = High.atan2 ya xb}
+      else if 0 <= sxa then {low = Low.atan2 ya xa; high = High.atan2 yb xb}
+      else {low = Low.atan2 yb xa; high = High.atan2 yb xb}
     else if 0 < sya then
-      if sxb <= 0 then {low = Low.atan xb yb; high = High.atan xa ya}
-      else if 0 <= sxa then {low = Low.atan xb ya; high = High.atan xa yb}
-      else {low = Low.atan xb ya; high = High.atan xa ya}
+      if sxb <= 0 then {low = Low.atan2 yb xb; high = High.atan2 ya xa}
+      else if 0 <= sxa then {low = Low.atan2 ya xb; high = High.atan2 yb xa}
+      else {low = Low.atan2 ya xb; high = High.atan2 ya xa}
     else if sya = syb then
       if sxb <= 0 then
         if sxa = 0 then raise(Domain_error "atan2")
@@ -435,12 +435,12 @@ module I = struct
       else if 0 <= sxa then {low = 0.; high = 0.}
       else {low = 0.; high = pi.high}
     else if sya = 0 then
-      { low = if 0 < sxb then 0. else Low.atan xb yb;
-        high = if sxa < 0 then pi.high else High.atan xa yb }
+      { low = if 0 < sxb then 0. else Low.atan2 yb xb;
+        high = if sxa < 0 then pi.high else High.atan2 yb xa }
     else if syb = 0 then
-      { low = if sxa < 0 then -.pi.high else Low.atan xa ya;
-        high = if 0 < sxb then 0. else High.atan xb ya }
-    else if 0 <= sxa then {low = Low.atan xa ya; high = High.atan xa yb}
+      { low = if sxa < 0 then -.pi.high else Low.atan2 ya xa;
+        high = if 0 < sxb then 0. else High.atan2 ya xb }
+    else if 0 <= sxa then {low = Low.atan2 ya xa; high = High.atan2 yb xa}
     else {low = -.pi.high; high = pi.high}
 
   let cosh {low = a; high = b} =

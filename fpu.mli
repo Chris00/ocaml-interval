@@ -189,8 +189,13 @@ module Low : sig
   val acos: float -> float
   (** Arc-cosine function. *)
 
-  val atan: float -> float -> float
-  (** [atan x y] computes [atan2 y x]. *)
+  val atan : float -> float
+  (** Arc-tangent function. *)
+
+  val atan2: float -> float -> float
+  (** [atan2 y x] returns the arc tangent of [y /. x]. The signs of
+     [x] and [y] are used to determine the quadrant of the
+     result.  Result is in radians and is between -π and π. *)
 
   val sinh: float -> float
   (** Computes the hyperbolic sine, sinh(x). *)
@@ -249,8 +254,13 @@ module High : sig
   val acos: float -> float
   (** Arc-cosine function. *)
 
-  val atan: float -> float -> float
-  (** [atan x y] computes [atan2 y x]. *)
+  val atan : float -> float
+  (** Arc-tangent function. *)
+
+  val atan2: float -> float -> float
+  (** [atan2 y x] returns the arc tangent of [y /. x]. The signs of
+     [x] and [y] are used to determine the quadrant of the
+     result.  Result is in radians and is between -π and π. *)
 
   val sinh: float -> float
   (** Computes the hyperbolic sine, sinh(x). *)
@@ -339,9 +349,11 @@ val ftan_high: float -> float [@@deprecated "Use High.tan"]
 (** Computes tan(x) for x in \]-2^63, 2^63\[ *)
 
 val fatan: float -> float -> float
-val fatan_low: float -> float -> float  [@@deprecated "Use Low.atan"]
-val fatan_high: float -> float -> float [@@deprecated "Use High.atan"]
-(** fatan x y computes atan2 y x *)
+val fatan_low: float -> float -> float
+  [@@deprecated "Use [Low.atan2 y x] instead of [fatan_low x y]"]
+val fatan_high: float -> float -> float
+  [@@deprecated "Use [High.atan2 y x] instead of [fatan_high x y]"]
+(** [fatan x y] computes [atan2 y x]. *)
 
 val facos: float -> float
 val facos_low: float -> float  [@@deprecated "Use Low.acos"]

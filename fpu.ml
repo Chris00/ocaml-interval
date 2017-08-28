@@ -76,11 +76,13 @@ module Low = struct
   external tan: float -> float = "ftan_low_caml" "ftan_low" [@@unboxed]
   external asin: float -> float = "fasin_low_caml" "fasin_low" [@@unboxed]
   external acos: float -> float = "facos_low_caml" "facos_low" [@@unboxed]
-  external atan: float -> float -> float
-    = "fatan_low_caml" "fatan_low" [@@unboxed]
+  external atan2: float -> float -> float
+    = "fatan2_low_caml" "fatan2_low" [@@unboxed]
   external sinh: float -> float = "fsinh_low_caml" "fsinh_low" [@@unboxed]
   external cosh: float -> float = "fcosh_low_caml" "fcosh_low" [@@unboxed]
   external tanh: float -> float = "ftanh_low_caml" "ftanh_low" [@@unboxed]
+
+  let atan x = atan2 x 1.0
 
   let ( ** ) x y =
     if x = infinity then inf_pow y
@@ -118,11 +120,13 @@ module High = struct
   external tan: float -> float = "ftan_high_caml" "ftan_high" [@@unboxed]
   external asin: float -> float = "fasin_high_caml" "fasin_high" [@@unboxed]
   external acos: float -> float = "facos_high_caml" "facos_high" [@@unboxed]
-  external atan: float -> float -> float
-    = "fatan_high_caml" "fatan_high" [@@unboxed]
+  external atan2: float -> float -> float
+    = "fatan2_high_caml" "fatan2_high" [@@unboxed]
   external sinh: float -> float = "fsinh_high_caml" "fsinh_high" [@@unboxed]
   external cosh: float -> float = "fcosh_high_caml" "fcosh_high" [@@unboxed]
   external tanh: float -> float = "ftanh_high_caml" "ftanh_high" [@@unboxed]
+
+  let atan x = atan2 x 1.0
 
   let ( ** ) x y =
     if x = infinity then inf_pow y
@@ -188,8 +192,8 @@ external facos: float -> float = "facos_caml" "facos" [@@unboxed]
 let facos_low = Low.acos
 let facos_high = High.acos
 external fatan: float -> float -> float = "fatan_caml" "fatan" [@@unboxed]
-let fatan_low = Low.atan
-let fatan_high = High.atan
+let fatan_low x y = Low.atan2 y x
+let fatan_high x y = High.atan2 y x
 
 external fsinh: float -> float = "fsinh_caml" "fsinh" [@@unboxed]
 let fsinh_low = Low.sinh
@@ -230,7 +234,7 @@ module Rename = struct
   let asin = fasin
   let acos = facos
   let atan x = fatan 1.0 x
-  let atan2 x y = fatan y x
+  let atan2 y x = fatan x y
   let cosh = fcosh
   let sinh = fsinh
   let tanh = ftanh
@@ -252,7 +256,7 @@ module Rename_all = struct
   let asin = fasin
   let acos = facos
   let atan x = fatan 1.0 x
-  let atan2 x y = fatan y x
+  let atan2 y x = fatan x y
   let cosh = fcosh
   let sinh = fsinh
   let tanh = ftanh
