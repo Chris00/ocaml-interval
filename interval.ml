@@ -93,7 +93,7 @@ module I = struct
   let truncate x =
     {low = floor x.low; high = ceil x.high}
 
-  let union x y = {low = fmin x.low y.low; high = fmax x.high y.high}
+  let hull x y = {low = fmin x.low y.low; high = fmax x.high y.high}
 
   let max x y = {low = fmax x.low y.low; high = fmax x.high y.high}
 
@@ -539,7 +539,7 @@ let size_I x = x.high -. x.low
 let sgn_I = I.sgn
 let truncate_I = I.truncate
 let abs_I = I.abs
-let union_I_I = I.union
+let union_I_I = I.hull
 let max_I_I = I.max
 let min_I_I = I.min
 let ( +$ ) = I.( + )

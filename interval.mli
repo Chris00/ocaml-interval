@@ -199,8 +199,8 @@ module I : sig
       - [~- a] if [a.high<=0.], and
       - [{low=0.; high=max -a.low a.high}] otherwise. *)
 
-  val union: t -> t -> t
-  (** [union a b] returns the union of the intervals [a] and [b], that is
+  val hull: t -> t -> t
+  (** [hull a b] returns the smallest interval containing [a] and [b], that is
       [{low=min a.low b.low; high=max a.high b.high}]. *)
 
   val max: t -> t -> t
@@ -473,7 +473,7 @@ val truncate_I: t -> t  [@@deprecated "Use I.truncate instead"]
 val abs_I: t -> t  [@@deprecated "Use I.abs instead"]
 
 (** [union_I_I a b] returns [{low=min a.low b.low; high=max a.high b.high}] *)
-val union_I_I: t -> t -> t  [@@deprecated "Use I.union instead"]
+val union_I_I: t -> t -> t  [@@deprecated "Use I.hull instead"]
 
 (** [max_I_I a b] returns [{low=max a.low b.low; high=max a.high b.high}] *)
 val max_I_I: t -> t -> t  [@@deprecated "Use I.max instead"]
