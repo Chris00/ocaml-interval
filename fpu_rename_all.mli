@@ -21,7 +21,8 @@
 
 [@@@deprecated "Use Fpu.Rename_all"]
 
-(** Aliases floating point functions to their "constant" counterparts.
+(** @deprecated Use Fpu.Rename_all.
+   Aliases floating point functions to their "constant" counterparts.
 
    As described in the [Fpu] module documentation, there are problems
    when mixing some C-lib or ocaml native functions with interval

@@ -21,7 +21,8 @@
 
 [@@@deprecated "Use Fpu.Rename"]
 
-(** Aliases floating point functions to their "constant" counterparts,
+(** @deprecated Use Fpu.Rename.
+   Aliases floating point functions to their "constant" counterparts,
    except for "ordinary functions".
 
    As described in the [Fpu] module documentation, there are problems

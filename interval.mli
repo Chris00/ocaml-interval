@@ -79,10 +79,10 @@ let x = I.(v 0.5 1. + sin(v 3. 3.125))
 
    Another design choice was to have non mutable elements in interval
    structure, and to maintain an "ordinary" syntax for operations,
-   such as [let a = b+$c in ...] thus mapping interval computation
+   such as [let a = b + c in ...] thus mapping interval computation
    formula on airthmetic formula. We could have instead chosen to have
    mutable elements, and to write for example ([Interval.add a b c])
-   to perform “a = b + c”.  The first choice is, to our point of view,
+   to perform “a ← b + c”.  The first choice is, to our point of view,
    more elegant and easier to use.  The second is more efficient,
    especially when computing functions with many temporary results,
    which force the GC to create and destroy lot of intervals when
@@ -95,7 +95,7 @@ let x = I.(v 0.5 1. + sin(v 3. 3.125))
 
 
 (** The interval type. Be careful however when creating intervals. For
-   example, the following code: [let a = \{low=1./.3.;high=1./.3.\}]
+   example, the following code: [let a = \{low=1./.3.; high=1./.3.\}]
    creates an interval which does NOT contain the mathematical object
    1/3.
 
@@ -216,20 +216,24 @@ module I : sig
      properly rounded. *)
 
   val ( +. ): t -> float -> t
-  (** [a +$. x] returns [{low=a.low+.x; high=a.high+.x}] properly rounded. *)
+  (** [a +. x] returns [{low = a.low +. x; high = a.high +. x}]
+      properly rounded. *)
 
   val ( +: ): float -> t -> t
-  (** [x +.$ a] returns [{low=a.low+.x; high=a.high+.x}] properly rounded. *)
+  (** [x +: a] returns [{low = a.low +. x; high = a.high +. x}]
+      properly rounded. *)
 
   val ( - ): t -> t -> t
-  (** [a - b] returns [{low=a.low-.b.high;high=a.high-.b.low}] properly
-     rounded. *)
+  (** [a - b] returns [{low = a.low -. b.high;  high = a.high -. b.low}]
+      properly rounded. *)
 
   val ( -. ): t -> float -> t
-  (** [a -$. x] returns [{low=a.low-.x;high=a.high-.x}] properly rounded. *)
+  (** [a -. x] returns [{low = a.low -. x;  high = a.high -. x}]
+      properly rounded. *)
 
   val ( -: ): float -> t -> t
-  (** [x -.$ a] returns [{low=x-.a.high; high=x-.a.low}] properly rounded. *)
+  (** [x -: a] returns [{low = x -. a.high;  high = x -. a.low}]
+      properly rounded. *)
 
   val ( ~- ): t -> t
   (** [~- a] is the unary negation, it returns [{low=-a.high; high=-a.low}]. *)
@@ -240,8 +244,8 @@ module I : sig
      {!zero} is returned. *)
 
   val ( *. ): float -> t -> t
-  (** [x *$. a] multiplies [a] by [x] according to interval arithmetic
-     and returns the proper result.  If [x=0.] then [zero_I] is returned. *)
+  (** [x *. a] multiplies [a] by [x] according to interval arithmetic
+     and returns the proper result.  If [x=0.] then {!zero} is returned. *)
 
   val ( *: ): t -> float -> t
   (** [a *. x] multiplies [a] by [x] according to interval arithmetic
@@ -250,53 +254,58 @@ module I : sig
   val ( / ): t -> t -> t
   (** [a / b] divides the first interval by the second according to
      interval arithmetic and returns the proper result.
-     Raise [Division_by_zero] if [b=zero]. *)
+     Raise [Division_by_zero] if [b=]{!zero}. *)
 
   val ( /. ): t -> float -> t
-  (** [a /$. x] divides [a] by [x] according to interval arithmetic and
-     returns the proper result.  Raise [Division_by_zero] if [x=0.]. *)
+  (** [a /. x] divides [a] by [x] according to interval arithmetic and
+     returns the proper result.  Raise [Division_by_zero] if [x=0.0]. *)
 
   val ( /: ): float -> t -> t
-  (** [x /.$ a] divides [x] by [a] according to interval arithmetic and
-     returns the result.  Raise [Division_by_zero] if [a=zero]. *)
+  (** [x /: a] divides [x] by [a] according to interval arithmetic and
+     returns the result.  Raise [Division_by_zero] if [a=]{!zero}. *)
 
   val inv: t -> t
-  (** [inv a] returns [1. /.$ a].
-      Raise [Division_by_zero] if [a=zero_I] *)
+  (** [inv a] returns [1. /: a].
+      @raise Division_by_zero if [a=]{!zero}. *)
 
   val mod_f: t -> float -> t
   (** [mod_f a f] returns [a] mod [f] according to interval arithmetic
-     et OCaml [mod_float] definition.  Raise [Division_by_zero] if [f=0.]. *)
+     et OCaml [mod_float] definition.  Raise [Division_by_zero] if [f=0.0]. *)
 
   val sqrt: t -> t
-  (** [sqrt a] returns [{low=sqrt a;high=sqrt b}] if [a>=0.],
-     [{low=0.;high=sqrt b}] if [a<0.<=b].
-     Raise [Domain_error] if [b<0.]. *)
+  (** [sqrt x] returns
+      - [{low=sqrt x.low; high=sqrt x.high}] (properly rounded)
+        if [x.low >= 0.],
+      - [{low=0.; high=sqrt x.high}] if [x.low < 0. <= x.high].
+
+      @raise Domain_error if [x.high < 0.0]. *)
 
   val ( ** ): t -> int -> t
   (** [pow_i a n] returns interval [a] raised to [n]th power according
-     to interval arithmetic.  If [n=0] then {!one} is returned.  Raise
-     [Domain_error] if [n<=0] and [a=zero].  Computed with exp-log in
-     base2. *)
+     to interval arithmetic.  If [n=0] then {!one} is returned.
+     Computed with exp-log in base2.
+
+     @raise Domain_error if [n <= 0] and [a=]{!zero}. *)
 
   val ( **. ): t -> float -> t
-  (** [a **$. f] returns interval [a] raised to f power according to
-     interval arithmetic.  If [f=0.] then {!one} is
-     returned. Raise [Domain_error] if [f<=0. and a=zero_I] or if [f]
-     is not an integer value and [a.high < 0.].  Computed with exp-log in
-     base2. *)
+  (** [a **. f] returns interval [a] raised to [f] power according to
+     interval arithmetic.  If [f=0.] then {!one} is returned.
+     Computed with exp-log in base2.
+     @raise Domain_error if [f <= 0.] and [a=]{!zero} or if [f]
+     is not an integer value and [a.high < 0.]. *)
 
   val ( **: ): float -> t -> t
-  (** [x **.$ a] returns float [x] raised to interval [a] power
-     according to interval arithmetic, considering the restiction of x
-     power y to x >= 0.  Raise [Domain_error] if [x < 0] and [a.high
-     <= 0]. *)
+  (** [x **: a] returns float [x] raised to interval [a] power
+     according to interval arithmetic, considering the restiction of [x]
+     to x >= 0.
+     @raise Domain_error if [x < 0.] and [a.high <= 0.0]. *)
 
   val ( *** ): t -> t -> t
-  (** [a **$ b] returns interval [a] raised to [b] power according to
-     interval arithmetic, considering the restriction of x power y to
-     x >= 0.  Raise [Domain_error] if [a.high < 0] or [(a.high=0. and
-     b.high<=0.)] *)
+  (** [a *** b] returns interval [a] raised to [b] power according to
+     interval arithmetic, considering the restriction of "x power y" to
+     x >= 0.
+     @raise Domain_error if [a.high < 0] or
+            ([a.high = 0.] and [b.high <= 0.]). *)
 
 
   (** {2 Logarithmic and exponential functions} *)
@@ -409,7 +418,7 @@ end
    [Interval].  They are kept for backward compatibility. *)
 
 type interval = t [@@deprecated "Use Interval.t instead"]
-(** Deprecated version of {!Interval.t}. *)
+(** @deprecated Alias of {!Interval.t}. *)
 
 (** Neutral element for addition *)
 val zero_I : t [@@deprecated "Use I.zero instead"]

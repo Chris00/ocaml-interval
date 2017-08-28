@@ -178,10 +178,10 @@ module Low : sig
   (** Computes sin(x) for x ∈ \]-2⁶³, 2⁶³\[. *)
 
   val cos: float -> float
-  (** Computes cos(x) for x in \]-2⁶³, 2⁶³\[. *)
+  (** Computes cos(x) for x ∈ \]-2⁶³, 2⁶³\[. *)
 
   val tan: float -> float
-  (** Computes tan(x) for x in \]-2⁶³, 2⁶³\[. *)
+  (** Computes tan(x) for x ∈ \]-2⁶³, 2⁶³\[. *)
 
   val asin: float -> float
   (** Arc-sine function. *)
@@ -381,7 +381,7 @@ val ftanh_high: float -> float [@@deprecated "Use High.tanh"]
 (** Computes tanh(x) *)
 
 val is_neg: float -> bool
-(** is_neg x returns if x has its sign bit set (true for -0.) *)
+(** [is_neg x] returns if [x] has its sign bit set (true for [-0.]). *)
 
 
 (** {2 Overriding standard functions} *)
@@ -449,7 +449,7 @@ module Rename : sig
   (** Alias for {!Fpu.fcosh}. *)
 
   val sinh: float -> float
-  (** Alias for {!Fpu.sinh}. *)
+  (** Alias for {!Fpu.fsinh}. *)
 
   val tanh: float -> float
   (** Alias for {!Fpu.ftanh}. *)
@@ -528,7 +528,7 @@ module Rename_all : sig
   (** Alias for {!Fpu.fcosh}. *)
 
   val sinh: float -> float
-  (** Alias for {!Fpu.sinh}. *)
+  (** Alias for {!Fpu.fsinh}. *)
 
   val tanh: float -> float
   (** Alias for {!Fpu.ftanh}. *)
@@ -549,8 +549,9 @@ When setting the rounding mode to UPWARD or DOWNWARD, it is better to set it
 immediately back to NEAREST. However  we have no guarantee
 on how the compiler will reorder the instructions generated.
 It is ALWAYS better to write:
-
+{[
 let a = set_high(); let res = 1./.3. in set_nearest (); res;;
+]}
 
 The above code will NOT work on linux-x64 where many floating point
 functions are implemented using SSE instructions.
@@ -558,8 +559,9 @@ These three functions should only be used when there is no other
 solution, and you really know what tou are doing, and this should never happen.
 Please use the regular functions of the fpu module for computations.
 For example prefer:
-
-let a = fdiv_high 1. 3.;;
+{[
+let a = High.(1. /. 3.)
+]}
 
 PS: The Interval module and the fpu module functions correctly set and
 restore the rounding mode
