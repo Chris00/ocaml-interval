@@ -1,7 +1,7 @@
 OCAMLDIR:= "$(shell ocamlc -where)"
 CSLC = ocamlc -annot -bin-annot
 CSLOPT = ocamlopt -annot -bin-annot
-NORM_OBJS= fpu.cmo fpu_rename_all.cmo fpu_rename.cmo interval.cmo 
+NORM_OBJS= interval__U.cmo fpu.cmo fpu_rename_all.cmo fpu_rename.cmo interval.cmo
 OPT_OBJS=  $(NORM_OBJS:.cmo=.cmx)
 CC = gcc
 
@@ -32,7 +32,7 @@ tests: all
 
 .SUFFIXES: .ml .mli .cmo .cmi .cmx
 
-.ml.cmo :
+%.cmo : %.ml %.cmi
 	$(CSLC) -c $<
 .mli.cmi :
 	$(CSLC) -c $<

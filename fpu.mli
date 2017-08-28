@@ -200,6 +200,10 @@ module Low : sig
 
   val tanh: float -> float
   (** Computes the hyperbolic tangent, tanh(x). *)
+
+  (** Locally open to restore standard integer and floating point
+     operators. *)
+  module U = Interval__U
 end
 
 (** Functions rounding up their results. *)
@@ -256,6 +260,10 @@ module High : sig
 
   val tanh: float -> float
   (** Computes the hyperbolic tangent, tanh(x). *)
+
+  (** Locally open to restore standard integer and floating point
+     operators. *)
+  module U = Interval__U
 end
 
 

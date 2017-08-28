@@ -34,23 +34,7 @@ exception Domain_error of string
 
 module I = struct
   (* Save original operators *)
-  module U = struct
-    external ( ~- ) : int -> int = "%negint"
-    external ( ~+ ) : int -> int = "%identity"
-    external ( + ) : int -> int -> int = "%addint"
-    external ( - ) : int -> int -> int = "%subint"
-    external ( * ) : int -> int -> int = "%mulint"
-    external ( / ) : int -> int -> int = "%divint"
-    external ( ~-. ) : float -> float = "%negfloat"
-    external ( ~+. ) : float -> float = "%identity"
-    external ( +. ) : float -> float -> float = "%addfloat"
-    external ( -. ) : float -> float -> float = "%subfloat"
-    external ( *. ) : float -> float -> float = "%mulfloat"
-    external ( /. ) : float -> float -> float = "%divfloat"
-    external ( ** ) : float -> float -> float = "caml_power_float" "pow"
-                                                [@@unboxed] [@@noalloc]
-    (* FIXME: Do we also want to recover [sin],...? *)
-  end
+  module U = Interval__U
 
   let zero = {low=0.; high=0.}
   let one = {low=1.; high=1.}

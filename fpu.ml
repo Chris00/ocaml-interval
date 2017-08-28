@@ -55,6 +55,8 @@ external flog_pow_high: float -> float -> float
 
 (* Operations rounded down. *)
 module Low = struct
+  module U = Interval__U
+
   external float: int -> float = "ffloat_low_caml"
   external ( +. ): float -> float -> float
     = "fadd_low_caml" "fadd_low" [@@unboxed]
@@ -95,6 +97,8 @@ end
 
 (* Operations rounded up. *)
 module High = struct
+  module U = Interval__U
+
   external float: int -> float = "ffloat_high_caml"
   external ( +. ) : float -> float -> float
     = "fadd_high_caml" "fadd_high" [@@unboxed]
