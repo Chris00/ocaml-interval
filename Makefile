@@ -11,6 +11,8 @@ all : interval.cma interval.cmxa doc/index.html ocamlfpu
 interval.cma interval.cmxa: $(NORM_OBJS) $(OPT_OBJS) chcw.o
 	ocamlmklib -o interval -oc interval_stubs $^
 
+interval.cmo interval.cmi fpu.cmo fpu.cmi: interval__U.cmi
+
 ocamlfpu: interval.cma
 	ocamlmktop -I . -o ocamlfpu interval.cma
 
