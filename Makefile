@@ -49,12 +49,23 @@ clean:
 	$(MAKE) -C EXAMPLES $@
 	$(MAKE) -C EXAMPLES/B_AND_B $@
 
-.PHONY: doc
+.PHONY: doc odoc
 doc: doc/index.html
 
 doc/index.html: $(wildcard *.mli)
 	mkdir -p doc
 	ocamldoc -d doc -html -charset utf-8 $^
+
+%.odoc: %.cmti
+	odoc compile --package interval -I . $<
+
+doc/%.html: %.odoc
+	odoc html -o doc/ $<
+
+odoc:
+	mkdir -p doc/
+	$(MAKE) $(addprefix doc/, $(NORM_OBJS:.cmo=.html))
+	odoc css -o doc/
 
 depend:
 	ocamldep *.mli *.ml > .depend
