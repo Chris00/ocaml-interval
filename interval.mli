@@ -24,7 +24,7 @@
 
    All operations use correct rounding.
 
-   It is recommended to open this module.  It will being into scope
+   It is recommended to open this module.  It will put into scope
    the interval type and a module [I] (see {!Interval.I})
    containing interval operations:
 {[open Interval
@@ -204,7 +204,7 @@ module I : sig
       [{low=min a.low b.low; high=max a.high b.high}]. *)
 
   val max: t -> t -> t
-  (** [max a b] returns "maximum" of the intervals [a] and [b], that is
+  (** [max a b] returns the "maximum" of the intervals [a] and [b], that is
       [{low=max a.low b.low; high=max a.high b.high}]. *)
 
   val min: t -> t -> t
@@ -270,7 +270,7 @@ module I : sig
 
   val mod_f: t -> float -> t
   (** [mod_f a f] returns [a] mod [f] according to interval arithmetic
-     et OCaml [mod_float] definition.  Raise [Division_by_zero] if [f=0.0]. *)
+     and OCaml [mod_float] definition.  Raise [Division_by_zero] if [f=0.0]. *)
 
   val sqrt: t -> t
   (** [sqrt x] returns
