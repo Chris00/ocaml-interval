@@ -66,7 +66,7 @@ let x = I.(v 0.5 1. + sin(v 3. 3.125))
      continuity or raise exceptions. For example, [{low=2.;high=3.} /
      {low=0.;high=2.}] returns [{low=1.;high=Inf}], while
      [{low=2.;high=3.} / {low=0.;high=0.}] or [{low=0.;high=0.} /
-     {low=0.;high=0.}] raises [Division_by_zero].
+     {low=0.;high=0.}] raises [Interval.Division_by_zero].
    - Intervals \[+Inf,+Inf\] or \[-Inf,-Inf\] are never used and never
      returned.
    - When using a float in the following operations, it must never be
@@ -254,23 +254,26 @@ module I : sig
   val ( / ): t -> t -> t
   (** [a / b] divides the first interval by the second according to
      interval arithmetic and returns the proper result.
-     Raise [Division_by_zero] if [b=]{!zero}. *)
+     Raise [Interval.Division_by_zero] if [b=]{!zero}. *)
 
   val ( /. ): t -> float -> t
   (** [a /. x] divides [a] by [x] according to interval arithmetic and
-     returns the proper result.  Raise [Division_by_zero] if [x=0.0]. *)
+     returns the proper result.
+     Raise [Interval.Division_by_zero] if [x=0.0]. *)
 
   val ( /: ): float -> t -> t
   (** [x /: a] divides [x] by [a] according to interval arithmetic and
-     returns the result.  Raise [Division_by_zero] if [a=]{!zero}. *)
+     returns the result.
+     Raise [Interval.Division_by_zero] if [a=]{!zero}. *)
 
   val inv: t -> t
   (** [inv a] returns [1. /: a].
-      @raise Division_by_zero if [a=]{!zero}. *)
+      Raise [Interval.Division_by_zero] if [a=]{!zero}. *)
 
   val mod_f: t -> float -> t
   (** [mod_f a f] returns [a] mod [f] according to interval arithmetic
-     and OCaml [mod_float] definition.  Raise [Division_by_zero] if [f=0.0]. *)
+     and OCaml [mod_float] definition.
+     Raise [Interval.Division_by_zero] if [f=0.0]. *)
 
   val sqrt: t -> t
   (** [sqrt x] returns
