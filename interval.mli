@@ -44,7 +44,7 @@ let x = I.(v 0.5 1. + sin(v 3. 3.125))
    - The float operators [+.], [-.], [/.] take an interval to
      the left and a float to the right, but [*.] does the opposite.
      This is to match the standard presentation of polynomials.
-     Example: [Interval.(3. *. x**2 + 2. *. x +. 4.)].
+     Example: [Interval.I.(3. *. x**2 + 2. *. x +. 4.)].
    - New operators [+:], [-:], [*:] and [/:] are as in the previous
      point bu with the interval and float swapped.  Note that [+:] and
      [*:] are not really needed because you can always swap arguments.
@@ -170,7 +170,7 @@ module I : sig
   val compare_f: t -> float -> int
   (** [compare_f a x] returns
       - [1] if [a.high < x],
-      - [0] if [a.low <= x <= a.high], i.e., if [x] ∈ [a], and
+      - [0] if [a.low] ≤ [x] ≤ [a.high], i.e., if [x] ∈ [a], and
       - [-1] if [x < a.low].  *)
 
   val size: t -> t
@@ -195,9 +195,9 @@ module I : sig
 
   val abs: t -> t
   (** [abs a] returns the absolute value of the interval, that is
-      - [a] if [a.low>=0.],
-      - [~- a] if [a.high<=0.], and
-      - [{low=0.; high=max -a.low a.high}] otherwise. *)
+      - [a] if [a.low] ≥ [0.],
+      - [~- a] if [a.high] ≤ [0.], and
+      - [{low=0.; high=max (-a.low) a.high}] otherwise. *)
 
   val hull: t -> t -> t
   (** [hull a b] returns the smallest interval containing [a] and [b], that is
@@ -278,8 +278,8 @@ module I : sig
   val sqrt: t -> t
   (** [sqrt x] returns
       - [{low=sqrt x.low; high=sqrt x.high}] (properly rounded)
-        if [x.low >= 0.],
-      - [{low=0.; high=sqrt x.high}] if [x.low < 0. <= x.high].
+        if [x.low] ≥ [0.],
+      - [{low=0.; high=sqrt x.high}] if [x.low] < 0 ≤ [x.high].
 
       @raise Domain_error if [x.high < 0.0]. *)
 
@@ -318,7 +318,7 @@ module I : sig
       - [{low=log a.low; high=log a.high}] if [a.low>0.], and
       - [{low=neg_infinity; high=log a.high}] if [a.low<0<=a.high].
 
-      Raise [Domain_error] if [a.high<=0.]. *)
+      Raise [Domain_error] if [a.high] ≤ 0. *)
 
   val exp: t -> t
   (** [exp a] returns [{low=exp a.high; high=exp b.high}], properly rounded. *)
@@ -328,26 +328,29 @@ module I : sig
 
   val cos: t -> t
   (** [cos a] returns the proper extension of cos to interval arithmetic.
-      Returns \[-1,1\] if one of the bounds is greater or lower than +/-2**53. *)
+      Returns \[-1,1\] if one of the bounds is greater or lower than ±2⁵³. *)
 
   val sin: t -> t
   (** [sin a] returns the proper extension of sin to interval arithmetic.
-      Returns \[-1,1\] if one of the bounds is greater or lower than +/-2**53. *)
+      Returns \[-1,1\] if one of the bounds is greater or lower than ±2⁵³. *)
 
   val tan: t -> t
   (** [tan a]  returns the proper extension of tan to interval arithmetic.
-      Returns \[-∞,∞\] if one of the bounds is greater or lower than +/-2**53. *)
+      Returns \[-∞,∞\] if one of the bounds is greater or lower than ±2⁵³. *)
 
   val acos: t -> t
-  (** [acos a] raise [Domain_error] if [a.low>1. or a.high<-1.],
-     else returns [{low=if a.high<1. then acos a.high else 0; high=if
-     a.low>-1. then acos a.low else pi}].  All values are in \[0,π\].*)
+  (** [acos a] returns [{low=(if a.high<1. then acos a.high else 0);
+     high=(if a.low>-1. then acos a.low else pi)}].
+     All values are in \[0,π\].
+
+     @raise Domain_error if [a.low > 1.] or [a.high < -1.] *)
 
   val asin: t -> t
-  (** [asin a] raise [Domain_error] if [a.low > 1.] or [a.high < -1.],
-     else returns [{low=if a.low > -1. then asin a.low else -pi/2; high=if
-     a.low < 1. then asin a.high else pi/2}].  All values are in
-     \[-π/2,π/2\]. *)
+  (** [asin a] returns [{low=(if a.low > -1. then asin a.low else -pi/2);
+     high=(if a.low < 1. then asin a.high else pi/2)}].
+     All values are in \[-π/2,π/2\].
+
+     @raise Domain_error if [a.low > 1.] or [a.high < -1.] *)
 
   val atan: t -> t
   (** [atan a] returns [{low=atan a.low; high=atan a.high}] properly

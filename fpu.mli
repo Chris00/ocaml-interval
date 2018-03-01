@@ -144,7 +144,11 @@ Intel 980X Linux 64 bits
 
 *)
 
-(** {2 Rounding down and up standard functions} *)
+(** {2 Rounding down and up standard functions}
+
+   The following sub-modules {!Low} and {!High} implement the same
+   functions but with different roundings (down for {!Low} and up
+   for {!High}).  *)
 
 (** Functions rounding down their results. *)
 module Low : sig
