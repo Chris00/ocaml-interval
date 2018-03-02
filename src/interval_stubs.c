@@ -22,10 +22,10 @@
 #include <fenv.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <mlvalues.h>
-#include <alloc.h>
-#include <fail.h>
-#include <memory.h>
+#include <caml/mlvalues.h>
+#include <caml/alloc.h>
+#include <caml/fail.h>
+#include <caml/memory.h>
 #include <unistd.h>
 #include <math.h>
 

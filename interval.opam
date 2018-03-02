@@ -12,5 +12,5 @@ build-doc: [[make "doc/index.html"]]
 install: [make "install"]
 remove: [["ocamlfind" "remove" "interval"]]
 depends: [
-  "ocamlfind" {build}
+  "jbuilder" {build}
 ]

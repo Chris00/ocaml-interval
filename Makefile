@@ -1,73 +1,30 @@
-OCAMLDIR:= "$(shell ocamlc -where)"
-CSLC = ocamlc -annot -bin-annot
-CSLOPT = ocamlopt -annot -bin-annot
-NORM_OBJS= interval__U.cmo fpu.cmo fpu_rename_all.cmo fpu_rename.cmo interval.cmo
-OPT_OBJS=  $(NORM_OBJS:.cmo=.cmx)
-CC = gcc
+PKGVERSION = $(shell git describe --always --dirty)
 
-all : interval.cma interval.cmxa doc/index.html ocamlfpu
+all build byte native:
+	jbuilder build @install #--dev
+	jbuilder build @examples
+	jbuilder build @runtest
 
+ocamlfpu: all
+	cd _build/default/src/ && ocamlmktop -I . -o ocamlfpu interval.cma
 
-interval.cma interval.cmxa: $(NORM_OBJS) $(OPT_OBJS) chcw.o
-	ocamlmklib -o interval -oc interval_stubs $^
-
-interval.cmo interval.cmi fpu.cmo fpu.cmi: interval__U.cmi
-
-ocamlfpu: interval.cma
-	ocamlmktop -I . -o ocamlfpu interval.cma
-
-examples EXAMPLES: all
-	$(MAKE) -C EXAMPLES
-	$(MAKE) -C EXAMPLES/B_AND_B
-
-install: all
-	ocamlfind install interval $(wildcard META \
-	  *.cmi *.cmti *.cma *.cmx *.cmxa *.mli *.a *.so)
-
-remove:
-	ocamlfind remove interval
+install uninstall:
+	jbuilder $@
 
 tests: all
-	$(MAKE) -C TESTS
-
-.PHONY: examples EXAMPLES install remove tests
-
-.SUFFIXES: .ml .mli .cmo .cmi .cmx
-
-%.cmo : %.ml %.cmi
-	$(CSLC) -c $<
-.mli.cmi :
-	$(CSLC) -c $<
-.ml.cmx :
-	$(CSLOPT) -c $<
-.c.o :
-	$(CC) -W -Wall -O3 -I $(OCAMLDIR)/caml -fPIC -c  $<
+	cd _build/default/TESTS/ && ./tests.exe
 
 clean:
-	$(RM) -f *.annot *.cmo *.cmi *.cmt *.cmx *.o *~ *.cma *.cmxa *.a a.out *.so ocamlfpu ocamlfpu.exe
-	$(MAKE) -C TESTS $@
-	$(MAKE) -C EXAMPLES $@
-	$(MAKE) -C EXAMPLES/B_AND_B $@
+	jbuilder clean
 
-.PHONY: doc odoc
-doc: doc/index.html
+doc:
+	sed -e 's/%%VERSION%%/$(PKGVERSION)/' src/interval.mli \
+	  > _build/default/src/interval.mli
+	jbuilder build @doc
+	echo '.def { background: #f9f9de; }' >> _build/default/_doc/odoc.css
 
-doc/index.html: $(wildcard *.mli)
-	mkdir -p doc
-	ocamldoc -d doc -html -charset utf-8 $^
+lint:
+	opam lint interval.opam
 
-%.odoc: %.cmti
-	odoc compile --package interval -I . $<
-
-doc/%.html: %.odoc
-	odoc html -o doc/ $<
-
-odoc:
-	mkdir -p doc/
-	$(MAKE) $(addprefix doc/, $(NORM_OBJS:.cmo=.html))
-	odoc css -o doc/
-
-depend:
-	ocamldep *.mli *.ml > .depend
-
-include .depend
+.PHONY: all build byte native ocamlfpu install uninstall tests \
+  examples EXAMPLES doc lint

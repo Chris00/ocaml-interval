@@ -8,13 +8,17 @@ rounding, and currently **ONLY** works on Intel processors.
 The package has been developed for Linux systems but should probably
 work on windows distribution with a few tweaks.
 
-To build the library just type `make` in the main directory.
+To build the library, install jbuilder/[dune][] and type `jbuilder
+build` in the main directory.  You can compile the examples with
+`jbuilder build @examples`; the programs will be in
+`_build/default/EXAMPLES/`.  To execute the tests, issue `jbuilder
+runtest`).
 
-After compilation, the documentation will be available in the `doc/`
-directory in HTML format.  You can also consult the interfaces
-of [Interval](interval.mli) and [Fpu](fpu.mli).  It is extremely wise
-to read the whole documentation, even if you intend to only use the
-interval module.
+To documentation is build using `jbuilder build @doc` and will be in
+`_build/default/_doc/` in HTML format.  You can also consult the
+interfaces of [Interval](src/interval.mli) and [Fpu](src/fpu.mli).
+It is extremely wise to read the whole documentation, even if you
+intend to only use the interval module.
 
 Tests are available in the `TESTS/` directory.  They are mainly for
 debugging purpose and quite complicated.  You may run them (`make
@@ -36,3 +40,4 @@ gottelan@recherche.enac.fr
 Happy interval programming...
 
 [interval arithmetic]: https://en.wikipedia.org/wiki/Interval_arithmetic
+[dune]: https://github.com/ocaml/dune
