@@ -296,8 +296,8 @@ let () =
 
   List.iter (check_f_I Exact values bounds)
     [ ("f + I", [( +. ); Low.( +. ); High.( +. )], I.( +: ));
-      ("f - I", [( +. ); Low.( +. ); High.( +. )], I.( -: ));
-      ("f * I", [( +. ); Low.( +. ); High.( +. )], I.( *. ));
+      ("f - I", [( -. ); Low.( -. ); High.( -. )], I.( -: ));
+      ("f * I", [( *. ); Low.( *. ); High.( *. )], I.( *. ));
       ("f / I", [( /. ); Low.( /. ); High.( /. )], I.( /: ));
       ("f**I", [pospow; Low.pow; High.pow], I.( **: )) ];
 
