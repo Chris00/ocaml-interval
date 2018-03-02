@@ -19,20 +19,20 @@ let griewank_x v =
   let sum = !s1/. 4000.0 -. !s2 +.1. in
   1./.(1.+. sum)
 
-let griewank_X v =
-  let s1 = ref  zero_I and s2 = ref one_I in
-  for i= 0 to (Array.length v)-1 do
-    s1:= !s1 +$ (pow_I_i v.(i) 2);
-    s2:= !s2 *$ (cos_I (v.(i) /$.(sqrt (float (i+1)))))
+let griewank_X vec =
+  let s1 = ref I.zero and s2 = ref I.one in
+  for i = 0 to Array.length vec - 1 do
+    s1 := I.(!s1 + vec.(i)**2);
+    s2 := I.(!s2 * cos(vec.(i) / (sqrt (of_int U.(i+1)))))
   done;
-  let sum = ((!s1 /$. 4000.0)  -$ !s2) +$. 1. in
-  1./.$ (sum +$. 1.)
+  let sum = I.((!s1 /. 4000. - !s2) +. 1.) in
+  I.(inv (sum +. 1.))
 
 let _ =
   let (int,fint,p,pv)=
     B_and_b.branch_and_bound griewank_x griewank_X start_inter
       precisionx precisionfx in
-  print_X int;print_string " = ";
-  print_I fint; print_newline ();
+  I.Arr.pr stdout int; print_string " = ";
+  I.pr stdout fint; print_newline ();
   Array.iter (function x -> Printf.printf "%f " x) p;
   Printf.printf " = %f\n%!" pv

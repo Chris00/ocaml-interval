@@ -223,16 +223,16 @@ let speed_cmp2_I loops (name, f) =
   Printf.printf "%f\n" dt; flush stdout
 
 
-let inv x = 1./.x
-let inv_low x = fdiv_low 1. x
-let inv_high x = fdiv_high 1. x
+let inv x = 1. /. x
+let inv_low x = Low.(1. /. x)
+let inv_high x = High.(1. /. x)
 
-let atan_low y = fatan_low 1. y
-let atan_high y = fatan_high 1. y
+let atan_low y = Low.atan2 y 1.
+let atan_high y = High.atan2 y 1.
 
 let myatan2 y x = if y = 0.&& x = 0. then nan else atan2 y x
-let myatan2_low y x = if y = 0. && x = 0. then nan else fatan_low x y
-let myatan2_high y x = if y = 0. && x = 0. then nan else fatan_high x y
+let myatan2_low y x = if y = 0. && x = 0. then nan else Low.atan2 y x
+let myatan2_high y x = if y = 0. && x = 0. then nan else High.atan2 y x
 
 let pospow x y =
   if x = 0. then fpow 0. y
@@ -266,52 +266,52 @@ let () =
     add_mul pio2.low pio2.high da 994 1006 [infinity])) in
 
   List.iter (check_I_f Exact values bounds)
-    [ ("I + f", [(+.); fadd_low; fadd_high], I.( +. ));
-      ("I - f", [(-.); fsub_low; fsub_high], I.( -. ));
-      ("I * f", [( *.); fmul_low; fmul_high], I.( *: ));
-      ("I / f", [(/.); fdiv_low; fdiv_high], I.( /. ));
-      ("I**f", [fpow; fpow_low; fpow_high], I.( **. ));];
+    [ ("I + f", [( +. ); Low.( +. ); High.( +. )], I.( +. ));
+      ("I - f", [( -. ); Low.( -. ); High.( -. )], I.( -. ));
+      ("I * f", [( *. ); Low.( *. ); High.( *. )], I.( *: ));
+      ("I / f", [( /. ); Low.( /. ); High.( /. )], I.( /. ));
+      ("I**f", [fpow; Low.( ** ); High.( ** )], I.( **. ));];
 
   List.iter (check_I Exact values bounds)
     [ ("I.abs",  [abs_float], I.abs);
       ("I.inv",  [inv; inv_low; inv_high], I.inv);
-      ("I.sqrt", [sqrt; fsqrt_low; fsqrt_high], I.sqrt);
-      ("I.log",  [log; flog_low; flog_high], I.log);
-      ("I.exp",  [ exp; fexp_low; fexp_high], I.exp);
+      ("I.sqrt", [sqrt; Low.sqrt; High.sqrt], I.sqrt);
+      ("I.log",  [log; Low.log; High.log], I.log);
+      ("I.exp",  [ exp; Low.exp; High.exp], I.exp);
       ("I.atan", [atan; atan_low; atan_high], I.atan);
-      ("I.asin", [asin; fasin_low; fasin_high], I.asin);
-      ("I.acos", [facos; facos_low; facos_high], I.acos);
-      ("I.cosh", [cosh; fcosh_low; fcosh_high], I.cosh);
-      ("I.sinh", [sinh; fsinh_low; fsinh_high], I.sinh);
-      ("I.tanh", [tanh; ftanh_low; ftanh_high], I.tanh);];
+      ("I.asin", [asin; Low.asin; High.asin], I.asin);
+      ("I.acos", [facos; Low.acos; High.acos], I.acos);
+      ("I.cosh", [cosh; Low.cosh; High.cosh], I.cosh);
+      ("I.sinh", [sinh; Low.sinh; High.sinh], I.sinh);
+      ("I.tanh", [tanh; Low.tanh; High.tanh], I.tanh);];
 
   List.iter (check_I Exact pio2s angles)
-    [ ("I.cos", [cos; fcos_low; fcos_high], I.cos);
-      ("I.sin", [sin; fsin_low; fsin_high], I.sin)];
-  check_I In pio2s angles ("I.tan", [ftan; ftan_low; ftan_high], I.tan);
+    [ ("I.cos", [cos; Low.cos; High.cos], I.cos);
+      ("I.sin", [sin; Low.sin; High.sin], I.sin)];
+  check_I In pio2s angles ("I.tan", [ftan; Low.tan; High.tan], I.tan);
 
   check_I_f In values bounds ("I.mod_f", [fmod; mod_float], I.mod_f);
   check_I_i Exact values bounds valuesi
-    ("I.( ** )", [fpow; fpow_low; fpow_high], I.( ** ));
+    ("I.( ** )", [fpow; Low.( ** ); High.( ** )], I.( ** ));
 
   List.iter (check_f_I Exact values bounds)
-    [ ("f + I", [(+.); fadd_low; fadd_high], I.( +: ));
-      ("f - I", [(+.); fadd_low; fadd_high], I.( -: ));
-      ("f * I", [(+.); fadd_low; fadd_high], I.( *. ));
-      ("f / I", [(/.); fdiv_low; fdiv_high], I.( /: ));
-      ("f**I", [pospow; flog_pow_low; flog_pow_high], I.( **: )) ];
+    [ ("f + I", [( +. ); Low.( +. ); High.( +. )], I.( +: ));
+      ("f - I", [( +. ); Low.( +. ); High.( +. )], I.( -: ));
+      ("f * I", [( +. ); Low.( +. ); High.( +. )], I.( *. ));
+      ("f / I", [( /. ); Low.( /. ); High.( /. )], I.( /: ));
+      ("f**I", [pospow; Low.pow; High.pow], I.( **: )) ];
 
   List.iter (check_I_I Exact values bounds)
-    [ ("I + I", [(+.); fadd_low; fadd_high], I.( + ));
-      ("I - I", [(-.); fsub_low; fsub_high], I.( - ));
-      ("I * I", [( *.); fmul_low; fmul_high], I.( * ));
-      ("I / I", [(/.); fdiv_low; fdiv_high], I.( / ));
+    [ ("I + I", [( +. ); Low.( +. ); High.( +. )], I.( + ));
+      ("I - I", [( -. ); Low.( -. ); High.( -. )], I.( - ));
+      ("I * I", [( *. ); Low.( *. ); High.( *. )], I.( * ));
+      ("I / I", [( /. ); Low.( /. ); High.( /. )], I.( / ));
       ("max I I", [ max; max; max], I.max);
       ("min I I", [ min; min; min], I.min)];
 
   List.iter (check_I_I Exact values bounds)
     [ ("I.atan2", [myatan2; myatan2_low; myatan2_high], I.atan2);
-      ("I**I", [pospow; flog_pow_low; flog_pow_high], I.( *** ) ) ];
+      ("I**I", [pospow; Low.pow; High.pow], I.( *** ) ) ];
 
   check_I_I Mod2pi values bounds
     ("I.atan2mod", [myatan2; myatan2_low; myatan2_high], I.atan2mod);
