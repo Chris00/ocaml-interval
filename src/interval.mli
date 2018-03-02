@@ -46,8 +46,9 @@ let x = I.(v 0.5 1. + sin(v 3. 3.125))
      This is to match the standard presentation of polynomials.
      Example: [Interval.I.(3. *. x**2 + 2. *. x +. 4.)].
    - New operators [+:], [-:], [*:] and [/:] are as in the previous
-     point bu with the interval and float swapped.  Note that [+:] and
-     [*:] are not really needed because you can always swap arguments.
+     point but with the interval and float swapped.  Note that [+:] and
+     [*:] are not really needed because the operations are commutative
+     but are present for consistency.
    - For exponentiation, [**] has been chosen for integer exponent
      because they are the more frequent, [**.] when the exponent is a
      float, [**:] when the base is a float and [***] for exponentiation
@@ -100,8 +101,9 @@ let x = I.(v 0.5 1. + sin(v 3. 3.125))
    1/3.
 
    If you want to create an interval representing 1/3, you have to
-   write [let a = I.(inv(v 3. 3.))] because rounding will
-   then be properly set. *)
+   write [let a = I.(inv(v 3. 3.))] because rounding will then be
+   properly handled and the resulting interval will indeed contain the
+   exact value of 1/3. *)
 type t = {
     low: float; (** low bound, possibly = -∞ *)
     high: float (** high bound, possibly = +∞ *)
@@ -117,7 +119,7 @@ exception Domain_error of string [@@warn_on_literal_pattern]
 
 
 (** Interval operations.  Locally open this module — using
-   e.g. [I.(...)] to redefine classical arithmetic operators for
+   e.g. [I.(...)] — to redefine classical arithmetic operators for
    interval arithmetic. *)
 module I : sig
   val zero : t
