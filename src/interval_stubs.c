@@ -40,6 +40,13 @@ the "volatile" keyword and the "memory" keyword in the clobber list.
 It is extremely wise to check the assembly code generated...
 */
 
+#if defined _MSC_BUILD
+#error "MSVC inline assembly is not supported at the moment.  Please contribute."
+#elif !(defined __GNUC__)
+#define asm __asm__
+#define __volatile__
+#endif
+
 /* Set the processor to different rounding modes */
 #define SET_LOW(ref) "fstcw "#ref"\n\t andw $0xf3ff,"#ref"\n\t orw $0x0400,"#ref"\n\t fldcw "#ref"\n\t"
 #define SET_HIGH(ref) "fstcw "#ref"\n\t andw $0xf3ff,"#ref"\n\t orw $0x0800,"#ref"\n\t fldcw "#ref"\n\t"

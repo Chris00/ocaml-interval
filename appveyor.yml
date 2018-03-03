@@ -11,7 +11,7 @@ environment:
     CYG_BASH: "%CYG_ROOT%\\bin\\bash -lc"
     FORK_USER: ocaml
   matrix:
-    - OPAM_SWITCH: 4.04.2+msvc64c
+#    - OPAM_SWITCH: 4.04.2+msvc64c
     - OPAM_SWITCH: 4.04.2+mingw64c
 
 install:

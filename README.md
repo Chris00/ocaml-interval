@@ -5,8 +5,8 @@ This is an [interval arithmetic][] library for OCaml.
 
 This library uses assembly code to compute all operations with proper
 rounding, and currently **ONLY** works on Intel processors.
-The package has been developed for Linux systems but should probably
-work on windows distribution with a few tweaks.
+The package has been developed for Linux systems but
+works on Windows when compiled with GCC.
 
 To build the library, install jbuilder/[dune][] and type `jbuilder
 build` in the main directory.  You can compile the examples with
