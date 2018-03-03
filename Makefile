@@ -12,7 +12,12 @@ install uninstall:
 	jbuilder $@
 
 tests: all
-	cd _build/default/TESTS/ && ./tests.exe
+	@ echo "Run tests..."
+	@ cd _build/default/TESTS/ && ./tests.exe > tests.log && \
+	C=`grep DEFINED tests.log | wc -l` && \
+	if [ $$C -gt 0 ]; then \
+	  echo "Tests: $$C errors (see _build/default/TESTS/tests.log)"; \
+	else echo "All tests passed successfully"; fi
 
 clean:
 	jbuilder clean
