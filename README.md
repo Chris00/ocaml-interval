@@ -19,7 +19,8 @@ runtest`).
 
 To documentation is build using `jbuilder build @doc` and will be in
 `_build/default/_doc/` in HTML format.  You can also consult the
-interfaces of [Interval](src/interval.mli) and [Fpu](src/fpu.mli).
+interfaces of [Interval](src/interval.mli) and [Fpu](src/fpu.mli) and
+[online](https://chris00.github.io/ocaml-interval/doc/interval/).
 It is extremely wise to read the whole documentation, even if you
 intend to only use the interval module.
 
@@ -43,7 +44,7 @@ gottelan@recherche.enac.fr
 Happy interval programming...
 
 Remark: This library was originally published on Jean-Marc Alliot
-[website][http://www.alliot.fr/fbbdet.html.fr] but was moved to Github
+[website](http://www.alliot.fr/fbbdet.html.fr) but was moved to Github
 with the permission of the authors.
 
 
