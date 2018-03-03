@@ -42,5 +42,10 @@ gottelan@recherche.enac.fr
 
 Happy interval programming...
 
+Remark: This library was originally published on Jean-Marc Alliot
+[website][http://www.alliot.fr/fbbdet.html.fr] but was moved to Github
+with the permission of the authors.
+
+
 [interval arithmetic]: https://en.wikipedia.org/wiki/Interval_arithmetic
 [dune]: https://github.com/ocaml/dune

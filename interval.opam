@@ -3,7 +3,7 @@ maintainer: "Christophe Troestler <Christophe.Troestler@umons.ac.be>"
 authors: ["Jean-Marc Alliot <jean-marc.alliot@irit.fr>"
           "Jean-Baptiste Gotteland <gottelan@recherche.enac.fr>"
           "Christophe Troestler <Christophe.Troestler@umons.ac.be>"]
-homepage: "http://www.alliot.fr/fbbdet.html.fr"
+homepage: "https://github.com/Chris00/ocaml-interval"
 dev-repo: "https://github.com/Chris00/ocaml-interval.git"
 bug-reports: "https://github.com/Chris00/ocaml-interval/issues"
 doc: "https://Chris00.github.io/ocaml-interval/doc"
