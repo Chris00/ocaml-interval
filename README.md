@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/Chris00/ocaml-interval.svg?branch=master)](https://travis-ci.org/Chris00/ocaml-interval)
+[![Build status](https://ci.appveyor.com/api/projects/status/s144ehk5tls6imiu?svg=true)](https://ci.appveyor.com/project/Chris00/ocaml-interval)
+
 Interval
 ========
 
