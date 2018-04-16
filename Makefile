@@ -13,10 +13,10 @@ install uninstall:
 
 tests: all
 	@ echo "Run tests..."
-	@ cd _build/default/TESTS/ && ./tests.exe > tests.log && \
+	@ cd _build/default/tests/ && ./tests.exe > tests.log && \
 	C=`grep DEFINED tests.log | wc -l` && \
 	if [ $$C -gt 0 ]; then \
-	  echo "Tests: $$C errors (see _build/default/TESTS/tests.log)"; \
+	  echo "Tests: $$C errors (see _build/default/tests/tests.log)"; \
 	else echo "All tests passed successfully"; fi
 
 clean:
@@ -32,4 +32,4 @@ lint:
 	opam lint interval.opam
 
 .PHONY: all build byte native ocamlfpu install uninstall tests \
-  examples EXAMPLES doc lint
+  examples doc lint
