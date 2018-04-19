@@ -99,36 +99,23 @@ module I = struct
 
   let min x y = {low = fmin x.low y.low; high = fmin x.high y.high}
 
+  let ( + ) {low = a; high = b} {low = c; high = d} =
+    { low = Low.(a +. c);  high = High.(b +. d) }
 
-  external ( + ) : t -> t -> t = "fadd_I_caml"
-  external ( - ) : t -> t -> t = "fsub_I_caml"
+  let ( - ) {low = a; high = b} {low = c; high = d} =
+    { low = Low.(a -. d);  high = High.(b -. c) }
 
-  (*
-  let (+$) {low = a; high = b} {low = c; high = d} =
-    {low = fadd_low a c; high = fadd_high b d}
-  *)
+  let ( +. ) {low = a; high = b} x =
+    { low = Low.(a +. x);  high = High.(b +. x) }
 
-  external (+.) : t -> float -> t = "fadd_I_x_caml"
+  let ( +: ) x {low = a; high = b} =
+    { low = Low.(a +. x);  high = High.(b +. x) }
 
-  let (+:) x a = a +. x
+  let ( -. ) {low = a; high = b} x =
+    { low = Low.(a -. x);  high = High.(b -. x) }
 
-  (*
-  let (+$.) {low = a; high = b} x =
-    {low = fadd_low a x; high = fadd_high b x}
-  *)
-
-  (*
-  let (-$) {low = a; high = b} {low = c; high = d} =
-    {low = fsub_low a d; high = fsub_high b c}
-  *)
-
-  external (-.) : t -> float -> t = "fsub_I_x_caml"
-  external (-:) : float -> t -> t = "fsub_x_I_caml"
-
-  (*
-  let (-$.) {low = a; high = b} y =
-    {low = fsub_low a y; high = fsub_high b y}
-  *)
+  let ( -: ) x {low = c; high = d} =
+    { low = Low.(x -. d);  high = High.(x -. c) }
 
   let ( ~- ) {low = a; high = b} = {low = -.b; high = -.a}
 
