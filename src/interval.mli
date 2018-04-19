@@ -45,7 +45,11 @@ let x = I.(v 0.5 1. + sin(v 3. 3.125))
      the left and a float to the right, but [*.] does the opposite.
      This is to match the standard presentation of polynomials.
      Example: [Interval.I.(3. *. x**2 + 2. *. x +. 4.)].
-   - New operators [+:], [-:], [*:] and [/:] are as in the previous
+     WARNING: you should {i only} use these functions when the float
+     argument represent the exact mathematical value (taking into account
+     that the compiler will round literals).  For example, [42.] is fine
+     while [0.1] is not (because it has an infinite binary representation).
+   - Operators [+:], [-:], [*:] and [/:] are as in the previous
      point but with the interval and float swapped.  Note that [+:] and
      [*:] are not really needed because the operations are commutative
      but are present for consistency.
