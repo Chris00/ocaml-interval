@@ -218,6 +218,18 @@ module I = struct
     else if sb = 0 then {low = neg_infinity; high = High.(1. /. a)}
     else {low =  neg_infinity; high = infinity}
 
+  type 'a one_or_two = One of 'a | Two of 'a * 'a
+
+  let invx {low = a; high = b} =
+    let sa = compare a 0. and sb = compare b 0. in
+    if sa = 0 then
+      if sb = 0 then raise Division_by_zero
+      else One {low = Low.(1. /. b); high = infinity}
+    else if 0 < sa || sb < 0 then One {low = Low.(1. /. b); high = High.(1. /. a)}
+    else if sb = 0 then One {low = neg_infinity; high = High.(1. /. a)}
+    else Two({low = neg_infinity;  high = High.(1. /. a) },
+             {low = Low.(1. /. b);  high = infinity})
+
   let sqrt {low = a; high = b} =
     if b < 0. then raise(Domain_error "sqrt")
     else {low = if a < 0. then 0. else Low.sqrt a; high = High.sqrt b}

@@ -273,8 +273,17 @@ module I : sig
      Raise [Interval.Division_by_zero] if [a=]{!zero}. *)
 
   val inv: t -> t
-  (** [inv a] returns [1. /: a].
+  (** [inv a] returns [1. /: a] but is more efficient.
       Raise [Interval.Division_by_zero] if [a=]{!zero}. *)
+
+  type 'a one_or_two = One of 'a | Two of 'a * 'a
+
+  val invx : t -> t one_or_two
+  (** [invx a] is the extended division.  When 0 ∉ [a], the result is
+     [One(inv a)].  If 0 ∈ [a], then the two natural intervals
+     (properly rounded) [Two](\[-∞, 1/a.low\], \[1/a.high, +∞\]) are
+     returned.
+     Raise [Interval.Division_by_zero] if [a=]{!zero}. *)
 
   val mod_f: t -> float -> t
   (** [mod_f a f] returns [a] mod [f] according to interval arithmetic
