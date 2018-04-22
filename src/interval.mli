@@ -182,6 +182,10 @@ module I : sig
       - [0] if [a.low] ≤ [x] ≤ [a.high], i.e., if [x] ∈ [a], and
       - [-1] if [x < a.low].  *)
 
+  val is_bounded : t -> bool
+  (** [is_bounded x] says whether the interval is bounded, i.e.,
+      -∞ < [x.low] and [x.high] < ∞. *)
+
   val size: t -> t
   (** [size a] returns an interval containing the true length of the
      interval [a.high - a.low]. *)

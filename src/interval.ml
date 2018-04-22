@@ -77,6 +77,9 @@ module I = struct
   let compare_f {low = a; high = b} x =
     if b < x then 1 else if a <= x then 0 else -1
 
+  let is_bounded {low; high} =
+    neg_infinity < low && high < infinity
+
   let size x =
     { low = Low.(x.high -. x.low);  high = High.(x.high -. x.low) }
 
