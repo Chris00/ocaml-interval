@@ -234,6 +234,23 @@ module I = struct
     else Two({low = neg_infinity;  high = High.(1. /. a) },
              {low = Low.(1. /. b);  high = infinity})
 
+  let cancelminus x y =
+    (* Intervals here cannot be empty. *)
+    if is_bounded x && is_bounded y then
+      let low = Low.(x.low -. y.low) in
+      let high = High.(x.high -. y.high) in
+      if low <= high (* thus not NaN *) then {low; high}
+      else entire
+    else entire
+
+  let cancelplus x y = (* = cancelminus x (-y) *)
+    if is_bounded x && is_bounded y then
+      let low = Low.(x.low +. y.high) in
+      let high = High.(x.high +. y.low) in
+      if low <= high (* thus not NaN *) then {low; high}
+      else entire
+    else entire
+
   let sqrt {low = a; high = b} =
     if b < 0. then raise(Domain_error "sqrt")
     else {low = if a < 0. then 0. else Low.sqrt a; high = High.sqrt b}

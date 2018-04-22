@@ -292,6 +292,14 @@ module I : sig
      returned.
      Raise [Interval.Division_by_zero] if [a=]{!zero}. *)
 
+  val cancelminus : t -> t -> t
+  (** [cancelminus x y] returns the tightest interval [z] such that
+     [x] ⊆ [z] + [y].  If no such [z] exists, it returns [entire]. *)
+
+  val cancelplus : t -> t -> t
+  (** [cancelplus x y] returns the tightest interval [z] such that
+     [x] ⊆ [z] - [y].  If no such [z] exists, it returns [entire]. *)
+
   val mod_f: t -> float -> t
   (** [mod_f a f] returns [a] mod [f] according to interval arithmetic
      and OCaml [mod_float] definition.
