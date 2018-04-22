@@ -141,6 +141,9 @@ module I : sig
   val e: t
   (** [e] (Euler's constant) with bounds properly rounded. *)
 
+  val entire : t
+  (** The entire set of real numbers. *)
+
   val v : float -> float -> t
   (** [v a b] returns [{low=a; high=b}].  BEWARE that, unless you take
      care, if you use [v a b] with literal values for [a] and/or [b],

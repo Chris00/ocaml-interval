@@ -38,6 +38,7 @@ module I = struct
 
   let zero = {low=0.; high=0.}
   let one = {low=1.; high=1.}
+  let entire = {low = neg_infinity;  high = infinity}
 
   let v (a: float) (b: float) =
     if a < b (* ⇒ a, b not NaN; most frequent case *) then
