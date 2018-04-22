@@ -176,6 +176,8 @@ module I : sig
 
      Example: [Printf.printf ("%s = " ^^ fmt "%.10f" ^^ "\n") name i]. *)
 
+  (** {2 Boolean functions} *)
+
   val compare_f: t -> float -> int
   (** [compare_f a x] returns
       - [1] if [a.high < x],
@@ -185,6 +187,51 @@ module I : sig
   val is_bounded : t -> bool
   (** [is_bounded x] says whether the interval is bounded, i.e.,
       -∞ < [x.low] and [x.high] < ∞. *)
+
+  val is_entire : t -> bool
+  (** [is_entire x] says whether [x] is the {!entire} interval. *)
+
+  val equal : t -> t -> bool
+  (** [equal a b] says whether the two intervals are the same. *)
+
+  val ( = ) : t -> t -> bool
+  (** Synonym for {!equal}. *)
+
+  val subset : t -> t -> bool
+  (** [subset x y] returns true iff [x] ⊆ [y]. *)
+
+  val ( <= ) : t -> t -> bool
+  (** [x <= y] says whether [x] is weakly less than [y] i.e.,
+      ∀ξ ∈ x, ∃η ∈ y, ξ ≤ η and ∀η ∈ y, ∃ξ ∈ x, ξ ≤ η. *)
+
+  val ( >= ) : t -> t -> bool
+  (** [x >= y] says whether [x] is weakly greater than [y] i.e.,
+      ∀ξ ∈ x, ∃η ∈ y, ξ ≥ η and ∀η ∈ y, ∃ξ ∈ x, ξ ≥ η. *)
+
+  val precedes : t -> t -> bool
+  (** [precedes x y] returns true iff [x] is to the left but may touch
+     [y]. *)
+
+  val interior : t -> t -> bool
+  (** [interior x y] returns true if [x] is interior to [y] in the
+     topological sense.  For example [interior entire entire] is [true]. *)
+
+  val ( < ) : t -> t -> bool
+  (** [x < y] says whether [x] is strictly weakly less than [y] i.e.,
+      ∀ξ ∈ x, ∃η ∈ y, ξ < η and ∀η ∈ y, ∃ξ ∈ x, ξ < η. *)
+
+  val ( > ) : t -> t -> bool
+  (** [x > y] iff [y < x]. *)
+
+  val strict_precedes : t -> t -> bool
+  (** [strict_precedes x y] returns true iff [x] is to the left and
+     does not touch [y]. *)
+
+  val disjoint : t -> t -> bool
+  (** [disjoint x y] returns true iff [x] ∩ [y] = ∅. *)
+
+
+  (** {2 Operations} *)
 
   val size: t -> t
   (** [size a] returns an interval containing the true length of the

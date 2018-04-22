@@ -80,6 +80,37 @@ module I = struct
   let is_bounded {low; high} =
     neg_infinity < low && high < infinity
 
+  let is_entire {low; high} =
+    neg_infinity = low && high = infinity
+
+  let equal {low = a; high = b} {low = c; high = d} =
+    a = c && b = d
+
+  let subset {low = a; high = b} {low = c; high = d} =
+    (* No empty intervals. *)
+    c <= a && b <= d
+
+  let less {low = a; high = b} {low = c; high = d} =
+    a <= c && b <= d
+
+  let precedes x y = x.high <= y.low (* intervals are not empty *)
+
+  let interior {low = a; high = b} {low = c; high = d} =
+    (* Intervals are not empty *)
+    (c < a || (c = neg_infinity && a = neg_infinity))
+    && (b < d || (b = infinity && d = infinity))
+
+  let strict_less {low = a; high = b} {low = c; high = d} =
+    (* Intervals are not empty *)
+    (a < c || (a = neg_infinity && c = neg_infinity))
+    && (b < d || (b = infinity && d = infinity))
+
+  let strict_precedes x y = x.high < y.low (* intervals not empty *)
+
+  let disjoint {low = a; high = b} {low = c; high = d} =
+    (* Intervals are not empty *)
+    b < c || d < a
+
   let size x =
     { low = Low.(x.high -. x.low);  high = High.(x.high -. x.low) }
 
@@ -533,6 +564,13 @@ module I = struct
       let fmt = Custom(Custom_succ Custom_zero, to_string, End_of_format) in
       Format(fmt , "Inverval.Arr.t")
   end
+
+  (* Infix aliases *)
+  let ( = ) = equal
+  let ( <= ) = less
+  let ( < ) = strict_less
+  let ( >= ) x y = less y x
+  let ( > ) x y = strict_less y x
 end
 
 
