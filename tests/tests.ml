@@ -336,6 +336,6 @@ let () =
       ("**", ( ** )); ("fpow", fpow);
       ("mod_float", mod_float); ("fmod", fmod)];
 
-  List.iter (speed_cmp2_I 10000000) [
+  List.iter (speed_cmp2_I 20000000) [
       ("I+I", I.( + )); ("I-I", I.( - ));
       ("I*I", I.( * )); ("I/I", I.( / ))];
