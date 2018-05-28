@@ -526,7 +526,7 @@ val pow_I_f : t -> float -> t  [@@deprecated "Use I.( **. ) instead"]
 val pow_I_I : t -> t -> t  [@@deprecated "Use I.( *** ) instead"]
 
 
-(** {2:perf Performance}
+(* {2:perf Performance}
 
 Intel Atom 230 Linux 32 bits:
 {ul

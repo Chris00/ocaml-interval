@@ -178,10 +178,6 @@ module I = struct
     { low = if a = neg_infinity then 0. else Low.exp a;
       high = if b = infinity then infinity else High.exp b}
 
-  let i_sgn x =
-    let sgn_low = compare x.low 0. and sgn_high = compare x.high 0. in
-    if sgn_low <> sgn_high then 0 else sgn_low
-
   let max_63 = ldexp 1. 63
 
   external cos: t -> t = "fcos_I_caml"
@@ -287,9 +283,6 @@ module I = struct
 
     let size_max v =
       Array.fold_left (fun m {low = a; high = b} -> fmax m High.(b -. a)) 0. v
-
-    let size v =
-      Array.fold_left (fun m vi -> fmax m (abs_float vi)) 0. v
 
     let pr ch v =
       if U.(Array.length v = 0) then Printf.fprintf ch "[| |]"

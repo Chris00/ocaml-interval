@@ -8,7 +8,7 @@ let precisionx = 0.01
 let precisionfx = 0.0001
 
 let start_inter =
-  Array.init dim (function i -> {low=lowbound;high=highbound})
+  Array.init dim (function _i -> {low=lowbound;high=highbound})
 
 let griewank_x v =
   let s1 = ref 0.0 and s2 = ref 1.0 in

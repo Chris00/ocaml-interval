@@ -124,8 +124,6 @@ module I = struct
     Format(fmt , "Inverval.t")
 
 
-  let is_NaN (x : float) = x <> x
-
   let compare_f {low = a; high = b} x =
     if b < x then 1 else if a <= x then 0 else -1
 

@@ -1,9 +1,8 @@
 PKGVERSION = $(shell git describe --always --dirty)
 
 all build byte native:
-	jbuilder build @install #--dev
-	jbuilder build @examples
-	jbuilder build @runtest
+	jbuilder build @install @examples --dev
+	jbuilder build @runtest --force
 
 ocamlfpu: all
 	cd _build/default/src/ && ocamlmktop -I . -o ocamlfpu interval.cma

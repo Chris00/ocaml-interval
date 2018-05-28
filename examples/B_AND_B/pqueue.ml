@@ -30,10 +30,10 @@ and ('a, 'b) element = ('a, 'b) pqueuenode
 let empty = fun () -> Nil
 
 let rec climb = function
-  | {left = Nil; right = Nil} -> Nil
-  | {left = Nil; right = r} -> r
-  | {left = l; right = Nil} -> l
-  | {left = (Node l) as ll; right = (Node r) as rr} ->
+  | {left = Nil; right = Nil; _} -> Nil
+  | {left = Nil; right = r; _} -> r
+  | {left = l; right = Nil; _} -> l
+  | {left = (Node l) as ll; right = (Node r) as rr; _} ->
      if l.key < r.key
      then Node {valid = l.valid; key = l.key; value = l.value;
                 left = climb l; right= rr}
@@ -44,7 +44,7 @@ let rec insert flag key value = function
   | Nil -> let e = {valid = flag; key = key; value = value;
                     left = Nil; right = Nil} in
            (e , Node e)
-  | Node ({valid=f} as n) when !f = false ->
+  | Node ({valid=f; _} as n) when !f = false ->
      insert flag key value (climb n)
   | Node {valid = x; key = k; value = v; left = l; right = r} ->
      if k < key
@@ -62,8 +62,8 @@ let insert key value =
 
 let rec extract = function
   Nil -> raise Not_found
-| Node ({valid = f} as n) when !f = false -> extract (climb n)
-| Node ({key = k; value = v; left = l; right = r} as n) ->
+| Node ({valid = f; _} as n) when !f = false -> extract (climb n)
+| Node ({key = k; value = v; _} as n) ->
     (k, v, climb n)
 
 
@@ -71,5 +71,5 @@ let suppress n = n.valid := false
 
 
 let unpack = function
-  | {valid = f} when !f = false -> raise (Failure "unpack")
-  | {key =k; value= v} -> (k,v)
+  | {valid = f; _} when !f = false -> raise (Failure "unpack")
+  | {key =k; value= v; _} -> (k,v)
