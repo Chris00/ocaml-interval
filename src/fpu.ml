@@ -19,8 +19,6 @@
     If not, see <http://www.gnu.org/licenses/>.
 *)
 
-let _ = Callback.register_exception "failure" (Failure "")
-
 (* Utilities for exponentiation *)
 
 external is_neg: float -> bool = "is_neg_caml"
@@ -55,17 +53,8 @@ external flog_pow_high: float -> float -> float
 
 (* Operations rounded down. *)
 module Low = struct
-  module U = Interval__U
+  include Interval_base.Low
 
-  external float: int -> float = "ffloat_low_caml"
-  external ( +. ): float -> float -> float
-    = "fadd_low_caml" "fadd_low" [@@unboxed]
-  external ( -. ): float -> float -> float
-    = "fsub_low_caml" "fsub_low" [@@unboxed]
-  external ( *. ): float -> float -> float
-    = "fmul_low_caml" "fmul_low" [@@unboxed]
-  external ( /. ): float -> float -> float
-    = "fdiv_low_caml" "fdiv_low" [@@unboxed]
   external pow: float -> float -> float
     = "flog_pow_low_caml" "flog_pow_low" [@@unboxed]
   external sqrt: float -> float = "fsqrt_low_caml" "fsqrt_low" [@@unboxed]
@@ -99,17 +88,8 @@ end
 
 (* Operations rounded up. *)
 module High = struct
-  module U = Interval__U
+  include Interval_base.High
 
-  external float: int -> float = "ffloat_high_caml"
-  external ( +. ) : float -> float -> float
-    = "fadd_high_caml" "fadd_high" [@@unboxed]
-  external ( -. ): float -> float -> float
-    = "fsub_high_caml" "fsub_high" [@@unboxed]
-  external ( *. ): float -> float -> float
-    = "fmul_high_caml" "fmul_high" [@@unboxed]
-  external ( /. ): float -> float -> float
-    = "fdiv_high_caml" "fdiv_high" [@@unboxed]
   external pow: float -> float -> float
     = "flog_pow_high_caml" "flog_pow_high" [@@unboxed]
   external sqrt: float -> float = "fsqrt_high_caml" "fsqrt_high" [@@unboxed]
@@ -140,10 +120,6 @@ module High = struct
     else if mod_float y 2. = 0. then flog_pow_high (-.x) y
     else -.flog_pow_low (-.x) y
 end
-
-external set_low: unit -> unit = "set_low" [@@noalloc]
-external set_high: unit -> unit = "set_high" [@@noalloc]
-external set_nearest: unit -> unit = "set_nearest" [@@noalloc]
 
 external ffloat: int -> float = "ffloat_caml"
 let ffloat_high = High.float

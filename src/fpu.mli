@@ -152,14 +152,7 @@ Intel 980X Linux 64 bits
 
 (** Functions rounding down their results. *)
 module Low : sig
-  val float: int -> float
-  (** The float function is exact on 32 bits machine but not on 64
-     bits machine with ints larger than 53 bits. *)
-
-  val ( +. ) : float -> float -> float
-  val ( -. ) : float -> float -> float
-  val ( *. ) : float -> float -> float
-  val ( /. ) : float -> float -> float
+  include module type of Interval_base.Low
 
   val ( ** ) : float -> float -> float
   (** [x**y] computes [x] at power [y], rounded down, expanded to its
@@ -209,22 +202,11 @@ module Low : sig
 
   val tanh: float -> float
   (** Computes the hyperbolic tangent, tanh(x). *)
-
-  (** Locally open to restore standard integer and floating point
-     operators. *)
-  module U = Interval__U
 end
 
 (** Functions rounding up their results. *)
 module High : sig
-  val float: int -> float
-  (** The float function is exact on 32 bits machine but not on 64
-     bits machine with ints larger than 53 bits. *)
-
-  val ( +. ) : float -> float -> float
-  val ( -. ) : float -> float -> float
-  val ( *. ) : float -> float -> float
-  val ( /. ) : float -> float -> float
+  include module type of Interval_base.High
 
   val ( ** ) : float -> float -> float
   (** [x**y] computes [x] at power [y], rounded up, expanded to its
@@ -274,10 +256,6 @@ module High : sig
 
   val tanh: float -> float
   (** Computes the hyperbolic tangent, tanh(x). *)
-
-  (** Locally open to restore standard integer and floating point
-     operators. *)
-  module U = Interval__U
 end
 
 
@@ -539,47 +517,3 @@ module Rename_all : sig
 end
 
 
-(** {2 Changing the rounding mode (DANGEROUS)} *)
-
-(**
-Below, we have functions for changing the rounding mode.
-The default mode for rounding is NEAREST.
-
-BE VERY CAREFUL: using these functions unwisely can ruin all your
-computations. Remember also that on 64 bits machine these functions won't
-change the behaviour of the SSE instructions.
-
-When setting the rounding mode to UPWARD or DOWNWARD, it is better to set it
-immediately back to NEAREST. However  we have no guarantee
-on how the compiler will reorder the instructions generated.
-It is ALWAYS better to write:
-{[
-let a = set_high(); let res = 1./.3. in set_nearest (); res;;
-]}
-
-The above code will NOT work on linux-x64 where many floating point
-functions are implemented using SSE instructions.
-These three functions should only be used when there is no other
-solution, and you really know what tou are doing, and this should never happen.
-Please use the regular functions of the fpu module for computations.
-For example prefer:
-{[
-let a = High.(1. /. 3.)
-]}
-
-PS: The Interval module and the fpu module functions correctly set and
-restore the rounding mode
-for all interval computations, so you don't really need these functions.
-
-PPS: Please, don't use them...
-*)
-
-
-val set_low: unit -> unit
-(** Sets the rounding mod to DOWNWARD (towards minus infinity) *)
-
-val set_high: unit -> unit
-(** Sets the rounding mod to UPWARD (towards infinity) *)
-
-val set_nearest: unit -> unit
-(** Sets the rounding mod to NEAREST (default mode) *)

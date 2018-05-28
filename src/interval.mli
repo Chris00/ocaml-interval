@@ -108,244 +108,19 @@ let x = I.(v 0.5 1. + sin(v 3. 3.125))
    write [let a = I.(inv(v 3. 3.))] because rounding will then be
    properly handled and the resulting interval will indeed contain the
    exact value of 1/3. *)
-type t = {
+type t = Interval_base.t = {
     low: float; (** low bound, possibly = -∞ *)
     high: float (** high bound, possibly = +∞ *)
   }
 
 exception Division_by_zero
-(** Exception raised when a division by 0 occurs. *)
-
-exception Domain_error of string [@@warn_on_literal_pattern]
-(** Exception raised when an interval is completely outside the domain
-   of a function.  The string is the name of the function and is meant
-   to help when running code in the REPL (aka toploop). *)
-
+exception Domain_error of string
 
 (** Interval operations.  Locally open this module — using
    e.g. [I.(...)] — to redefine classical arithmetic operators for
    interval arithmetic. *)
 module I : sig
-  val zero : t
-  (** Neutral element for addition. *)
-
-  val one : t
-  (** Neutral element for multiplication. *)
-
-  val pi: t
-  (** π with bounds properly rounded. *)
-
-  val two_pi : t
-  (** 2π with bounds properly rounded. *)
-
-  val e: t
-  (** [e] (Euler's constant) with bounds properly rounded. *)
-
-  val entire : t
-  (** The entire set of real numbers. *)
-
-  val v : float -> float -> t
-  (** [v a b] returns [{low=a; high=b}].  BEWARE that, unless you take
-     care, if you use [v a b] with literal values for [a] and/or [b],
-     the resulting interval may not contain these values because the
-     compiler will round them to binary numbers before passing them to
-     [v].
-
-     @raise Invalid_argument if the interval \[[a], [b]\] is equal to
-     \[-∞,-∞\] or \[+∞,+∞\] or one of the bounds is NaN. *)
-
-  val of_int : int -> t
-  (** Returns the interval containing the float conversion of an integer. *)
-
-  val to_string : ?fmt: (float -> 'b, 'a, 'b) format -> t -> string
-  (** [to_string i] return a string representation of the interval [i].
-      @param fmt is the format used to print the two bounds of [i].
-                 Default: ["%g"]. *)
-
-  val pr : out_channel -> t -> unit
-  (** Print the interval to the channel.  To be used with [Printf]
-     format "%a". *)
-
-  val pp : Format.formatter -> t -> unit
-  (** Print the interval to the formatter.  To be used with [Format]
-     format "%a". *)
-
-  val fmt : (float -> 'b, 'a, 'b) format -> (t -> 'c, 'd, 'e, 'c) format4
-  (** [fmt float_fmt] returns a format to print intervals where each
-     component is printed with [float_fmt].
-
-     Example: [Printf.printf ("%s = " ^^ fmt "%.10f" ^^ "\n") name i]. *)
-
-  (** {2 Boolean functions} *)
-
-  val compare_f: t -> float -> int
-  (** [compare_f a x] returns
-      - [1] if [a.high < x],
-      - [0] if [a.low] ≤ [x] ≤ [a.high], i.e., if [x] ∈ [a], and
-      - [-1] if [x < a.low].  *)
-
-  val is_bounded : t -> bool
-  (** [is_bounded x] says whether the interval is bounded, i.e.,
-      -∞ < [x.low] and [x.high] < ∞. *)
-
-  val is_entire : t -> bool
-  (** [is_entire x] says whether [x] is the {!entire} interval. *)
-
-  val equal : t -> t -> bool
-  (** [equal a b] says whether the two intervals are the same. *)
-
-  val ( = ) : t -> t -> bool
-  (** Synonym for {!equal}. *)
-
-  val subset : t -> t -> bool
-  (** [subset x y] returns true iff [x] ⊆ [y]. *)
-
-  val ( <= ) : t -> t -> bool
-  (** [x <= y] says whether [x] is weakly less than [y] i.e.,
-      ∀ξ ∈ x, ∃η ∈ y, ξ ≤ η and ∀η ∈ y, ∃ξ ∈ x, ξ ≤ η. *)
-
-  val ( >= ) : t -> t -> bool
-  (** [x >= y] says whether [x] is weakly greater than [y] i.e.,
-      ∀ξ ∈ x, ∃η ∈ y, ξ ≥ η and ∀η ∈ y, ∃ξ ∈ x, ξ ≥ η. *)
-
-  val precedes : t -> t -> bool
-  (** [precedes x y] returns true iff [x] is to the left but may touch
-     [y]. *)
-
-  val interior : t -> t -> bool
-  (** [interior x y] returns true if [x] is interior to [y] in the
-     topological sense.  For example [interior entire entire] is [true]. *)
-
-  val ( < ) : t -> t -> bool
-  (** [x < y] says whether [x] is strictly weakly less than [y] i.e.,
-      ∀ξ ∈ x, ∃η ∈ y, ξ < η and ∀η ∈ y, ∃ξ ∈ x, ξ < η. *)
-
-  val ( > ) : t -> t -> bool
-  (** [x > y] iff [y < x]. *)
-
-  val strict_precedes : t -> t -> bool
-  (** [strict_precedes x y] returns true iff [x] is to the left and
-     does not touch [y]. *)
-
-  val disjoint : t -> t -> bool
-  (** [disjoint x y] returns true iff [x] ∩ [y] = ∅. *)
-
-
-  (** {2 Operations} *)
-
-  val size: t -> t
-  (** [size a] returns an interval containing the true length of the
-     interval [a.high - a.low]. *)
-
-  val size_high : t -> float
-  (** [size_high a] returns the length of the interval [a.high - a.low]
-     rounded up. *)
-
-  val size_low : t -> float
-  (** [size_low a] returns the length of the interval [a.high - a.low]
-     rounded down. *)
-
-  val sgn: t -> t
-  (** [sgn a] returns the sign of each bound, i.e.,
-      [{low=float (compare a.low 0.);  high=float (compare a.high 0.)}]. *)
-
-  val truncate: t -> t
-  (** [truncate a] returns the integer interval containing [a], that is
-      [{low=floor a.low; high=ceil a.high}]. *)
-
-  val abs: t -> t
-  (** [abs a] returns the absolute value of the interval, that is
-      - [a] if [a.low] ≥ [0.],
-      - [~- a] if [a.high] ≤ [0.], and
-      - [{low=0.; high=max (-a.low) a.high}] otherwise. *)
-
-  val hull: t -> t -> t
-  (** [hull a b] returns the smallest interval containing [a] and [b], that is
-      [{low=min a.low b.low; high=max a.high b.high}]. *)
-
-  val max: t -> t -> t
-  (** [max a b] returns the "maximum" of the intervals [a] and [b], that is
-      [{low=max a.low b.low; high=max a.high b.high}]. *)
-
-  val min: t -> t -> t
-  (** [min a b] returns the "minimum" of the intervals [a] and [b], that is
-      [{low=min a.low b.low;high=min a.high b.high}]. *)
-
-  val ( + ) : t -> t -> t
-  (** [a + b] returns [{low=a.low +. b.low; high=a.high +. b.high}]
-     properly rounded. *)
-
-  val ( +. ): t -> float -> t
-  (** [a +. x] returns [{low = a.low +. x; high = a.high +. x}]
-      properly rounded. *)
-
-  val ( +: ): float -> t -> t
-  (** [x +: a] returns [{low = a.low +. x; high = a.high +. x}]
-      properly rounded. *)
-
-  val ( - ): t -> t -> t
-  (** [a - b] returns [{low = a.low -. b.high;  high = a.high -. b.low}]
-      properly rounded. *)
-
-  val ( -. ): t -> float -> t
-  (** [a -. x] returns [{low = a.low -. x;  high = a.high -. x}]
-      properly rounded. *)
-
-  val ( -: ): float -> t -> t
-  (** [x -: a] returns [{low = x -. a.high;  high = x -. a.low}]
-      properly rounded. *)
-
-  val ( ~- ): t -> t
-  (** [~- a] is the unary negation, it returns [{low=-a.high; high=-a.low}]. *)
-
-  val ( * ): t -> t -> t
-  (** [a * b] multiplies [a] by [b] according to interval arithmetic
-     and returns the proper result.  If [a=zero] or [b=zero] then
-     {!zero} is returned. *)
-
-  val ( *. ): float -> t -> t
-  (** [x *. a] multiplies [a] by [x] according to interval arithmetic
-     and returns the proper result.  If [x=0.] then {!zero} is returned. *)
-
-  val ( *: ): t -> float -> t
-  (** [a *. x] multiplies [a] by [x] according to interval arithmetic
-     and returns the proper result.  If [x=0.] then {!zero} is returned. *)
-
-  val ( / ): t -> t -> t
-  (** [a / b] divides the first interval by the second according to
-     interval arithmetic and returns the proper result.
-     Raise [Interval.Division_by_zero] if [b=]{!zero}. *)
-
-  val ( /. ): t -> float -> t
-  (** [a /. x] divides [a] by [x] according to interval arithmetic and
-     returns the proper result.
-     Raise [Interval.Division_by_zero] if [x=0.0]. *)
-
-  val ( /: ): float -> t -> t
-  (** [x /: a] divides [x] by [a] according to interval arithmetic and
-     returns the result.
-     Raise [Interval.Division_by_zero] if [a=]{!zero}. *)
-
-  val inv: t -> t
-  (** [inv a] returns [1. /: a] but is more efficient.
-      Raise [Interval.Division_by_zero] if [a=]{!zero}. *)
-
-  type 'a one_or_two = One of 'a | Two of 'a * 'a
-
-  val invx : t -> t one_or_two
-  (** [invx a] is the extended division.  When 0 ∉ [a], the result is
-     [One(inv a)].  If 0 ∈ [a], then the two natural intervals
-     (properly rounded) [Two](\[-∞, 1/a.low\], \[1/a.high, +∞\]) are
-     returned.
-     Raise [Interval.Division_by_zero] if [a=]{!zero}. *)
-
-  val cancelminus : t -> t -> t
-  (** [cancelminus x y] returns the tightest interval [z] such that
-     [x] ⊆ [z] + [y].  If no such [z] exists, it returns [entire]. *)
-
-  val cancelplus : t -> t -> t
-  (** [cancelplus x y] returns the tightest interval [z] such that
-     [x] ⊆ [z] - [y].  If no such [z] exists, it returns [entire]. *)
+  include module type of Interval_base.I
 
   val mod_f: t -> float -> t
   (** [mod_f a f] returns [a] mod [f] according to interval arithmetic
@@ -456,16 +231,6 @@ module I : sig
 
   val tanh: t -> t
   (** tanh is the proper extension of tanh to interval arithmetic. *)
-
-
-  (** {2 Usual arithmetic operators} *)
-
-  (** Module undoing the redeclaration of usual infix operators [+],
-     [+.], etc. in case it is needed locally, while this module is
-     open.
-
-     Example: [I.(x + sin(of_int U.(n + 1)))]. *)
-  module U = Interval__U
 
 
   (** {2 Arrays of intervals} *)

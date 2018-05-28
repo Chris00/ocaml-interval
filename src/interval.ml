@@ -27,268 +27,38 @@ open Fpu
 let fmin (a: float) (b: float) = if a <= b then a else b
 let fmax (a: float) (b: float) = if a <= b then b else a
 
-type t = {low: float; high: float}
+type t = Interval_base.t = {low: float; high: float}
 
-exception Division_by_zero
-exception Domain_error of string
+exception Division_by_zero = Interval_base.Division_by_zero
+exception Domain_error = Interval_base.Domain_error
 
 module I = struct
-  (* Save original operators *)
-  module U = Interval__U
-
-  let zero = {low=0.; high=0.}
-  let one = {low=1.; high=1.}
-  let entire = {low = neg_infinity;  high = infinity}
-
-  let v (a: float) (b: float) =
-    if a < b (* ⇒ a, b not NaN; most frequent case *) then
-      { low=a; high=b }
-    else if a = b then
-      if a = neg_infinity then
-        invalid_arg "Interval.I.v: [-inf, -inf] is not allowed"
-      else if a = infinity then
-        invalid_arg "Interval.I.v: [+inf, +inf] is not allowed"
-      else { low=a; high=b }
-    else (* a > b or one of them is NaN *)
-      invalid_arg("Interval.I.v: [" ^ string_of_float a ^ ", "
-                  ^ string_of_float b ^ "] not allowed")
-
-  let to_string_fmt fmt i =
-    Printf.sprintf "[%(%f%), %(%f%)]" fmt i.low fmt i.high
-
-  let to_string ?(fmt=("%g": _ format)) i = to_string_fmt fmt i
-
-  let pr ch i =
-    Printf.fprintf ch "[%g, %g]" i.low i.high
-
-  let pp fmt i =
-    Format.fprintf fmt "[%g, %g]" i.low i.high
-
-  let fmt fmt_float =
-    let open CamlinternalFormatBasics in
-    let to_string () i = to_string_fmt fmt_float i in
-    let fmt = Custom(Custom_succ Custom_zero, to_string, End_of_format) in
-    Format(fmt , "Inverval.t")
-
-
-
-  let is_NaN (x : float) = x <> x
-
-  let compare_f {low = a; high = b} x =
-    if b < x then 1 else if a <= x then 0 else -1
-
-  let is_bounded {low; high} =
-    neg_infinity < low && high < infinity
-
-  let is_entire {low; high} =
-    neg_infinity = low && high = infinity
-
-  let equal {low = a; high = b} {low = c; high = d} =
-    a = c && b = d
-
-  let subset {low = a; high = b} {low = c; high = d} =
-    (* No empty intervals. *)
-    c <= a && b <= d
-
-  let less {low = a; high = b} {low = c; high = d} =
-    a <= c && b <= d
-
-  let precedes x y = x.high <= y.low (* intervals are not empty *)
-
-  let interior {low = a; high = b} {low = c; high = d} =
-    (* Intervals are not empty *)
-    (c < a || (c = neg_infinity && a = neg_infinity))
-    && (b < d || (b = infinity && d = infinity))
-
-  let strict_less {low = a; high = b} {low = c; high = d} =
-    (* Intervals are not empty *)
-    (a < c || (a = neg_infinity && c = neg_infinity))
-    && (b < d || (b = infinity && d = infinity))
-
-  let strict_precedes x y = x.high < y.low (* intervals not empty *)
-
-  let disjoint {low = a; high = b} {low = c; high = d} =
-    (* Intervals are not empty *)
-    b < c || d < a
-
-  let size x =
-    { low = Low.(x.high -. x.low);  high = High.(x.high -. x.low) }
-
-  let size_low x = Low.(x.high -. x.low)
-  let size_high x = High.(x.high -. x.low)
-
-  let abs ({low = a; high = b} as x) =
-    if 0. <= a then x
-    else if b <= 0. then {low = -.b; high = -.a}
-    else {low = 0.; high = fmax (-.a) b}
-
-  let sgn {low = a; high = b} =
-    {low = float (compare a 0.); high = float (compare b 0.)}
-
-  let truncate x =
-    {low = floor x.low; high = ceil x.high}
-
-  let hull x y = {low = fmin x.low y.low; high = fmax x.high y.high}
-
-  let max x y = {low = fmax x.low y.low; high = fmax x.high y.high}
-
-  let min x y = {low = fmin x.low y.low; high = fmin x.high y.high}
-
-  let ( + ) {low = a; high = b} {low = c; high = d} =
-    { low = Low.(a +. c);  high = High.(b +. d) }
-
-  let ( - ) {low = a; high = b} {low = c; high = d} =
-    { low = Low.(a -. d);  high = High.(b -. c) }
-
-  let ( +. ) {low = a; high = b} x =
-    { low = Low.(a +. x);  high = High.(b +. x) }
-
-  let ( +: ) x {low = a; high = b} =
-    { low = Low.(a +. x);  high = High.(b +. x) }
-
-  let ( -. ) {low = a; high = b} x =
-    { low = Low.(a -. x);  high = High.(b -. x) }
-
-  let ( -: ) x {low = c; high = d} =
-    { low = Low.(x -. d);  high = High.(x -. c) }
-
-  let ( ~- ) {low = a; high = b} = {low = -.b; high = -.a}
-
-  let ( * ) {low = a; high = b} {low = c; high = d} =
-    let sa = compare a 0. and sb = compare b 0. in
-    let sc = compare c 0. and sd = compare d 0. in
-    if (sa = 0 && sb = 0) || (sc = 0 && sd = 0) then {low = 0.; high = 0.}
-    else if sb <= 0 then
-      if sd <= 0 then {low = Low.(b *. d); high = High.(a *. c)}
-      else if 0 <= sc then {low = Low.(a *. d); high = High.(b *. c)}
-      else {low = Low.(a *. d); high = High.(a *. c)}
-    else if 0 <= sa then
-      if sd <= 0 then {low = Low.(b *. c); high = High.(a *. d)}
-      else if 0 <= sc then {low = Low.(a *. c); high = High.(b *. d)}
-      else {low = Low.(b *. c); high = High.(b *. d)}
-    else if 0 <= sc then {low = Low.(a *. d); high = High.(b *. d)}
-    else if sd <= 0 then {low = Low.(b *. c); high = High.(a *. c)}
-    else
-      { low = fmin Low.(a *. d) Low.(b *. c);
-        high = fmax High.(a *. c) High.(b *. d) }
-
-  let ( *. ) y {low = a; high = b} =
-    let sy = compare y 0. in
-    if sy = 0 then {low = 0.; high = 0.}
-    else if sy < 0 then {low = Low.(b *. y); high = High.(a *. y)}
-    else {low = Low.(a *. y); high = High.(b *. y)}
-
-  let ( *: ) a y = y *. a
-
-  let ( / ) {low = a; high = b} {low = c; high = d} =
-    let sc = compare c 0. and sd = compare d 0. in
-    if sd = 0 then
-      if sc = 0 then raise Division_by_zero
-      else if b <= 0. then
-        {low = Low.(b /. c); high = if a = 0. then 0. else infinity}
-      else if 0. <= a then {low = neg_infinity; high = High.(a /. c)}
-      else {low = neg_infinity; high = infinity}
-    else if sd < 0 then
-      { low = if b <= 0. then Low.(b /. c) else Low.(b /. d);
-        high = if 0. <= a then High.(a /. c) else High.(a /. d) }
-    else if sc = 0 then
-      if b <= 0. then
-        {low = if a = 0. then 0. else neg_infinity; high = High.(b /. d)}
-      else if 0. <= a then {low = Low.(a /. d); high = infinity}
-      else {low = neg_infinity; high = infinity}
-    else if 0 < sc then
-      { low = if a <= 0. then Low.(a /. c) else Low.(a /. d);
-        high = if b <= 0. then High.(b /. d) else High.(b /. c) }
-    else if a = 0. && b = 0. then {low = 0.; high = 0.}
-    else {low = neg_infinity; high = infinity}
-
-  let ( /. ) {low = a; high = b} y =
-    let sy = compare y 0. in
-    if sy = 0 then raise Division_by_zero
-    else if 0 < sy then {low = Low.(a /. y); high = High.(b /. y)}
-    else {low = Low.(b /. y); high = High.(a /. y)}
-
-  let ( /: ) x {low = a; high = b} =
-    let sx = compare x 0. and sa = compare a 0. and sb = compare b 0. in
-    if sx = 0 then
-      if sa = 0 && sb = 0 then raise Division_by_zero
-      else {low = 0.; high = 0.}
-    else if 0 < sa || sb < 0 then
-      if 0 < sx then {low = Low.(x /. b); high = High.(x /. a)}
-      else {low = Low.(x /. a); high = High.(x /. b)}
-    else if sa = 0 then
-      if sb = 0 then raise Division_by_zero
-      else if 0 <= sx then {low = Low.(x /. b); high = infinity}
-      else {low = neg_infinity; high = High.(x /. b)}
-    else if sb = 0 then
-      if sx = 0 then {low = 0.; high = 0.}
-      else if 0 <= sx then {low = neg_infinity; high = High.(x /. a)}
-      else {low = Low.(x /. a); high = infinity}
-    else {low = neg_infinity; high = infinity}
+  include Interval_base.I       (* Redefines =, <=,... *)
 
   let mod_f {low = a; high = b} y =
     (* assume that the result of fmod is exact *)
-    let sy = compare y 0. in
-    let y = if sy = 0 then raise Division_by_zero else abs_float y in
-    if 0. <= a then
-      if High.(b -. a) < y then (
+    let sy = Pervasives.compare y 0. in
+    let y = if U.(sy = 0) then raise Division_by_zero else abs_float y in
+    if U.(0. <= a) then
+      if U.(High.(b -. a) < y) then (
         let ma = fmod a y and mb = fmod b y in
-        if ma <= mb then {low = ma; high = mb} else {low = 0.; high = y})
+        if U.(ma <= mb) then {low = ma; high = mb} else {low = 0.; high = y})
       else {low = 0.; high = y}
-    else if b <= 0. then
-      if High.(b -. a) < y then (
+    else if U.(b <= 0.) then
+      if U.(High.(b -. a) < y) then (
         let ma = fmod a y and mb = fmod b y in
-        if ma <= mb then {low = ma; high = mb} else {low = -.y; high = 0.})
+        if U.(ma <= mb) then {low = ma; high = mb} else {low = -.y; high = 0.})
       else {low = -.y; high = 0.}
     else
-      { low = if a <= -.y then -.y else fmod a y;
-        high = if y <= b then y else fmod b y }
-
-  let inv {low = a; high = b} =
-    let sa = compare a 0. and sb = compare b 0. in
-    if sa = 0 then
-      if sb = 0 then raise Division_by_zero
-      else {low = Low.(1. /. b); high = infinity}
-    else if 0 < sa || sb < 0 then {low = Low.(1. /. b); high = High.(1. /. a)}
-    else if sb = 0 then {low = neg_infinity; high = High.(1. /. a)}
-    else {low =  neg_infinity; high = infinity}
-
-  type 'a one_or_two = One of 'a | Two of 'a * 'a
-
-  let invx {low = a; high = b} =
-    let sa = compare a 0. and sb = compare b 0. in
-    if sa = 0 then
-      if sb = 0 then raise Division_by_zero
-      else One {low = Low.(1. /. b); high = infinity}
-    else if 0 < sa || sb < 0 then One {low = Low.(1. /. b); high = High.(1. /. a)}
-    else if sb = 0 then One {low = neg_infinity; high = High.(1. /. a)}
-    else Two({low = neg_infinity;  high = High.(1. /. a) },
-             {low = Low.(1. /. b);  high = infinity})
-
-  let cancelminus x y =
-    (* Intervals here cannot be empty. *)
-    if is_bounded x && is_bounded y then
-      let low = Low.(x.low -. y.low) in
-      let high = High.(x.high -. y.high) in
-      if low <= high (* thus not NaN *) then {low; high}
-      else entire
-    else entire
-
-  let cancelplus x y = (* = cancelminus x (-y) *)
-    if is_bounded x && is_bounded y then
-      let low = Low.(x.low +. y.high) in
-      let high = High.(x.high +. y.low) in
-      if low <= high (* thus not NaN *) then {low; high}
-      else entire
-    else entire
+      { low = if U.(a <= -.y) then -.y else fmod a y;
+        high = if U.(y <= b) then y else fmod b y }
 
   let sqrt {low = a; high = b} =
-    if b < 0. then raise(Domain_error "sqrt")
-    else {low = if a < 0. then 0. else Low.sqrt a; high = High.sqrt b}
-
-  let of_int n = {low = Low.float n; high = High.float n}
+    if U.(b < 0.) then raise(Domain_error "sqrt")
+    else {low = if U.(a < 0.) then 0. else Low.sqrt a; high = High.sqrt b}
 
   let ( ** ) {low = a; high = b} n =
+    let open U in
     let nf = of_int n in
     let pow_l x =
       if x = infinity then 0.
@@ -322,6 +92,7 @@ module I = struct
     else {low = neg_infinity; high = infinity}
 
   let ( **. ) {low = a; high = b} nf =
+    let open U in
     let pow_l x = if x = infinity then 0. else Low.pow x nf in
     let pow_h x = if x = infinity then infinity else High.pow x nf in
     let sn = compare nf 0. and sa = compare a 0. and sb = compare b 0. in
@@ -356,6 +127,7 @@ module I = struct
     else {low = neg_infinity; high = infinity}
 
   let ( *** ) {low = a; high = b} {low = c; high = d} =
+    let open U in
     let a = fmax 0. a in
     if b < 0. then raise(Domain_error "***")
     else if b = 0. then
@@ -379,6 +151,7 @@ module I = struct
            high = fmax High.(a**c) High.(b**d)}
 
   let ( **: ) x {low = a; high = b} =
+    let open U in
     if x = 0. && 0. < b then {low = 0.; high = 0.}
     else if x <= 0. then raise(Domain_error "**:")
     else if x < 1. then
@@ -395,19 +168,15 @@ module I = struct
     else {low = Low.pow x a; high = High.pow x b}
 
   let log {low = a; high = b} =
+    let open U in
     let sb = compare b 0. in
     if sb <= 0 then raise(Domain_error "log")
     else {low = if a <= 0. then neg_infinity else Low.log a; high = High.log b}
 
   let exp {low = a; high = b} =
+    let open U in
     { low = if a = neg_infinity then 0. else Low.exp a;
       high = if b = infinity then infinity else High.exp b}
-
-  let pi = {low = Low.atan2 0. (-1.); high = High.atan2 0. (-1.)}
-  let two_pi = 2.0 *. pi
-  let pio2_I = {low = Low.atan2 1. 0.; high = High.atan2 1. 0.}
-
-  let e = {low = Low.exp 1.0; high = High.exp 1.0}
 
   let i_sgn x =
     let sgn_low = compare x.low 0. and sgn_high = compare x.high 0. in
@@ -419,6 +188,7 @@ module I = struct
   external sin: t -> t = "fsin_I_caml"
 
   let tan {low = a; high = b} =
+    let open U in
     if -.max_63 <= a && b <= max_63 && High.(b -. a) < pi.high then (
       let ta = Low.tan a in
       let tb = High.tan b in
@@ -427,21 +197,24 @@ module I = struct
     else {low = neg_infinity; high = infinity}
 
   let acos {low = a; high = b} =
+    let open U in
     if a <= 1. && -1. <= b then
       {low = if b < 1. then Low.acos b else 0.;
        high = if -1. < a then High.acos a else pi.high}
     else raise(Domain_error "acos")
 
   let asin {low = a; high = b} =
+    let open U in
     if a <= 1. && -1. <= b then
-      { low = if -1. < a then Low.asin a else -.pio2_I.high;
-        high = if b < 1. then High.asin b else pio2_I.high }
+      { low = if -1. < a then Low.asin a else -.half_pi.high;
+        high = if b < 1. then High.asin b else half_pi.high }
     else raise(Domain_error "asin")
 
   let atan {low = a; high = b} =
     { low = Low.atan2 a 1.; high = High.atan2 b 1.}
 
   let atan2mod {low = ya; high = yb} {low = xa; high = xb} =
+    let open U in
     let sya = compare ya 0. and syb = compare yb 0. in
     let sxa = compare xa 0. and sxb = compare xb 0. in
     if syb < 0 then
@@ -464,11 +237,12 @@ module I = struct
       { low = if 0 <= sxa then Low.atan2 ya xa else -.pi.high;
         high = if sxb <= 0 then High.atan2 ya xb else 0. }
     else if sxb <= 0 then
-      {low = Low.atan2 yb xb; high = High.(atan2 ya xb +. two_pi.high)}
+      {low = Low.atan2 yb xb; high = High.(atan2 ya xb +. two_pi)}
     else if 0 <= sxa then {low = Low.atan2 ya xa; high = High.atan2 yb xa}
     else {low = -.pi.high; high = pi.high}
 
   let atan2 {low = ya; high = yb} {low = xa; high = xb} =
+    let open U in
     let sya = compare ya 0. and syb = compare yb 0. in
     let sxa = compare xa 0. and sxb = compare xb 0. in
     if syb < 0 then
@@ -495,6 +269,7 @@ module I = struct
     else {low = -.pi.high; high = pi.high}
 
   let cosh {low = a; high = b} =
+    let open U in
     if b < 0. then {low = Low.cosh b; high = High.cosh a}
     else if a < 0. then {low = 1.; high = High.cosh (fmax (-.a) b)}
     else {low = Low.cosh a; high = High.cosh b}
@@ -517,7 +292,7 @@ module I = struct
       Array.fold_left (fun m vi -> fmax m (abs_float vi)) 0. v
 
     let pr ch v =
-      if Array.length v = 0 then Printf.fprintf ch "[| |]"
+      if U.(Array.length v = 0) then Printf.fprintf ch "[| |]"
       else (
         Printf.fprintf ch "[| [%g, %g]" (v.(0)).low (v.(0)).high;
         for i = 1 to U.(Array.length v - 1) do
@@ -527,7 +302,7 @@ module I = struct
       )
 
     let pp ch v =
-      if Array.length v = 0 then Format.fprintf ch "[| |]"
+      if U.(Array.length v = 0) then Format.fprintf ch "[| |]"
       else (
         Format.fprintf ch "[| [%g, %g]" (v.(0)).low (v.(0)).high;
         for i = 1 to U.(Array.length v - 1) do
@@ -549,7 +324,7 @@ module I = struct
       Buffer.add_string b " |]"
 
     let to_string_fmt fmt v =
-      if Array.length v = 0 then "[| |]"
+      if U.(Array.length v = 0) then "[| |]"
       else (
         let b = Buffer.create 256 in
         add_buffer b fmt v;
@@ -564,13 +339,6 @@ module I = struct
       let fmt = Custom(Custom_succ Custom_zero, to_string, End_of_format) in
       Format(fmt , "Inverval.Arr.t")
   end
-
-  (* Infix aliases *)
-  let ( = ) = equal
-  let ( <= ) = less
-  let ( < ) = strict_less
-  let ( >= ) x y = less y x
-  let ( > ) x y = strict_less y x
 end
 
 

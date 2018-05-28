@@ -16,5 +16,8 @@ build: [
 build-doc: [[ "jbuilder" "build" "@doc"]]
 depends: [
   "jbuilder" {build}
+  "configurator" {build}
+  "stdio" {build}
+  "base" {build}
 ]
 

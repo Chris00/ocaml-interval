@@ -26,69 +26,8 @@
 #include <caml/memory.h>
 #include <math.h>
 
-/*
-We work with _high and _low version of arithmetic functions.
-Extreme care must be taken regarding inline assembly. As setting the mode of the
-processor has to be done before any computation, we have to prevent instructions
-reordering.
-This is also true for setting back the mode to nearest: the result has to be stored
-in the stack before setting the mode to nearest: computation is done in 80 bits mode
-and casting the result to 64 bits has to be done before changing rounding mode
-because the casting itself introduces errors.
-This is why some (artificial) variables dependencies have to be used, along with
-the "volatile" keyword and the "memory" keyword in the clobber list.
-It is extremely wise to check the assembly code generated...
-*/
+#include "interval_intel.h"
 
-#if defined _MSC_BUILD
-#error "MSVC inline assembly is not supported at the moment.  Please contribute."
-#elif !(defined __GNUC__)
-#define asm __asm__
-#define __volatile__
-#endif
-
-/* Set the processor to different rounding modes */
-#define SET_LOW(ref) "fstcw "#ref"\n\t andw $0xf3ff,"#ref"\n\t orw $0x0400,"#ref"\n\t fldcw "#ref"\n\t"
-#define SET_HIGH(ref) "fstcw "#ref"\n\t andw $0xf3ff,"#ref"\n\t orw $0x0800,"#ref"\n\t fldcw "#ref"\n\t"
-#define SET_NEAREST(ref) "fstcw "#ref"\n\t andw $0xf3ff,"#ref"\n\t fldcw "#ref"\n\t"
-
-/*
-Set the processor to use full 64+16 bits. Useful with long double,
-but VERY dangerous with ordinary doubles because optimization of the code by the
-compiler can give different results depending on the way the the computation was
-done (the x87 80 bits registers are stored in 64 bits memory locations)...
-This is the default with Linux.
-*/
-#define SET_64(ref) "fstcw "#ref"\n\t andw $0xfcff,"#ref"\n\t orw $0x0300,"#ref"\n\t fldcw "#ref"\n\t"
-/*
-Set the processor to use 53+11 bits. This is the standard for double in IEEE-754
-*/
-#define SET_53(ref) "fstcw "#ref"\n\t andw $0xfcff,"#ref"\n\t orw $0x0200,"#ref"\n\t fldcw "#ref"\n\t"
-/*
-Set the processor to use 24+8 bits. IEEE-754 standard for float
-*/
-#define SET_24(ref) "fstcw "#ref"\n\t andw $0xfcff,"#ref"\n\t fldcw "#ref"\n\t"
-
-static short int cw;
-static long long int tmp;
-
-CAMLexport
-void set_nearest() {
-  asm __volatile__(SET_NEAREST(%0)
-		   :"=m"(cw));
-}
-
-CAMLexport
-void set_high() {
-  asm __volatile__(SET_HIGH(%0)
-		   :"=m"(cw));
-}
-
-CAMLexport
-void set_low() {
-  asm __volatile__(SET_LOW(%0)
-		   :"=m"(cw));
-}
 
 /* Infinity -------------------------------------------------------------------- */
 long double infinity = 1.0/0.0;
@@ -96,57 +35,16 @@ long double neg_infinity = -1.0/0.0;
 
 /* Int to float conversion ----------------------------------------------------- */
 
-#define FILDQ(ref) "fildq "#ref"\n\t"
-
 static double ffloat(long int a) {
   double res;
 
   tmp = a;
   asm __volatile__(FILDQ(%1)
-		   :"=t"(res)
-		   :"m"(tmp)
-		   :"memory");
+                   :"=t"(res)
+                   :"m"(tmp)
+                   :"memory");
   return(res);
 }
-
-
-static double ffloat_low(long int a) {
-  double res;
-  tmp = a;
-  asm __volatile__(SET_LOW(%0)
-		   :"=m"(cw)
-		   :"m"(tmp)
-		   :"memory");
-  asm __volatile__(FILDQ(%1)
-		   :"=t"(res)
-		   :"m"(tmp),"m"(cw)
-		   :"memory");
-  asm __volatile__(SET_NEAREST(%0)
-		   :"=m"(cw)
-		   :"m"(res),"m"(tmp)
-		   :"memory");
-  return(res);
-}
-
-static double ffloat_high(long int a) {
-  double res;
-
-  tmp = a;
-  asm __volatile__(SET_HIGH(%0)
-		   :"=m"(cw)
-		   :"m"(tmp)
-		   :"memory");
-  asm __volatile__(FILDQ(%1)
-		   :"=t"(res)
-		   :"m"(tmp),"m"(cw)
-		   :"memory");
-  asm __volatile__(SET_NEAREST(%0)
-		   :"=m"(cw)
-		   :"m"(res),"m"(tmp)
-		   :"memory");
-  return(res);
-}
-
 
 /* long double to double conversions ------------------------------------------ */
 
@@ -182,7 +80,7 @@ static double to_high(long double a) {
   return(res);
 }
 
-/* fadd_l, fsub_l, fmul_l, fdiv_l --------------------------------------------- */
+/* fadd, fsub, fmul, fdiv --------------------------------------------- */
 CAMLexport
 double fadd(double a, double b) {
 
@@ -192,44 +90,6 @@ double fadd(double a, double b) {
 		   :"=t"(res)
 		   :"0"(a),"u"(b),"m"(cw)
 		   :"memory");
-  return(res);
-}
-
-CAMLexport
-double fadd_low(double a, double b) {
-
-  volatile double res;
-
-  asm __volatile__(SET_LOW(%3)
-		   "fadd %%st(1),%%st(0)\n\t"
-		   :"=t"(res)
-		   :"0"(a),"u"(b),"m"(cw)
-		   :"memory");
-
-  asm __volatile__(SET_NEAREST(%0)
-		   :"=m"(cw)
-		   :"m"(cw)
-		   :"memory");
-
-  return(res);
-}
-
-CAMLexport
-double fadd_high(double a, double b) {
-
-  volatile double res;
-
-  asm __volatile__(SET_HIGH(%3)
-		   "fadd %%st(1),%%st(0)\n\t"
-		   :"=t"(res)
-		   :"0"(a),"u"(b),"m"(cw)
-		   :"memory");
-
-  asm __volatile__(SET_NEAREST(%0)
-		   :"=m"(cw)
-		   :"m"(cw)
-		   :"memory");
-
   return(res);
 }
 
@@ -285,43 +145,6 @@ double fsub(double a, double b) {
   return(res);
 }
 
-CAMLexport
-double fsub_low(double a, double b) {
-  volatile double res;
-
-  asm __volatile__(SET_LOW(%3)
-		   "fsub %%st(1),%%st(0)\n\t"
-		   :"=t"(res)
-		   :"0"(a),"u"(b),"m"(cw)
-		   :"memory");
-
-  asm __volatile__(SET_NEAREST(%0)
-		   :"=m"(cw)
-		   :"m"(cw)
-		   :"memory");
-
-  return(res);
-}
-
-CAMLexport
-double fsub_high(double a, double b) {
-
-  volatile double res;
-
-  asm __volatile__(SET_HIGH(%3)
-		   "fsub %%st(1),%%st(0)\n\t"
-		   :"=t"(res)
-		   :"0"(a),"u"(b),"m"(cw)
-		   :"memory");
-
-  asm __volatile__(SET_NEAREST(%0)
-		   :"=m"(cw)
-		   :"m"(cw)
-		   :"memory");
-
-  return(res);
-}
-
 static long double fsub_l(long double a,long double b) {
   long double res;
 
@@ -373,44 +196,6 @@ double fmul(double a, double b) {
   return(res);
 }
 
-CAMLexport
-double fmul_low(double a, double b) {
-
-  volatile double res;
-
-  asm __volatile__(SET_LOW(%3)
-		   "fmul %%st(1),%%st(0)\n\t"
-		   :"=t"(res)
-		   :"0"(a),"u"(b),"m"(cw)
-		   :"memory");
-
-  asm __volatile__(SET_NEAREST(%0)
-		   :"=m"(cw)
-		   :"m"(cw)
-		   :"memory");
-
-  return(res);
-}
-
-CAMLexport
-double fmul_high(double a, double b) {
-
-  volatile double res;
-
-  asm __volatile__(SET_HIGH(%3)
-		   "fmul %%st(1),%%st(0)\n\t"
-		   :"=t"(res)
-		   :"0"(a),"u"(b),"m"(cw)
-		   :"memory");
-
-  asm __volatile__(SET_NEAREST(%0)
-		   :"=m"(cw)
-		   :"m"(cw)
-		   :"memory");
-
-  return(res);
-}
-
 long double fmul_l(long double a, long double b) {
   long double res;
 
@@ -459,44 +244,6 @@ double fdiv(double a, double b) {
 		   :"=t"(res)
 		   :"0"(a),"u"(b),"m"(cw)
 		   :"memory");
-  return(res);
-}
-
-CAMLexport
-double fdiv_low(double a, double b) {
-
-  volatile double res;
-
-  asm __volatile__(SET_LOW(%3)
-		   "fdiv %%st(1),%%st(0)\n\t"
-		   :"=t"(res)
-		   :"0"(a),"u"(b),"m"(cw)
-		   :"memory");
-
-  asm __volatile__(SET_NEAREST(%0)
-		   :"=m"(cw)
-		   :"m"(cw)
-		   :"memory");
-
-  return(res);
-}
-
-CAMLexport
-double fdiv_high(double a, double b) {
-
-  volatile double res;
-
-  asm __volatile__(SET_HIGH(%3)
-		   "fdiv %%st(1),%%st(0)\n\t"
-		   :"=t"(res)
-		   :"0"(a),"u"(b),"m"(cw)
-		   :"memory");
-
-  asm __volatile__(SET_NEAREST(%0)
-		   :"=m"(cw)
-		   :"m"(cw)
-		   :"memory");
-
   return(res);
 }
 
@@ -1771,60 +1518,20 @@ value ffloat_caml(value a) {
   return(caml_copy_double(ffloat(Long_val(a))));
 }
 
-value ffloat_low_caml(value a) {
-  return(caml_copy_double(ffloat_low(Long_val(a))));
-}
-
-value ffloat_high_caml(value a) {
-  return(caml_copy_double(ffloat_high(Long_val(a))));
-}
-
 value fadd_caml(value a,value b) {
   return caml_copy_double(fadd(Double_val(a), Double_val(b)));
-}
-
-value fadd_low_caml(value a,value b) {
-  return caml_copy_double(fadd_low(Double_val(a), Double_val(b)));
-}
-
-value fadd_high_caml(value a,value b) {
-  return caml_copy_double(fadd_high(Double_val(a), Double_val(b)));
 }
 
 value fsub_caml(value a,value b) {
   return caml_copy_double(fsub(Double_val(a), Double_val(b)));
 }
 
-value fsub_low_caml(value a,value b) {
-  return caml_copy_double(fsub_low(Double_val(a), Double_val(b)));
-}
-
-value fsub_high_caml(value a,value b) {
-  return caml_copy_double(fsub_high(Double_val(a), Double_val(b)));
-}
-
-value fmul_caml(value a,value b) {
-  return caml_copy_double(fmul(Double_val(a), Double_val(b)));
-}
-
-value fmul_low_caml(value a,value b) {
-  return caml_copy_double(fmul_low(Double_val(a), Double_val(b)));
-}
-
-value fmul_high_caml(value a,value b) {
-  return caml_copy_double(fmul_high(Double_val(a), Double_val(b)));
-}
-
 value fdiv_caml(value a,value b) {
   return caml_copy_double(fdiv(Double_val(a), Double_val(b)));
 }
 
-value fdiv_low_caml(value a,value b) {
-  return caml_copy_double(fdiv_low(Double_val(a), Double_val(b)));
-}
-
-value fdiv_high_caml(value a,value b) {
-  return caml_copy_double(fdiv_high(Double_val(a), Double_val(b)));
+value fmul_caml(value a, value b) {
+  return caml_copy_double(fmul(Double_val(a), Double_val(b)));
 }
 
 value fprem_caml(value a,value b) {

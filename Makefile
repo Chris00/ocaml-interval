@@ -29,7 +29,8 @@ doc:
 	echo '.def { background: #f9f9de; }' >> _build/default/_doc/odoc.css
 
 lint:
-	opam lint interval.opam
+	@opam lint interval_base.opam
+	@opam lint interval_intel.opam
 
 .PHONY: all build byte native ocamlfpu install uninstall tests \
   examples doc lint
