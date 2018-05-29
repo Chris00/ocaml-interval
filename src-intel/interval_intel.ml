@@ -19,8 +19,6 @@
     If not, see <http://www.gnu.org/licenses/>.
 *)
 
-
-open Fpu
 module Fpu = Fpu
 module Low = Fpu.Low
 module High = Fpu.High
@@ -44,17 +42,17 @@ module I = struct
     let y = if U.(sy = 0) then raise Division_by_zero else abs_float y in
     if U.(0. <= a) then
       if U.(High.(b -. a) < y) then (
-        let ma = fmod a y and mb = fmod b y in
+        let ma = Fpu.fmod a y and mb = Fpu.fmod b y in
         if U.(ma <= mb) then {low = ma; high = mb} else {low = 0.; high = y})
       else {low = 0.; high = y}
     else if U.(b <= 0.) then
       if U.(High.(b -. a) < y) then (
-        let ma = fmod a y and mb = fmod b y in
+        let ma = Fpu.fmod a y and mb = Fpu.fmod b y in
         if U.(ma <= mb) then {low = ma; high = mb} else {low = -.y; high = 0.})
       else {low = -.y; high = 0.}
     else
-      { low = if U.(a <= -.y) then -.y else fmod a y;
-        high = if U.(y <= b) then y else fmod b y }
+      { low = if U.(a <= -.y) then -.y else Fpu.fmod a y;
+        high = if U.(y <= b) then y else Fpu.fmod b y }
 
   let sqrt {low = a; high = b} =
     if U.(b < 0.) then raise(Domain_error "sqrt")
@@ -103,7 +101,7 @@ module I = struct
                    else one
     else if sb < 0 then
       if floor nf <> nf then raise(Domain_error "**.")
-      else if fmod nf 2. = 0. then
+      else if Fpu.fmod nf 2. = 0. then
         if 0 < sn then {low = Low.pow (-.b) nf; high = pow_h (-.a)}
         else {low = pow_l (-.a); high = High.pow (-.b) nf}
       else if 0 < sn then {low = -.pow_h (-.a); high = -. Low.pow (-.b) nf}
@@ -115,7 +113,7 @@ module I = struct
       if 0 < sn then {low = 0.; high = if sb = 0 then 0. else pow_h b}
       else if sb = 0 then raise(Domain_error "**.")
       else {low = pow_l b; high = infinity}
-    else if fmod nf 2. = 0. then
+    else if Fpu.fmod nf 2. = 0. then
       if 0 < sn then
         if sa = sb (* = 0. *) then {low = 0.; high = 0.}
         else {low = 0.; high = pow_h (fmax (-.a) b)}
