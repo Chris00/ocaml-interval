@@ -25,9 +25,9 @@
    All operations use correct rounding.
 
    It is recommended to open this module.  It will put into scope
-   the interval type and a module [I] (see {!Interval.I})
+   the interval type and a module [I] (see {!Interval_base.I})
    containing interval operations:
-{[open Interval
+{[open Interval_intel
 
 let x = I.(v 0.5 1. + sin(v 3. 3.125))
 ]}
@@ -44,7 +44,7 @@ let x = I.(v 0.5 1. + sin(v 3. 3.125))
    - The float operators [+.], [-.], [/.] take an interval to
      the left and a float to the right, but [*.] does the opposite.
      This is to match the standard presentation of polynomials.
-     Example: [Interval.I.(3. *. x**2 + 2. *. x +. 4.)].
+     Example: [I.(3. *. x**2 + 2. *. x +. 4.)].
      WARNING: you should {i only} use these functions when the float
      argument represent the exact mathematical value (taking into account
      that the compiler will round literals).  For example, [42.] is fine
@@ -71,7 +71,7 @@ let x = I.(v 0.5 1. + sin(v 3. 3.125))
      continuity or raise exceptions. For example, [{low=2.;high=3.} /
      {low=0.;high=2.}] returns [{low=1.;high=Inf}], while
      [{low=2.;high=3.} / {low=0.;high=0.}] or [{low=0.;high=0.} /
-     {low=0.;high=0.}] raises [Interval.Division_by_zero].
+     {low=0.;high=0.}] raises [Interval_base.Division_by_zero].
    - Intervals \[+Inf,+Inf\] or \[-Inf,-Inf\] are never used and never
      returned.
    - When using a float in the following operations, it must never be
@@ -125,7 +125,7 @@ module I : sig
   val mod_f: t -> float -> t
   (** [mod_f a f] returns [a] mod [f] according to interval arithmetic
      and OCaml [mod_float] definition.
-     Raise [Interval.Division_by_zero] if [f=0.0]. *)
+     Raise [Interval_base.Division_by_zero] if [f=0.0]. *)
 
   val sqrt: t -> t
   (** [sqrt x] returns
@@ -263,10 +263,10 @@ end
 
 
 (** The functions below are the ones of the older versions of
-   [Interval].  They are kept for backward compatibility. *)
+   [Interval].  They will soon be removed. *)
 
-type interval = t [@@deprecated "Use Interval.t instead"]
-(** @deprecated Alias of {!Interval.t}. *)
+type interval = t [@@deprecated "Use Interval_base.t instead"]
+(** @deprecated Alias of {!Interval_base.t}. *)
 
 (** Neutral element for addition *)
 val zero_I : t [@@deprecated "Use I.zero instead"]
