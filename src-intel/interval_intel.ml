@@ -21,6 +21,9 @@
 
 
 open Fpu
+module Fpu = Fpu
+module Low = Fpu.Low
+module High = Fpu.High
 
 (* [min] and [max], specialized to floats (faster).
    NaN do dot need to be handled. *)
@@ -333,7 +336,6 @@ module I = struct
       Format(fmt , "Inverval.Arr.t")
   end
 end
-
 
 let zero_I = I.zero
 let one_I = I.one

@@ -260,6 +260,9 @@ module I : sig
   end
 end
 
+module Fpu = Fpu
+module Low = Fpu.Low
+module High = Fpu.High
 
 
 (** The functions below are the ones of the older versions of
