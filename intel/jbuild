@@ -1,7 +1,7 @@
 (jbuild_version 1)
 
 (library
- ((name        interval)
+ ((name        interval_intel)
   (public_name interval_intel)
   (c_names    (interval_stubs))
   (libraries  (interval_base))
