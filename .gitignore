@@ -5,3 +5,4 @@ ocamlfpu
 TESTS/tests
 biblio/
 *.org
+/packages
