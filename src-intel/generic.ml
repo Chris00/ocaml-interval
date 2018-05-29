@@ -28,6 +28,8 @@ open Interval_base
 module Low = Fpu.Low
 module High = Fpu.High
 
+let[@inline] mod2 x = Fpu.fmod x 2.
+
 (* [min] and [max], specialized to floats (faster).
    NaN do dot need to be handled. *)
 let fmin (a: float) (b: float) = if a <= b then a else b
@@ -39,10 +41,10 @@ let sqrt {low = a; high = b} =
 
 let ( ** ) {low = a; high = b} n =
   let nf = I.of_int n in
-  let pow_l x =
+  let[@inline] pow_l x =
     if x = infinity then 0.
     else Low.pow x (if x < 1.0 then nf.high else nf.low) in
-  let pow_h x =
+  let[@inline] pow_h x =
     if x = infinity then infinity
     else High.pow x (if x < 1.0 then nf.low else nf.high) in
   let sn = compare n 0 and sa = compare a 0. and sb = compare b 0. in
@@ -71,14 +73,14 @@ let ( ** ) {low = a; high = b} n =
   else {low = neg_infinity; high = infinity}
 
 let ( **. ) {low = a; high = b} nf =
-  let pow_l x = if x = infinity then 0. else Low.pow x nf in
-  let pow_h x = if x = infinity then infinity else High.pow x nf in
+  let[@inline] pow_l x = if x = infinity then 0. else Low.pow x nf in
+  let[@inline] pow_h x = if x = infinity then infinity else High.pow x nf in
   let sn = compare nf 0. and sa = compare a 0. and sb = compare b 0. in
   if sn = 0 then if a = 0. && b = 0. then raise(Domain_error "**.")
                  else I.one
   else if sb < 0 then
     if floor nf <> nf then raise(Domain_error "**.")
-    else if Fpu.fmod nf 2. = 0. then
+    else if mod2 nf = 0. then
       if 0 < sn then {low = Low.pow (-.b) nf; high = pow_h (-.a)}
       else {low = pow_l (-.a); high = High.pow (-.b) nf}
     else if 0 < sn then {low = -.pow_h (-.a); high = -. Low.pow (-.b) nf}
@@ -90,7 +92,7 @@ let ( **. ) {low = a; high = b} nf =
     if 0 < sn then {low = 0.; high = if sb = 0 then 0. else pow_h b}
     else if sb = 0 then raise(Domain_error "**.")
     else {low = pow_l b; high = infinity}
-  else if Fpu.fmod nf 2. = 0. then
+  else if mod2 nf = 0. then
     if 0 < sn then
       if sa = sb (* = 0. *) then {low = 0.; high = 0.}
       else {low = 0.; high = pow_h (fmax (-.a) b)}
