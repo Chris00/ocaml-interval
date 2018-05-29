@@ -1,0 +1,7 @@
+(jbuild_version 1)
+
+(library
+ ((name        interval_crlibm)
+  (public_name interval_crlibm)
+  (libraries  (interval_base crlibm))
+  (synopsis "An interval library for OCaml (crlibm version)")))

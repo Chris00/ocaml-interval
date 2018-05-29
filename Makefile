@@ -30,6 +30,7 @@ doc:
 lint:
 	@opam lint interval_base.opam
 	@opam lint interval_intel.opam
+	@opam lint interval_crlibm.opam
 
 .PHONY: all build byte native ocamlfpu install uninstall tests \
   examples doc lint
