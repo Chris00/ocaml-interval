@@ -42,7 +42,7 @@ exception Domain_error of string [@@warn_on_literal_pattern]
    of a function.  The string is the name of the function and is meant
    to help when running code in the REPL (aka toploop). *)
 
-                            (** Interval operations.  Locally open this module — using
+(** Interval operations.  Locally open this module — using
    e.g. [I.(...)] — to redefine classical arithmetic operators for
    interval arithmetic. *)
 module I : sig
@@ -278,7 +278,32 @@ module I : sig
      open.
 
      Example: [I.(x + sin(of_int U.(n + 1)))]. *)
-  module U = Interval__U
+  module U : sig
+    (** Restore standard integer and floating point operators. *)
+
+    external ( ~- ) : int -> int = "%negint"
+    external ( ~+ ) : int -> int = "%identity"
+    external ( + ) : int -> int -> int = "%addint"
+    external ( - ) : int -> int -> int = "%subint"
+    external ( * ) : int -> int -> int = "%mulint"
+    external ( / ) : int -> int -> int = "%divint"
+
+    external ( ~-. ) : float -> float = "%negfloat"
+    external ( ~+. ) : float -> float = "%identity"
+    external ( +. ) : float -> float -> float = "%addfloat"
+    external ( -. ) : float -> float -> float = "%subfloat"
+    external ( *. ) : float -> float -> float = "%mulfloat"
+    external ( /. ) : float -> float -> float = "%divfloat"
+    external ( ** ) : float -> float -> float = "caml_power_float" "pow"
+                                                  [@@unboxed] [@@noalloc]
+
+    external ( = ) : 'a -> 'a -> bool = "%equal"
+    external ( <> ) : 'a -> 'a -> bool = "%notequal"
+    external ( < ) : 'a -> 'a -> bool = "%lessthan"
+    external ( > ) : 'a -> 'a -> bool = "%greaterthan"
+    external ( <= ) : 'a -> 'a -> bool = "%lessequal"
+    external ( >= ) : 'a -> 'a -> bool = "%greaterequal"
+  end
 end
 
 (** Functions rounding down their results. *)
@@ -310,7 +335,7 @@ module Low : sig
 
   (** Locally open to restore standard integer and floating point
      operators. *)
-  module U = Interval__U
+  module U = I.U
 end
 
 (** Functions rounding up their results. *)
@@ -342,7 +367,7 @@ module High : sig
 
   (** Locally open to restore standard integer and floating point
      operators. *)
-  module U = Interval__U
+  module U = I.U
 end
 
 
