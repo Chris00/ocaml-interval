@@ -24,7 +24,7 @@ clean:
 
 doc:
 	sed -e 's/%%VERSION%%/$(PKGVERSION)/' --in-place \
-	  _build/default/src/interval.mli
+	  _build/default/src-intel/interval_intel.mli
 	jbuilder build @doc
 	echo '.def { background: #f9f9de; }' >> _build/default/_doc/odoc.css
 
