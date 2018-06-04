@@ -22,9 +22,15 @@
 
 type t = Interval_base.t = { low: float;  high: float }
 
-module Low = Crlibm.Low
+module Low = struct
+  include Interval_base.Low  (* +, -,... *)
+  include Crlibm.Low
+end
 
-module High = Crlibm.High
+module High = struct
+  include Interval_base.High
+  include Crlibm.High
+end
 
 module I = struct
   include Interval_base.I
