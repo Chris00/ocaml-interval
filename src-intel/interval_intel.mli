@@ -136,7 +136,7 @@ module I : sig
       @raise Domain_error if [x.high < 0.0]. *)
 
   val ( ** ): t -> int -> t
-  (** [pow_i a n] returns interval [a] raised to [n]th power according
+  (** [a**n] returns interval [a] raised to [n]th power according
      to interval arithmetic.  If [n=0] then {!one} is returned.
      Computed with exp-log in base2.
 
@@ -222,6 +222,8 @@ module I : sig
      [x.high < 0] the returned interval is \[-π, π\].  This does not
      preserve the best inclusion function but is compatible with the
      [atan2] regular definition. *)
+
+  (** {2 Hyperbolic functions} *)
 
   val cosh: t -> t
   (** [cosh] is the proper extension of cosh to interval arithmetic. *)
