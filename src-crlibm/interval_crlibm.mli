@@ -38,8 +38,39 @@ type t = Interval_base.t = {
 module I : sig
   include module type of Interval_base.I
 
+  (* val mod_f: t -> float -> t *)
+
+  (** {2 Logarithmic and exponential functions} *)
+
+  val log: t -> t
+  (** [log a] returns, properly rounded,
+      - [{low=log a.low; high=log a.high}] if [a.low>0.], and
+      - [{low=neg_infinity; high=log a.high}] if [a.low<0<=a.high].
+
+      Raise [Domain_error] if [a.high] ≤ 0. *)
+
+  val exp: t -> t
+  (** [exp a] returns [{low=exp a.high; high=exp b.high}], properly rounded. *)
+
+
+  (** {2 Hyperbolic functions} *)
+
+  val cosh: t -> t
+  (** [cosh] is the proper extension of cosh to interval arithmetic. *)
+
+  val sinh: t -> t
+  (** sinh is the proper extension of sinh to interval arithmetic. *)
+
+  val tanh: t -> t
+  (** tanh is the proper extension of tanh to interval arithmetic. *)
 end
 
-module Low = Crlibm.Low
+module Low : sig
+  include module type of Interval_base.Low
+  include module type of Crlibm.Low
+end
 
-module High = Crlibm.High
+module High : sig
+  include module type of Interval_base.High
+  include module type of Crlibm.High
+end

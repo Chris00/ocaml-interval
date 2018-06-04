@@ -1,6 +1,5 @@
 (jbuild_version 1)
 
-(executable
- ((name      discover)
-  (modules   (discover))
-  (libraries (configurator stdio base))))
+(executables
+ ((names     (discover dispatch))
+  (libraries (configurator stdio base str))))

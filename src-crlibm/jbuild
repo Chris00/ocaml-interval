@@ -5,3 +5,8 @@
   (public_name interval_crlibm)
   (libraries  (interval_base crlibm))
   (synopsis "An interval library for OCaml (crlibm version)")))
+
+(rule
+ ((targets (generic.ml))
+  (deps    (../config/dispatch.exe ../src-intel/generic.ml))
+  (action  (run ${<}))))

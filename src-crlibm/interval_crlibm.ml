@@ -29,4 +29,12 @@ module High = Crlibm.High
 module I = struct
   include Interval_base.I
 
+
+  let tanh {low = a; high = b} =
+    (* [Crlibm.tanh] does not exists.  The bounds here may not be the
+       tightest. *)
+    { low = Low.(sinh a /. High.cosh a);
+      high = High.(sinh b /. Low.cosh b) }
+
+  include Generic (* Last because redefines [Low] and [High]. *)
 end
