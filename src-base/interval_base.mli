@@ -99,6 +99,7 @@ module I : sig
 
      Example: [Printf.printf ("%s = " ^^ fmt "%.10f" ^^ "\n") name i]. *)
 
+
   (** {2 Boolean functions} *)
 
   val compare_f: t -> float -> int
@@ -270,6 +271,12 @@ module I : sig
   (** [cancelplus x y] returns the tightest interval [z] such that
      [x] ⊆ [z] - [y].  If no such [z] exists, it returns [entire]. *)
 
+  val ( ** ): t -> int -> t
+  (** [a**n] returns interval [a] raised to [n]th power according
+     to interval arithmetic.  If [n=0] then {!one} is returned.
+
+     @raise Domain_error if [n <= 0] and [a=]{!zero}. *)
+
 
   (** {2 Usual arithmetic operators} *)
 
@@ -333,6 +340,15 @@ module Low : sig
   val ( *. ) : float -> float -> float
   val ( /. ) : float -> float -> float
 
+  val sqr : float -> float
+  (** [sqr x] returns a lower bound on [x]². *)
+
+  val cbr : float -> float
+  (** [cbr x] returns a lower bound on [x]³. *)
+
+  val pow_i : float -> int -> float
+  (** [pow_i x n] return a lower bound on [x]ⁿ. *)
+
   (** Locally open to restore standard integer and floating point
      operators. *)
   module U = I.U
@@ -364,6 +380,15 @@ module High : sig
   val ( -. ) : float -> float -> float
   val ( *. ) : float -> float -> float
   val ( /. ) : float -> float -> float
+
+  val sqr : float -> float
+  (** [sqr x] returns an upper bound on [x]². *)
+
+  val cbr : float -> float
+  (** [cbr x] returns an upper bound on [x]³. *)
+
+  val pow_i : float -> int -> float
+  (** [pow_i x n] return an upper bound on [x]ⁿ. *)
 
   (** Locally open to restore standard integer and floating point
      operators. *)

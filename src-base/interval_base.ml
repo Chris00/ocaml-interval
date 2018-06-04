@@ -30,7 +30,10 @@ type t = {low: float; high: float}
 exception Division_by_zero
 exception Domain_error of string
 
-module Low = struct
+let[@inline] is_even x = x land 1 = 0
+
+(* Base [Low] module. *)
+module L = struct
   module U = Interval__U
 
   type t = float
@@ -51,9 +54,18 @@ module Low = struct
     = "ocaml_low_mul_byte" "ocaml_low_mul" [@@unboxed]
   external ( /. ): float -> float -> float
     = "ocaml_low_div_byte" "ocaml_low_div" [@@unboxed]
+
+  let[@inline] sqr x = x *. x
+
+  (* a·xⁿ for a ≥ 0, x ≥ 0 and n ∈ ℕ. *)
+  let rec pos_pow_IN a x n =
+    if n = 0 then a
+    else if is_even n then pos_pow_IN a (x *. x) (n / 2)
+    else pos_pow_IN (a *. x) (x *. x) (n / 2)
 end
 
-module High = struct
+(* Base [High] module. *)
+module H = struct
   module U = Interval__U
 
   type t = float
@@ -74,6 +86,80 @@ module High = struct
     = "ocaml_high_mul_byte" "ocaml_high_mul" [@@unboxed]
   external ( /. ): float -> float -> float
     = "ocaml_high_div_byte" "ocaml_high_div" [@@unboxed]
+
+  let[@inline] sqr x = x *. x
+
+  (* a·xⁿ for a ≥ 0, x ≥ 0 and n ∈ ℕ. *)
+  let rec pos_pow_IN a x n =
+    if n = 0 then a
+    else if is_even n then pos_pow_IN a (x *. x) (n / 2)
+    else pos_pow_IN (a *. x) (x *. x) (n / 2)
+end
+
+let rec low_pow_IN x n = (* x ∈ ℝ, n ≥ 0 *)
+  if is_even n then L.(pos_pow_IN 1. (x *. x) (n / 2))
+  else if x >= 0. then x *. L.(pos_pow_IN 1. (x *. x) (n / 2))
+  else L.(x *. H.(pos_pow_IN 1. (x *. x) (n / 2)))
+and low_pow_i x = function
+  | 0 -> 1.
+  | 1 -> x
+  | 2 -> L.(x *. x)
+  | 3 -> if x >= 0. then L.(x *. x *. x) else L.(x *. H.(x *. x))
+  | 4 -> L.(let x2 = x *. x in x2 *. x2)
+  | n -> if n >= 0 then low_pow_IN x n
+         else (* Since the rounding has the same sign than xⁿ, we can
+                 treat u ↦ 1/u as decreasing. *)
+           L.(1. /. high_pow_IN x (- n))
+and high_pow_IN x n =
+  if is_even n then H.(pos_pow_IN 1. (x *. x) (n / 2))
+  else if x >= 0. then x *. H.(pos_pow_IN 1. (x *. x) (n / 2))
+  else H.(x *. L.(pos_pow_IN 1. (x *. x) (n / 2)))
+and high_pow_i x = function
+  | 0 -> 1.
+  | 1 -> x
+  | 2 -> H.(x *. x)
+  | 3 -> if x >= 0. then H.(x *. x *. x) else H.(x *. L.(x *. x))
+  | 4 -> H.(let x2 = x *. x in x2 *. x2)
+  | n -> if n >= 0 then high_pow_IN x n else H.(1. /. low_pow_IN x (- n))
+
+(* The [Low] and [High] modules below depend on both the previous
+   [Low0] and [High0]. *)
+module Low = struct
+  include L
+
+  let[@inline] cbr x =
+    if x >= 0. then x *. x *. x else x *. H.(x *. x)
+
+  (* xⁿ for x ≤ 0 and n ≥ 0.  Useful for the interval extension. *)
+  let neg_pow_IN x = function
+    | 0 -> 1.
+    | 1 -> x
+    | 2 -> x *. x
+    | 3 -> x *. H.(x *. x)
+    | 4 -> let x2 = x *. x in x2 *. x2
+    | n -> if is_even n then pos_pow_IN 1. (x *. x) (n / 2)
+           else x *. H.pos_pow_IN 1. (x *. x) (n / 2)
+
+  let pow_i = low_pow_i
+end
+
+module High = struct
+  include H
+
+  let[@inline] cbr x =
+    if x >= 0. then x *. x *. x else x *. L.(x *. x)
+
+  (* xⁿ for x ≤ 0 and n ≥ 0.  Useful for the interval extension. *)
+  let neg_pow_IN x = function
+    | 0 -> 1.
+    | 1 -> x
+    | 2 -> x *. x
+    | 3 -> x *. L.(x *. x)
+    | 4 -> let x2 = x *. x in x2 *. x2
+    | n -> if is_even n then pos_pow_IN 1. (x *. x) (n / 2)
+           else x *. L.pos_pow_IN 1. (x *. x) (n / 2)
+
+  let pow_i = high_pow_i
 end
 
 
@@ -313,6 +399,36 @@ module I = struct
       if low <= high (* thus not NaN *) then {low; high}
       else entire
     else entire
+
+  let sqr {low = a; high = b} =
+    if a >= 0. then {low = Low.(a *. a); high = High.(b *. b)}
+    else (* a < 0; a is not NaN *)
+      if b >= 0. then {low = 0.; high = fmax High.(a *. a) High.(b *. b)}
+      else {low = Low.(b *. b); high = High.(a *. a)}
+
+  let cbr {low = a; high = b} =
+    {low = Low.cbr a; high = High.cbr b}
+
+  let pow_IN x = function
+    | 0 -> one
+    | 1 -> x
+    | 2 -> sqr x
+    | 3 -> cbr x
+    | n  -> (* n ≥ 0 assumed *)
+       if is_even n then
+         if x.low >= 0. then
+           {low = Low.pos_pow_IN 1. x.low n;
+            high = High.pos_pow_IN 1. x.high n}
+         else if x.high > 0. then (* x.low < 0 < x.high *)
+           {low = 0.;  high = fmax High.(neg_pow_IN x.low n)
+                                High.(pos_pow_IN 1. x.high n)}
+         else (* x.low ≤ x.high ≤ 0 *)
+           {low = High.neg_pow_IN x.low n;  high = Low.neg_pow_IN x.high n}
+       else (* x ↦ xⁿ is increasing. *)
+         {low = Low.pow_i x.low n;  high = High.pow_i x.high n}
+
+  let ( ** ) x n =
+    if n >= 0 then pow_IN x n else inv(pow_IN x U.(- n))
 
   (* Infix aliases *)
   let ( = ) = equal
