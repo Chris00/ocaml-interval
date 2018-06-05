@@ -17,5 +17,6 @@ build-doc: [[ "jbuilder" "build" "@doc"]]
 depends: [
   "interval_base"
   "jbuilder" {build}
+  "crlibm"
 ]
 available: [ ocaml-version >= "3.12" ]
