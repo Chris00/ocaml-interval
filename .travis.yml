@@ -6,6 +6,7 @@ os:
 env:
   global:
     - PACKAGE=interval
+    - PINS="interval:. interval_base:. interval_intel:. interval_crlibm:."
   matrix:
     - OCAML_VERSION=4.06
     - OCAML_VERSION=4.05
