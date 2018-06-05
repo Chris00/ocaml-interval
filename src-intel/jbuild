@@ -6,3 +6,8 @@
   (c_names    (interval_stubs))
   (libraries  (interval_base))
   (synopsis  "Interval arithmetic library")))
+
+(rule
+ ((targets (interval_intel.h))
+  (deps    (../src-base/interval_intel.h))
+  (action  (copy ${<} ${@}))))
