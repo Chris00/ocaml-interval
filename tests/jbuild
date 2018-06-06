@@ -1,9 +1,17 @@
 (jbuild_version 1)
 
-(executables
- ((names     (tests))
-  (libraries (interval unix))))
+(executable
+ ((name    tests)
+  (modules (tests))
+  (libraries (interval))))
+
+(executable
+ ((name      test_base)
+  (modules   (test_base))
+  (libraries (interval_base))))
 
 (alias
  ((name runtest)
-  (deps (tests.exe))))
+  (package interval_base)
+  (deps (test_base.exe))
+  (action (run ${<}))))
