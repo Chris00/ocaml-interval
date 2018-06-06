@@ -48,6 +48,12 @@ bistro: lint
 	cd packages && git add $(PACKAGES)
 #	CONDUIT_TLS=native topkg opam submit $(addprefix -n, $(PACKAGES))
 
+pin:
+	for p in $(PACKAGES); do opam pin add -y $$p .; done
+
+upgrade:
+	opam upgrade -y $(PACKAGES)
+
 lint:
 	@opam lint interval.opam
 	@opam lint interval_base.opam
@@ -55,4 +61,4 @@ lint:
 	@opam lint interval_crlibm.opam
 
 .PHONY: all build byte native ocamlfpu install uninstall tests \
-  examples doc bistro lint
+  examples doc bistro pin upgrade lint
