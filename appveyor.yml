@@ -7,6 +7,7 @@ image:
 environment:
   global:
     PACKAGE: interval
+    PINS: "interval:. interval_base:. interval_intel:. interval_crlibm:."
     CYG_ROOT: "C:\\cygwin"
     CYG_BASH: "%CYG_ROOT%\\bin\\bash -lc"
     FORK_USER: ocaml
