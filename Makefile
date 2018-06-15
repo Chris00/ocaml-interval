@@ -55,10 +55,7 @@ upgrade:
 	opam upgrade -y $(PACKAGES)
 
 lint:
-	@opam lint interval.opam
-	@opam lint interval_base.opam
-	@opam lint interval_intel.opam
-	@opam lint interval_crlibm.opam
+	@for p in $(PACKAGES); do opam lint $$p.opam; done
 
 .PHONY: all build byte native ocamlfpu install uninstall tests \
   examples doc bistro pin upgrade lint
