@@ -1,7 +1,7 @@
 (jbuild_version 1)
 
 (library
- ((name        interval_base)
+ ((name        interval)
   (public_name interval_base)
   (c_names    (interval_base_stubs))
   (c_flags    (:standard (:include c_flags.sexp)))

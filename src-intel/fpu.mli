@@ -152,7 +152,7 @@ Intel 980X Linux 64 bits
 
 (** Functions rounding down their results. *)
 module Low : sig
-  include module type of Interval_base.Low
+  include module type of Interval.Low
 
   val ( ** ) : float -> float -> float
   (** [x**y] computes [x] at power [y], rounded down, expanded to its
@@ -206,7 +206,7 @@ end
 
 (** Functions rounding up their results. *)
 module High : sig
-  include module type of Interval_base.High
+  include module type of Interval.High
 
   val ( ** ) : float -> float -> float
   (** [x**y] computes [x] at power [y], rounded up, expanded to its

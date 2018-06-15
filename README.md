@@ -10,12 +10,12 @@ example in the REPL:
 ```ocaml
 # #require "interval_intel";;
 ~/.opam/4.06.1/lib/interval_base: added to search path
-~/.opam/4.06.1/lib/interval_base/interval_base.cma: loaded
+~/.opam/4.06.1/lib/interval_base/interval.cma: loaded
 ~/.opam/4.06.1/lib/interval_intel: added to search path
 ~/.opam/4.06.1/lib/interval_intel/interval_intel.cma: loaded
 # open Interval_intel;;
 # let v = I.v 1. 1.;;
-val v : Interval_base.t = {Interval_base.low = 1.; high = 1.}
+val v : Interval.t = {Interval.low = 1.; high = 1.}
 # I.sin v;;
 - : Interval_intel.t =
 {low = 0.841470984807896505; high = 0.841470984807896616}
@@ -23,8 +23,9 @@ val v : Interval_base.t = {Interval_base.low = 1.; high = 1.}
 
 Several [OPAM][] packages are provided by this repository:
 
-- `interval_base`: basic interval library that uses Intel assembly if
-  possible or C99 instructions.
+- `interval_base`: basic interval library that defines the datatype
+  `Interval.t` and uses Intel assembly if possible or C99 instructions
+  to perform arithmetic operations.
 
 - `interval_crlibm`: relies on [crlibm][] to implement the interval
   operations.  CRlibm provides *proved* correctly-rounded operations,

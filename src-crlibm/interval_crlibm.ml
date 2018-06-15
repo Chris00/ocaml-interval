@@ -20,20 +20,21 @@
 *)
 
 
-type t = Interval_base.t = { low: float;  high: float }
+type t = Interval.t = { low: float;  high: float }
 
 module Low = struct
-  include Interval_base.Low  (* +, -,... *)
+  include Interval.Low  (* +, -,... *)
   include Crlibm.Low
 end
 
 module High = struct
-  include Interval_base.High
+  include Interval.High
   include Crlibm.High
 end
 
 module I = struct
-  include Interval_base.I
+  include Interval.I
+
 
 
   let tanh {low = a; high = b} =

@@ -108,7 +108,7 @@ let x = I.(v 0.5 1. + sin(v 3. 3.125))
    write [let a = I.(inv(v 3. 3.))] because rounding will then be
    properly handled and the resulting interval will indeed contain the
    exact value of 1/3. *)
-type t = Interval_base.t = {
+type t = Interval.t = {
     low: float; (** low bound, possibly = -∞ *)
     high: float (** high bound, possibly = +∞ *)
   }
@@ -120,7 +120,7 @@ exception Domain_error of string
    e.g. [I.(...)] — to redefine classical arithmetic operators for
    interval arithmetic. *)
 module I : sig
-  include module type of Interval_base.I
+  include module type of Interval.I
 
   val mod_f: t -> float -> t
   (** [mod_f a f] returns [a] mod [f] according to interval arithmetic

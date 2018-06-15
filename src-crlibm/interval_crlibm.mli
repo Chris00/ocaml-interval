@@ -27,7 +27,7 @@
    flawed).  Some additional functions are also available, thanks to
    CRlibm.  *)
 
-type t = Interval_base.t = {
+type t = Interval.t = {
     low: float; (** low bound, possibly = -∞ *)
     high: float (** high bound, possibly = +∞ *)
   }
@@ -36,7 +36,7 @@ type t = Interval_base.t = {
    e.g. [I.(...)] — to redefine classical arithmetic operators for
    interval arithmetic. *)
 module I : sig
-  include module type of Interval_base.I
+  include module type of Interval.I
 
   (* val mod_f: t -> float -> t *)
 
@@ -66,11 +66,11 @@ module I : sig
 end
 
 module Low : sig
-  include module type of Interval_base.Low
+  include module type of Interval.Low
   include module type of Crlibm.Low
 end
 
 module High : sig
-  include module type of Interval_base.High
+  include module type of Interval.High
   include module type of Crlibm.High
 end

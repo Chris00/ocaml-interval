@@ -53,7 +53,7 @@ external flog_pow_high: float -> float -> float
 
 (* Operations rounded down. *)
 module Low = struct
-  include Interval_base.Low
+  include Interval.Low
 
   external pow: float -> float -> float
     = "flog_pow_low_caml" "flog_pow_low" [@@unboxed]
@@ -88,7 +88,7 @@ end
 
 (* Operations rounded up. *)
 module High = struct
-  include Interval_base.High
+  include Interval.High
 
   external pow: float -> float -> float
     = "flog_pow_high_caml" "flog_pow_high" [@@unboxed]

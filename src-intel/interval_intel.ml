@@ -23,13 +23,13 @@ module Fpu = Fpu
 module Low = Fpu.Low
 module High = Fpu.High
 
-type t = Interval_base.t = {low: float; high: float}
+type t = Interval.t = {low: float; high: float}
 
-exception Division_by_zero = Interval_base.Division_by_zero
-exception Domain_error = Interval_base.Domain_error
+exception Division_by_zero = Interval.Division_by_zero
+exception Domain_error = Interval.Domain_error
 
 module I = struct
-  include Interval_base.I       (* Redefines =, <=,... *)
+  include Interval.I       (* Redefines =, <=,... *)
   include Generic
 
   let sqrt {low = a; high = b} =

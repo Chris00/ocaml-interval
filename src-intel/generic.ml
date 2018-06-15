@@ -24,7 +24,7 @@
    Interval_crlibm library.  (Trigonometric functions depend on
    argument reduction which is performed differently.) *)
 
-open Interval_base
+open Interval
 module Low = Fpu.Low
 module High = Fpu.High
 

@@ -1,4 +1,4 @@
-open Interval_base
+open Interval
 
 let () =
   assert(Low.pow_i 2. 3 = 8.);
