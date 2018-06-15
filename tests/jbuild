@@ -3,7 +3,8 @@
 (executable
  ((name    tests)
   (modules (tests))
-  (libraries (interval))))
+  (libraries (interval_intel unix))))
+
 
 (executable
  ((name      test_base)

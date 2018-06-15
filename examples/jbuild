@@ -2,7 +2,7 @@
 
 (executables
  ((names        (example precision))
-  (libraries    (interval))))
+  (libraries    (interval_intel))))
 
 (alias
  ((name examples)

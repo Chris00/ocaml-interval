@@ -22,7 +22,7 @@
 (* VERY simple example of Branch and Bound using interval computation
 for function optimization *)
 
-open Interval
+open Interval_intel
 
 let cut_X v =
   let (k,_,_) = Array.fold_left (fun (k,maxv,i) x->

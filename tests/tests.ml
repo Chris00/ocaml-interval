@@ -20,8 +20,8 @@
 *)
 
 open Printf
+open Interval_intel
 open Fpu
-open Interval
 
 type test_mode = Exact | In | Mod2pi
 
