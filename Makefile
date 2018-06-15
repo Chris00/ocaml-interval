@@ -58,4 +58,4 @@ lint:
 	@for p in $(PACKAGES); do opam lint $$p.opam; done
 
 .PHONY: all build byte native ocamlfpu install uninstall tests \
-  examples doc bistro pin upgrade lint
+  examples clean doc bistro pin upgrade lint
