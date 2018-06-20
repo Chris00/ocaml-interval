@@ -46,5 +46,6 @@ module I = struct
     { low = Low.(sinh a /. High.cosh a);
       high = High.(sinh b /. Low.cosh b) }
 
-  include Generic (* Last because redefines [Low] and [High]. *)
+  include Generic (* Last because redefines [Low] and [High] as the
+                     CRlibm ones (generated during build). *)
 end

@@ -53,6 +53,24 @@ module I : sig
   (** [exp a] returns [{low=exp a.high; high=exp b.high}], properly rounded. *)
 
 
+  val tan: t -> t
+  (** [tan a]  returns the proper extension of tan to interval arithmetic.
+      Returns \[-∞,∞\] if one of the bounds is greater or lower than ±2⁵³. *)
+
+  val acos: t -> t
+  (** [acos a] returns [{low=(if a.high<1. then acos a.high else 0);
+     high=(if a.low>-1. then acos a.low else pi)}].
+     All values are in \[0,π\].
+
+     @raise Domain_error if [a.low > 1.] or [a.high < -1.] *)
+
+  val asin: t -> t
+  (** [asin a] returns [{low=(if a.low > -1. then asin a.low else -pi/2);
+     high=(if a.low < 1. then asin a.high else pi/2)}].
+     All values are in \[-π/2,π/2\].
+
+     @raise Domain_error if [a.low > 1.] or [a.high < -1.] *)
+
   val atan: t -> t
   (** [atan a] returns [{low=atan a.low; high=atan a.high}] properly
      rounded. *)

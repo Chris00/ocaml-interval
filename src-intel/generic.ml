@@ -44,6 +44,29 @@ let exp {low = a; high = b} =
   { low = if a = neg_infinity then 0. else Low.exp a;
     high = if b = infinity then infinity else High.exp b}
 
+let max_63 = ldexp 1. 63
+
+let tan {low = a; high = b} =
+  if -.max_63 <= a && b <= max_63 && Interval.High.(b -. a < pi) then (
+    let ta = Low.tan a in
+    let tb = High.tan b in
+    if ta <= tb then {low = ta; high = tb}
+    else {low = neg_infinity; high = infinity})
+  else {low = neg_infinity; high = infinity}
+
+let acos {low = a; high = b} =
+  if a <= 1. && -1. <= b then
+    {low = if b < 1. then Low.acos b else 0.;
+     high = if -1. < a then High.acos a else Interval.High.pi}
+  else raise(Domain_error "acos")
+
+let asin {low = a; high = b} =
+  if a <= 1. && -1. <= b then
+    { low = if -1. < a then Low.asin a else -. Interval.High.half_pi;
+      high = if b < 1. then High.asin b else Interval.High.half_pi }
+  else raise(Domain_error "asin")
+
+
 let cosh {low = a; high = b} =
   if b < 0. then {low = Low.cosh b; high = High.cosh a}
   else if a < 0. then {low = 1.; high = High.cosh (fmax (-.a) b)}

@@ -167,33 +167,8 @@ module I = struct
       { low = if U.(a <= -.y) then -.y else Fpu.fmod a y;
         high = if U.(y <= b) then y else Fpu.fmod b y }
 
-  let max_63 = ldexp 1. 63
-
   external cos: t -> t = "fcos_I_caml"
   external sin: t -> t = "fsin_I_caml"
-
-  let tan {low = a; high = b} =
-    let open U in
-    if -.max_63 <= a && b <= max_63 && High.(b -. a) < pi.high then (
-      let ta = Low.tan a in
-      let tb = High.tan b in
-      if ta <= tb then {low = ta; high = tb}
-      else {low = neg_infinity; high = infinity})
-    else {low = neg_infinity; high = infinity}
-
-  let acos {low = a; high = b} =
-    let open U in
-    if a <= 1. && -1. <= b then
-      {low = if b < 1. then Low.acos b else 0.;
-       high = if -1. < a then High.acos a else pi.high}
-    else raise(Domain_error "acos")
-
-  let asin {low = a; high = b} =
-    let open U in
-    if a <= 1. && -1. <= b then
-      { low = if -1. < a then Low.asin a else -.half_pi.high;
-        high = if b < 1. then High.asin b else half_pi.high }
-    else raise(Domain_error "asin")
 
   let atan {low = a; high = b} =
     { low = Low.atan2 a 1.; high = High.atan2 b 1.}
