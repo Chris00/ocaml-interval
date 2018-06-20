@@ -53,6 +53,11 @@ module I : sig
   (** [exp a] returns [{low=exp a.high; high=exp b.high}], properly rounded. *)
 
 
+  val atan: t -> t
+  (** [atan a] returns [{low=atan a.low; high=atan a.high}] properly
+     rounded. *)
+
+
   (** {2 Hyperbolic functions} *)
 
   val cosh: t -> t

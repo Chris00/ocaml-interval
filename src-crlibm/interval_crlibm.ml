@@ -37,6 +37,9 @@ module I = struct
 
 
 
+  let atan {low = a; high = b} =
+    { low = Low.atan a; high = High.atan b}
+
   let tanh {low = a; high = b} =
     (* [Crlibm.tanh] does not exists.  The bounds here may not be the
        tightest. *)
