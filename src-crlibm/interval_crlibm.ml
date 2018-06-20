@@ -33,7 +33,7 @@ module High = struct
 end
 
 module I = struct
-  include Interval.I
+  include Interval.I  (* Redefines inequalities for intervals *)
 
 
 
@@ -43,8 +43,11 @@ module I = struct
   let tanh {low = a; high = b} =
     (* [Crlibm.tanh] does not exists.  The bounds here may not be the
        tightest. *)
-    { low = Low.(sinh a /. High.cosh a);
-      high = High.(sinh b /. Low.cosh b) }
+    let low = if U.(a >= 0.) then Low.(sinh a /. High.cosh a)
+              else Low.(sinh a /. cosh a) in
+    let high = if U.(b >= 0.) then High.(sinh b /. Low.cosh b)
+               else High.(sinh b /. cosh b)in
+    { low; high }
 
   include Generic (* Last because redefines [Low] and [High] as the
                      CRlibm ones (generated during build). *)
