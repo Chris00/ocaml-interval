@@ -65,7 +65,8 @@ module I : sig
   (** [e] (Euler's constant) with bounds properly rounded. *)
 
   val entire : t
-  (** The entire set of real numbers. *)
+  (** The entire set of real numbers.
+     @since 1.5 *)
 
   val v : float -> float -> t
   (** [v a b] returns [{low=a; high=b}].  BEWARE that, unless you take
@@ -110,49 +111,61 @@ module I : sig
 
   val is_bounded : t -> bool
   (** [is_bounded x] says whether the interval is bounded, i.e.,
-      -∞ < [x.low] and [x.high] < ∞. *)
+      -∞ < [x.low] and [x.high] < ∞.
+      @since 1.5 *)
 
   val is_entire : t -> bool
-  (** [is_entire x] says whether [x] is the {!entire} interval. *)
+  (** [is_entire x] says whether [x] is the {!entire} interval.
+      @since 1.5 *)
 
   val equal : t -> t -> bool
-  (** [equal a b] says whether the two intervals are the same. *)
+  (** [equal a b] says whether the two intervals are the same.
+      @since 1.5 *)
 
   val ( = ) : t -> t -> bool
-  (** Synonym for {!equal}. *)
+  (** Synonym for {!equal}.
+      @since 1.5 *)
 
   val subset : t -> t -> bool
-  (** [subset x y] returns true iff [x] ⊆ [y]. *)
+  (** [subset x y] returns true iff [x] ⊆ [y].
+      @since 1.5 *)
 
   val ( <= ) : t -> t -> bool
   (** [x <= y] says whether [x] is weakly less than [y] i.e.,
-      ∀ξ ∈ x, ∃η ∈ y, ξ ≤ η and ∀η ∈ y, ∃ξ ∈ x, ξ ≤ η. *)
+      ∀ξ ∈ x, ∃η ∈ y, ξ ≤ η and ∀η ∈ y, ∃ξ ∈ x, ξ ≤ η.
+      @since 1.5 *)
 
   val ( >= ) : t -> t -> bool
   (** [x >= y] says whether [x] is weakly greater than [y] i.e.,
-      ∀ξ ∈ x, ∃η ∈ y, ξ ≥ η and ∀η ∈ y, ∃ξ ∈ x, ξ ≥ η. *)
+      ∀ξ ∈ x, ∃η ∈ y, ξ ≥ η and ∀η ∈ y, ∃ξ ∈ x, ξ ≥ η.
+      @since 1.5 *)
 
   val precedes : t -> t -> bool
-  (** [precedes x y] returns true iff [x] is to the left but may touch
-     [y]. *)
+  (** [precedes x y] returns true iff [x] is to the left but may touch [y].
+      @since 1.5 *)
 
   val interior : t -> t -> bool
   (** [interior x y] returns true if [x] is interior to [y] in the
-     topological sense.  For example [interior entire entire] is [true]. *)
+     topological sense.  For example [interior entire entire] is [true].
+     @since 1.5 *)
 
   val ( < ) : t -> t -> bool
   (** [x < y] says whether [x] is strictly weakly less than [y] i.e.,
-      ∀ξ ∈ x, ∃η ∈ y, ξ < η and ∀η ∈ y, ∃ξ ∈ x, ξ < η. *)
+      ∀ξ ∈ x, ∃η ∈ y, ξ < η and ∀η ∈ y, ∃ξ ∈ x, ξ < η.
+      @since 1.5 *)
 
   val ( > ) : t -> t -> bool
-  (** [x > y] iff [y < x]. *)
+  (** [x > y] iff [y < x].
+      @since 1.5 *)
 
   val strict_precedes : t -> t -> bool
   (** [strict_precedes x y] returns true iff [x] is to the left and
-     does not touch [y]. *)
+     does not touch [y].
+     @since 1.5 *)
 
   val disjoint : t -> t -> bool
-  (** [disjoint x y] returns true iff [x] ∩ [y] = ∅. *)
+  (** [disjoint x y] returns true iff [x] ∩ [y] = ∅.
+      @since 1.5 *)
 
 
   (** {2 Operations} *)
@@ -189,12 +202,14 @@ module I : sig
 
   val inter_exn : t -> t -> t
   (** [inter_exn x y] returns the intersection of [x] and [y].
-      @raise Domain_error if the intersection is empty. *)
+      @raise Domain_error if the intersection is empty.
+      @since 1.5 *)
 
   val inter : t -> t -> t option
   (** [inter_exn x y] returns [Some z] where [z] is the intersection
      of [x] and [y] if it is not empty and [None] if the intersection
-     is empty. *)
+     is empty.
+     @since 1.5 *)
 
   val max: t -> t -> t
   (** [max a b] returns the "maximum" of the intervals [a] and [b], that is
@@ -274,17 +289,19 @@ module I : sig
 
   val cancelminus : t -> t -> t
   (** [cancelminus x y] returns the tightest interval [z] such that
-     [x] ⊆ [z] + [y].  If no such [z] exists, it returns [entire]. *)
+     [x] ⊆ [z] + [y].  If no such [z] exists, it returns [entire].
+     @since 1.5 *)
 
   val cancelplus : t -> t -> t
   (** [cancelplus x y] returns the tightest interval [z] such that
-     [x] ⊆ [z] - [y].  If no such [z] exists, it returns [entire]. *)
+     [x] ⊆ [z] - [y].  If no such [z] exists, it returns [entire].
+     @since 1.5 *)
 
   val ( ** ): t -> int -> t
   (** [a**n] returns interval [a] raised to [n]th power according
      to interval arithmetic.  If [n=0] then {!one} is returned.
 
-     @raise Domain_error if [n <= 0] and [a=]{!zero}. *)
+     @raise Domain_error if [n < 0] and [a=]{!zero}. *)
 
 
   (** {2 Usual arithmetic operators} *)
