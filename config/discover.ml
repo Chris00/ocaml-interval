@@ -1,5 +1,4 @@
-open Stdio
-module C = Configurator
+module C = Configurator.V1
 
 let start_with s prefix =
   let len = String.length prefix in
@@ -19,8 +18,6 @@ let cflags_intel c =
 let () =
   let c = C.create "interval" in
   let cflags = cflags_intel c in
-  let write_sexp file sexp =
-    Out_channel.write_all file ~data:(Base.Sexp.to_string sexp) in
-  write_sexp "c_flags.sexp" Base.(sexp_of_list sexp_of_string cflags);
+  C.Flags.write_sexp "c_flags.sexp" cflags;
 
 

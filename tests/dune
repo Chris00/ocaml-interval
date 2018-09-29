@@ -1,0 +1,27 @@
+(executable
+ (name    tests)
+ (modules tests)
+ (libraries interval_intel unix))
+
+(executable
+ (name    accuracy)
+ (modules accuracy)
+ (libraries interval_intel))
+
+(alias
+ (name runtest)
+ (package interval)
+ (deps tests.exe accuracy.exe)
+ ; Do not run "tests.exe" (too long), use "make tests" for that.
+ (action (run %{exe:accuracy.exe})))
+
+(executable
+ (name      test_base)
+ (modules   test_base)
+ (libraries interval_base))
+
+(alias
+ (name runtest)
+ (package interval_base)
+ (deps test_base.exe)
+ (action (run %{deps})))

@@ -1,9 +1,0 @@
-(jbuild_version 1)
-
-(executables
- ((names        (example precision))
-  (libraries    (interval_intel))))
-
-(alias
- ((name examples)
-  (deps (example.exe precision.exe))))

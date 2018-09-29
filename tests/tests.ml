@@ -169,14 +169,14 @@ let check_I_i mode values bounds valuesi (name, f_list, f_I_i) =
       List.iter (fun f -> add_result infos [x; ny] (f x ny)) f_list) values;
     print_test infos) valuesi) bounds
 
-let rnd_values = Array.init 1000 (fun i -> 1000.-.Random.float 2000.)
+let rnd_values = Array.init 1000 (fun _ -> 1000.-.Random.float 2000.)
 
 let speed_cmp1 loops (name, f) =
   let l = Array.length rnd_values in
   Printf.printf "%10s speed (%d calls): " name loops; flush stdout;
   let top = (Unix.times ()).Unix.tms_utime in
-  for n = 1 to loops / l do
-    Array.iteri (fun i x -> ignore (f x)) rnd_values
+  for _ = 1 to loops / l do
+    Array.iter (fun x -> ignore (f x)) rnd_values
   done;
   let dt = (Unix.times ()).Unix.tms_utime -. top in
   Printf.printf "%f\n" dt; flush stdout
@@ -185,19 +185,19 @@ let speed_cmp2 loops (name, f) =
   let l = Array.length rnd_values in
   Printf.printf "%10s speed (%d calls): " name loops; flush stdout;
   let top = (Unix.times ()).Unix.tms_utime in
-  for n = 1 to loops / l do
-    Array.iteri (fun i x -> ignore (f x x)) rnd_values;
+  for _ = 1 to loops / l do
+    Array.iter (fun x -> ignore (f x x)) rnd_values;
   done;
   let dt = (Unix.times ()).Unix.tms_utime -. top in
   Printf.printf "%f\n" dt; flush stdout
 
 let rnd_values_I =
-  Array.init 1000 (fun i->
+  Array.init 1000 (fun _ ->
       let x1 = 1000. -. Random.float 2000. and x2 = Random.float 10. in
       I.v x1 (x1 +. x2))
 
 let rnd_values_pos_I =
-  Array.init 1000 (fun i->
+  Array.init 1000 (fun _ ->
       let x1 = Random.float 2000. and x2 = Random.float 10. in
       I.v x1 (x1 +. x2))
 
@@ -206,8 +206,8 @@ let speed_cmp1_I ?(pos=false) loops (name, f) =
   Printf.printf "%10s speed (%d calls): " name loops; flush stdout;
   let rnd_I = if pos then rnd_values_pos_I else rnd_values_I in
   let top = (Unix.times ()).Unix.tms_utime in
-  for n = 1 to loops / l do
-    Array.iteri (fun i x -> ignore (f x)) rnd_I
+  for _ = 1 to loops / l do
+    Array.iter (fun x -> ignore (f x)) rnd_I
   done;
   let dt = (Unix.times ()).Unix.tms_utime -. top in
   Printf.printf "%f\n" dt; flush stdout
@@ -216,8 +216,8 @@ let speed_cmp2_I loops (name, f) =
   let l = Array.length rnd_values_I in
   Printf.printf "%10s speed (%d calls): " name loops; flush stdout;
   let top = (Unix.times ()).Unix.tms_utime in
-  for n = 1 to loops / l do
-    Array.iteri (fun i x -> ignore (f x x)) rnd_values_I
+  for _ = 1 to loops / l do
+    Array.iter (fun x -> ignore (f x x)) rnd_values_I
   done;
   let dt = (Unix.times ()).Unix.tms_utime -. top in
   Printf.printf "%f\n" dt; flush stdout

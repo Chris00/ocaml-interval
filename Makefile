@@ -2,14 +2,14 @@ PACKAGES = $(basename $(wildcard *.opam))
 PKGVERSION = $(shell git describe --always)
 
 all build byte native:
-	jbuilder build @install @examples --dev
-	jbuilder build @runtest --force
+	dune build @install @examples
+	dune build @runtest --force
 
 ocamlfpu: all
 	cd _build/default/src/ && ocamlmktop -I . -o ocamlfpu interval.cma
 
 install uninstall:
-	jbuilder $@
+	dune $@
 
 tests: all
 	@ echo "Run tests..."
@@ -20,12 +20,12 @@ tests: all
 	else echo "All tests passed successfully"; fi
 
 clean:
-	jbuilder clean
+	dune clean
 
 doc:
 	sed -e 's/%%VERSION%%/$(PKGVERSION)/' --in-place \
 	  _build/default/src-intel/interval_intel.mli
-	jbuilder build @doc
+	dune build @doc
 	echo '.def { background: #f9f9de; }' >> _build/default/_doc/odoc.css
 
 # until we have https://github.com/ocaml/opam-publish/issues/38
