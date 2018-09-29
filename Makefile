@@ -1,7 +1,7 @@
 PACKAGES = $(basename $(wildcard *.opam))
 PKGVERSION = $(shell git describe --always)
 
-all build byte native:
+all build:
 	dune build @install @examples
 	dune build @runtest --force
 
@@ -49,7 +49,13 @@ bistro: lint
 #	CONDUIT_TLS=native topkg opam submit $(addprefix -n, $(PACKAGES))
 
 pin:
-	for p in $(PACKAGES); do opam pin add -y $$p .; done
+#	Installation in the right order
+	opam pin -k path -y add interval_base .
+	opam pin -k path -y add interval_intel .
+	opam pin -k path -y add interval_crlibm .
+
+unpin:
+	opam pin remove -y $(PACKAGES)
 
 upgrade:
 	opam upgrade -y $(PACKAGES)
@@ -57,5 +63,5 @@ upgrade:
 lint:
 	@for p in $(PACKAGES); do opam lint $$p.opam; done
 
-.PHONY: all build byte native ocamlfpu install uninstall tests \
-  examples clean doc bistro pin upgrade lint
+.PHONY: all build ocamlfpu install uninstall tests \
+  examples clean doc bistro pin unpin upgrade lint
