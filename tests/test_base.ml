@@ -21,3 +21,8 @@ let () =
   assert(I.(v 2. 2. ** (-2) = v 0.25 0.25));
   assert(I.(v 0. 0. ** 0 = one));
   assert(I.(v neg_infinity infinity ** 0 = one))
+
+let () =
+  assert(try I.(ignore(inter_exn (v 0. 1.) (v 2. 3.))); false
+         with Domain_error _ -> true);
+  assert(I.(inter (v 0. 1.) (v 2. 3.)) = None)

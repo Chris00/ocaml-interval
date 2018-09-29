@@ -187,6 +187,15 @@ module I : sig
   (** [hull a b] returns the smallest interval containing [a] and [b], that is
       [{low=min a.low b.low; high=max a.high b.high}]. *)
 
+  val inter_exn : t -> t -> t
+  (** [inter_exn x y] returns the intersection of [x] and [y].
+      @raise Domain_error if the intersection is empty. *)
+
+  val inter : t -> t -> t option
+  (** [inter_exn x y] returns [Some z] where [z] is the intersection
+     of [x] and [y] if it is not empty and [None] if the intersection
+     is empty. *)
+
   val max: t -> t -> t
   (** [max a b] returns the "maximum" of the intervals [a] and [b], that is
       [{low=max a.low b.low; high=max a.high b.high}]. *)

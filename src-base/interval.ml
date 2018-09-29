@@ -266,6 +266,17 @@ module I = struct
 
   let hull x y = {low = fmin x.low y.low; high = fmax x.high y.high}
 
+  let inter_exn {low = a; high = b} {low = c; high = d} =
+    let low = if a >= c then a else c in (* no NaN *)
+    let high = if b <= d then b else d in
+    if low <= high then {low; high}
+    else raise(Domain_error "I.inter_exn")
+
+  let inter {low = a; high = b} {low = c; high = d} =
+    let low = if a >= c then a else c in (* no NaN *)
+    let high = if b <= d then b else d in
+    if low <= high then Some {low; high} else None
+
   let max x y = {low = fmax x.low y.low; high = fmax x.high y.high}
 
   let min x y = {low = fmin x.low y.low; high = fmin x.high y.high}
