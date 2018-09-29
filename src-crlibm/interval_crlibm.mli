@@ -53,6 +53,14 @@ module I : sig
   (** [exp a] returns [{low=exp a.high; high=exp b.high}], properly rounded. *)
 
 
+  (** {2 Trigonometric functions} *)
+
+  val cos: t -> t
+  (** [cos a] returns the proper extension of cos to interval arithmetic. *)
+
+  val sin: t -> t
+  (** [sin a] returns the proper extension of sin to interval arithmetic. *)
+
   val tan: t -> t
   (** [tan a]  returns the proper extension of tan to interval arithmetic.
       Returns \[-∞,∞\] if one of the bounds is greater or lower than ±2⁵³. *)

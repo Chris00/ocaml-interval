@@ -6,7 +6,7 @@
 (executable
  (name    accuracy)
  (modules accuracy)
- (libraries interval_intel))
+ (libraries interval_intel interval_crlibm))
 
 (alias
  (name runtest)

@@ -19,6 +19,10 @@
     If not, see <http://www.gnu.org/licenses/>.
 *)
 
+(* [min] and [max], specialized to floats (faster).
+   NaN do dot need to be handled (see [I.v]). *)
+let[@inline] fmin (a: float) (b: float) = if a <= b then a else b
+let[@inline] fmax (a: float) (b: float) = if a <= b then b else a
 
 type t = Interval.t = { low: float;  high: float }
 
@@ -35,7 +39,41 @@ end
 module I = struct
   include Interval.I  (* Redefines inequalities for intervals *)
 
+  let mone_one = v (-1.) 1.
 
+  (* ASSUMING [x] is an integer value, [is_even x] says whether it is even. *)
+  external is_odd : (float [@unboxed]) -> bool
+    = "interval_is_odd_bc" "interval_is_odd" [@@noalloc]
+
+  let cos { low = a; high = b } =
+    let open U in
+    let k = floor Low.(a /. High.pi) in
+    let l = floor High.(b /. Low.pi) in
+    if is_odd k then
+      if l = k then {low = Low.cos a;  high = High.cos b} (* increasing *)
+      else if l = l +. 1. then
+        {low = fmin (Low.cos a) (Low.cos b);  high = 1.}
+      else mone_one
+    else (* k even *)
+      if l = k then {low = Low.cos b;  high = High.cos a} (* decreasing *)
+      else if l = k +. 1. then
+        {low = -1.;  high = fmax (High.cos a) (High.cos b)}
+      else mone_one
+
+  let sin { low = a; high = b } =
+    let open U in
+    let k = floor Low.(a /. High.pi -. 0.5) in
+    let l = floor High.(b /. Low.pi -. 0.5) in
+    if is_odd k then
+      if l = k then {low = Low.sin a;  high = High.sin b} (* increasing *)
+      else if l = k +. 1. then
+        {low = fmin (Low.sin a) (Low.sin b);  high = 1.}
+      else mone_one
+    else
+      if l = k then {low = Low.sin b;  high = High.sin a } (* decreasing *)
+      else if l = k +. 1. then
+        {low = -1.;  high = fmax (High.sin a) (High.sin b)}
+      else mone_one
 
   let atan {low = a; high = b} =
     { low = Low.atan a; high = High.atan b}
