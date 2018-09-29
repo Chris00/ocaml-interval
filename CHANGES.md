@@ -1,3 +1,23 @@
+1.5 2018-
+--------------
+
+- The library is now organized as 3 packages:
+  - `interval_base` (which defines the module `Interval`) group the
+    functions that work on any IEEE-754 processor;
+  - `interval_intel`: module using assembly instructions on Intel
+    Processors;
+  - `interval_crlibm`: module using the library CRLibm to evaluate
+    standard functions (a bit slower but more precise than the Intel
+    package).
+- New functions: `invx` (extended inverse), `cancelminus`,
+  `cancelplus`, `inter` and `inter_exn`.
+- New binary relations `equal`, `=`, `subset`, `<=`, `>=`, `precedes`,
+  `interior`, `<`, `>`, `strict_precedes`, `disjoint`.
+- New predicates `is_bounded`, `is_entire`.
+- New constant `I.entire` for [-∞, +∞].
+- The module `I.U` also restores inequality relations.
+- Speed and documentation improvements.
+
 1.4 2018-03-01
 --------------
 
