@@ -19,4 +19,4 @@ depends: [
   "interval_base"
   "dune" {build}
 ]
-available: [ arch = "amd64" ]
+available: [ arch = "x86_64" ]
