@@ -11,6 +11,7 @@ license: "LGPL-3.0"
 tags: ["interval" "science"]
 depends: [
   "ocaml"
-  "interval_intel"
-  "interval_crlibm"
+  "interval_base" {= version}
+  "interval_intel" {= version}
+  "interval_crlibm" {= version}
 ]
