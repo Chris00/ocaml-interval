@@ -25,3 +25,13 @@
  (package interval_base)
  (deps test_base.exe)
  (action (run %{deps})))
+
+(executable
+ (name      test_crlibm)
+ (modules   test_crlibm)
+ (libraries interval_crlibm))
+
+(alias
+ (name runtest)
+ (package interval_crlibm)
+ (action (run %{exe:test_crlibm.exe})))
