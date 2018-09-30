@@ -11,7 +11,7 @@
 (alias
  (name runtest)
  (package interval)
- (deps tests.exe accuracy.exe)
+ (deps tests.exe)
  ; Do not run "tests.exe" (too long), use "make tests" for that.
  (action (run %{exe:accuracy.exe})))
 
@@ -23,8 +23,7 @@
 (alias
  (name runtest)
  (package interval_base)
- (deps test_base.exe)
- (action (run %{deps})))
+ (action (run %{exe:test_base.exe})))
 
 (executable
  (name      test_crlibm)
