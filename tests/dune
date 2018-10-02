@@ -34,3 +34,24 @@
  (name runtest)
  (package interval_crlibm)
  (action (run %{exe:test_crlibm.exe})))
+
+(executable
+ (name      graphs)
+ (modules   graphs)
+ (libraries interval_crlibm))
+
+(alias
+ (name runtest)
+ (package interval_crlibm)
+ (action (run %{exe:graphs.exe})))
+
+(rule
+ (targets graphs.pdf)
+ (deps    graphs.tex)
+ (action  (progn
+           (run %{exe:graphs.exe})
+           (run pdflatex -interaction=nonstopmode graphs.tex))))
+
+(alias
+ (name graphs)
+ (deps graphs.pdf))

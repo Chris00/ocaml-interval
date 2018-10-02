@@ -19,6 +19,10 @@ tests: all
 	  echo "Tests: $$C errors (see _build/default/tests/tests.log)"; \
 	else echo "All tests passed successfully"; fi
 
+graphs:
+	dune build @graphs
+	@echo See $(wildcard _build/default/tests/*.pdf)
+
 clean:
 	dune clean
 
@@ -63,5 +67,5 @@ upgrade:
 lint:
 	@for p in $(PACKAGES); do opam lint $$p.opam; done
 
-.PHONY: all build ocamlfpu install uninstall tests \
+.PHONY: all build ocamlfpu install uninstall tests graphs \
   examples clean doc bistro pin unpin upgrade lint
