@@ -8,6 +8,7 @@ env:
     - PACKAGE=interval
     - PINS="interval:. interval_base:. interval_intel:. interval_crlibm:."
   matrix:
+    - OCAML_VERSION=4.07
     - OCAML_VERSION=4.06
     - OCAML_VERSION=4.05
     - OCAML_VERSION=4.04
