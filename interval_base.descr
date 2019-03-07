@@ -1,4 +1,0 @@
-An interval library for OCaml (base package)
-
-This library define basic interval operations.  It is supported on
-all platforms.

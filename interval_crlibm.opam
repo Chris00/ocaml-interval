@@ -20,3 +20,14 @@ depends: [
   "dune" {build}
   "crlibm"
 ]
+synopsis: "An interval library for OCaml (crlibm version)"
+description: "
+This library uses assembly code to compute all operations with proper
+roundings, and currently ONLY works on intel processors.
+
+This package uses CRlibm (a proved correctly rounded mathematical
+library) to provide enclosures of transcendental functions.  It can be
+40–60% slower than the version using the implementation in the CPU but
+the bounds are proved correct.  It also provides *pi versions of the
+trigonometric functions and their inverse.
+"

@@ -15,3 +15,4 @@ depends: [
   "interval_intel" {= version}
   "interval_crlibm" {= version}
 ]
+synopsis: "An interval arithmetic library for OCaml (meta package)"

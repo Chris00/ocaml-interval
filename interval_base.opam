@@ -18,3 +18,8 @@ depends: [
   "ocaml"
   "dune" {build}
 ]
+synopsis: "An interval library for OCaml (base package)"
+description: "
+This library define basic interval operations.  It is supported on
+all platforms.
+"
