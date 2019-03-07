@@ -16,7 +16,7 @@ build: [
 ]
 depends: [
   "ocaml" {>= "3.12"}
-  "interval_base"
+  "interval_base" {= version}
   "dune" {build}
   "crlibm"
 ]
