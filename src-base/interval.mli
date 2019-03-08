@@ -60,6 +60,12 @@ module type T = sig
      @raise Invalid_argument if the interval \[[a], [b]\] is equal to
      \[-∞,-∞\] or \[+∞,+∞\] or one of the bounds is NaN. *)
 
+  val low : t -> number
+  (** [low t] returns the lower bound of the interval. *)
+
+  val high : t -> number
+  (** [high t] returns the higher bound of the interval. *)
+
   val of_int : int -> t
   (** Returns the interval containing the conversion of an integer to
      the number type. *)

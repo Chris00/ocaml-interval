@@ -33,6 +33,8 @@ module type T = sig
 
   val entire : t
   val v : number -> number -> t
+  val low : t -> number
+  val high : t -> number
   val of_int : int -> t
 
   val to_string : ?fmt: (number -> 'b, 'a, 'b) format -> t -> string
@@ -261,6 +263,9 @@ module I = struct
     else (* a > b or one of them is NaN *)
       invalid_arg("Interval.I.v: [" ^ string_of_float a ^ ", "
                   ^ string_of_float b ^ "] not allowed")
+
+  let low i = i.low
+  let high i = i.high
 
   let of_int n = {low = Low.float n; high = High.float n}
 
