@@ -52,7 +52,7 @@ The easier way to install this library is to use [OPAM][]:
 
 `interval` is a meta-package that will install all packages mentioned above.
 
-If you cloned this repository, first install jbuilder/[dune][] and
+If you cloned this repository, first install [dune][] and
 type `make` in the main directory.  This will compile the libraries,
 the examples and run basic tests.  You can compile the examples with The
 programs of the examples will be in `_build/default/examples/`.
@@ -60,7 +60,7 @@ programs of the examples will be in `_build/default/examples/`.
 Documentation
 -------------
 
-To documentation is build using `jbuilder build @doc` and will be in
+To documentation is build using `dune build @doc` and will be in
 `_build/default/_doc/` in HTML format.  You can also consult the
 interfaces of [Interval](src/interval.mli) and [Fpu](src/fpu.mli) and
 [online](https://chris00.github.io/ocaml-interval/doc/interval/).
