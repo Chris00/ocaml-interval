@@ -32,26 +32,6 @@ doc:
 	dune build @doc
 	echo '.def { background: #f9f9de; }' >> _build/default/_doc/odoc.css
 
-# until we have https://github.com/ocaml/opam-publish/issues/38
-bistro: lint
-	topkg distrib
-	topkg publish distrib
-# 	Create packages and perform the subtitution that topkg does not
-#	(until opam2, https://discuss.ocaml.org/t/sync-versions-of-several-packages-coming-from-a-single-repo/808/5)
-	for p in $(PACKAGES); do \
-	  topkg opam pkg -n $$p; \
-	  sed -e 's/\(^ *"interval_[a-z]\+"\) */\1 {= "$(PKGVERSION)"}/' \
-	    --in-place _build/$$p.$(PKGVERSION)/opam; \
-	done
-	@[ -d packages ] || (echo \
-	  "ERROR: Make a symbolic link packages → opam-repo/packages"; exit 1)
-	for p in $(PACKAGES); do \
-	  mkdir -p packages/$$p; \
-	  cp -r _build/$$p.$(PKGVERSION) packages/$$p/; \
-	done
-	cd packages && git add $(PACKAGES)
-#	CONDUIT_TLS=native topkg opam submit $(addprefix -n, $(PACKAGES))
-
 pin:
 #	Installation in the right order
 	opam pin -k path -y add interval_base .
