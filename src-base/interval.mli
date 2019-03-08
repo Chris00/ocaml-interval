@@ -20,32 +20,14 @@
     If not, see <http://www.gnu.org/licenses/>.
 *)
 
-(** The interval type. Be careful however when creating intervals. For
-   example, the following code: [let a = \{low=1./.3.; high=1./.3.\}]
-   creates an interval which does NOT contain the mathematical object
-   1/3.
+(** Basic signature for interval arithmetic packages. *)
+module type T = sig
+  type number
+  (** Numbers type on which intervals are defined. *)
 
-   If you want to create an interval representing 1/3, you have to
-   write [let a = I.(inv(v 3. 3.))] because rounding will then be
-   properly handled and the resulting interval will indeed contain the
-   exact value of 1/3. *)
-type t = {
-    low: float; (** low bound, possibly = -∞ *)
-    high: float (** high bound, possibly = +∞ *)
-  }
+  type t
+  (** The type of intervals. *)
 
-exception Division_by_zero
-(** Exception raised when a division by 0 occurs. *)
-
-exception Domain_error of string [@@warn_on_literal_pattern]
-(** Exception raised when an interval is completely outside the domain
-   of a function.  The string is the name of the function and is meant
-   to help when running code in the REPL (aka toploop). *)
-
-(** Interval operations.  Locally open this module — using
-   e.g. [I.(...)] — to redefine classical arithmetic operators for
-   interval arithmetic. *)
-module I : sig
   val zero : t
   (** Neutral element for addition. *)
 
@@ -68,7 +50,7 @@ module I : sig
   (** The entire set of real numbers.
      @since 1.5 *)
 
-  val v : float -> float -> t
+  val v : number -> number -> t
   (** [v a b] returns [{low=a; high=b}].  BEWARE that, unless you take
      care, if you use [v a b] with literal values for [a] and/or [b],
      the resulting interval may not contain these values because the
@@ -79,9 +61,10 @@ module I : sig
      \[-∞,-∞\] or \[+∞,+∞\] or one of the bounds is NaN. *)
 
   val of_int : int -> t
-  (** Returns the interval containing the float conversion of an integer. *)
+  (** Returns the interval containing the conversion of an integer to
+     the number type. *)
 
-  val to_string : ?fmt: (float -> 'b, 'a, 'b) format -> t -> string
+  val to_string : ?fmt: (number -> 'b, 'a, 'b) format -> t -> string
   (** [to_string i] return a string representation of the interval [i].
       @param fmt is the format used to print the two bounds of [i].
                  Default: ["%g"]. *)
@@ -94,16 +77,16 @@ module I : sig
   (** Print the interval to the formatter.  To be used with [Format]
      format "%a". *)
 
-  val fmt : (float -> 'b, 'a, 'b) format -> (t -> 'c, 'd, 'e, 'c) format4
-  (** [fmt float_fmt] returns a format to print intervals where each
-     component is printed with [float_fmt].
+  val fmt : (number -> 'b, 'a, 'b) format -> (t -> 'c, 'd, 'e, 'c) format4
+  (** [fmt number_fmt] returns a format to print intervals where each
+     component is printed with [number_fmt].
 
      Example: [Printf.printf ("%s = " ^^ fmt "%.10f" ^^ "\n") name i]. *)
 
 
   (** {2 Boolean functions} *)
 
-  val compare_f: t -> float -> int
+  val compare_f: t -> number -> int
   (** [compare_f a x] returns
       - [1] if [a.high < x],
       - [0] if [a.low] ≤ [x] ≤ [a.high], i.e., if [x] ∈ [a], and
@@ -174,16 +157,16 @@ module I : sig
   (** [size a] returns an interval containing the true length of the
      interval [a.high - a.low]. *)
 
-  val size_high : t -> float
+  val size_high : t -> number
   (** [size_high a] returns the length of the interval [a.high - a.low]
      rounded up. *)
 
-  val size_low : t -> float
+  val size_low : t -> number
   (** [size_low a] returns the length of the interval [a.high - a.low]
      rounded down. *)
 
   val sgn: t -> t
-  (** [sgn a] returns the sign of each bound, i.e.,
+  (** [sgn a] returns the sign of each bound, e.g., for floats
       [{low=float (compare a.low 0.);  high=float (compare a.high 0.)}]. *)
 
   val truncate: t -> t
@@ -223,11 +206,11 @@ module I : sig
   (** [a + b] returns [{low=a.low +. b.low; high=a.high +. b.high}]
      properly rounded. *)
 
-  val ( +. ): t -> float -> t
+  val ( +. ): t -> number -> t
   (** [a +. x] returns [{low = a.low +. x; high = a.high +. x}]
       properly rounded. *)
 
-  val ( +: ): float -> t -> t
+  val ( +: ): number -> t -> t
   (** [x +: a] returns [{low = a.low +. x; high = a.high +. x}]
       properly rounded. *)
 
@@ -235,11 +218,11 @@ module I : sig
   (** [a - b] returns [{low = a.low -. b.high;  high = a.high -. b.low}]
       properly rounded. *)
 
-  val ( -. ): t -> float -> t
+  val ( -. ): t -> number -> t
   (** [a -. x] returns [{low = a.low -. x;  high = a.high -. x}]
       properly rounded. *)
 
-  val ( -: ): float -> t -> t
+  val ( -: ): number -> t -> t
   (** [x -: a] returns [{low = x -. a.high;  high = x -. a.low}]
       properly rounded. *)
 
@@ -251,11 +234,11 @@ module I : sig
      and returns the proper result.  If [a=zero] or [b=zero] then
      {!zero} is returned. *)
 
-  val ( *. ): float -> t -> t
+  val ( *. ): number -> t -> t
   (** [x *. a] multiplies [a] by [x] according to interval arithmetic
      and returns the proper result.  If [x=0.] then {!zero} is returned. *)
 
-  val ( *: ): t -> float -> t
+  val ( *: ): t -> number -> t
   (** [a *. x] multiplies [a] by [x] according to interval arithmetic
      and returns the proper result.  If [x=0.] then {!zero} is returned. *)
 
@@ -264,12 +247,12 @@ module I : sig
      interval arithmetic and returns the proper result.
      Raise [Interval.Division_by_zero] if [b=]{!zero}. *)
 
-  val ( /. ): t -> float -> t
+  val ( /. ): t -> number -> t
   (** [a /. x] divides [a] by [x] according to interval arithmetic and
      returns the proper result.
      Raise [Interval.Division_by_zero] if [x=0.0]. *)
 
-  val ( /: ): float -> t -> t
+  val ( /: ): number -> t -> t
   (** [x /: a] divides [x] by [a] according to interval arithmetic and
      returns the result.
      Raise [Interval.Division_by_zero] if [a=]{!zero}. *)
@@ -302,7 +285,36 @@ module I : sig
      to interval arithmetic.  If [n=0] then {!one} is returned.
 
      @raise Domain_error if [n < 0] and [a=]{!zero}. *)
+end
 
+
+(** The interval type. Be careful however when creating intervals. For
+   example, the following code: [let a = \{low=1./.3.; high=1./.3.\}]
+   creates an interval which does NOT contain the mathematical object
+   1/3.
+
+   If you want to create an interval representing 1/3, you have to
+   write [let a = I.(inv(v 3. 3.))] because rounding will then be
+   properly handled and the resulting interval will indeed contain the
+   exact value of 1/3. *)
+type t = {
+    low: float; (** low bound, possibly = -∞ *)
+    high: float (** high bound, possibly = +∞ *)
+  }
+
+exception Division_by_zero
+(** Exception raised when a division by 0 occurs. *)
+
+exception Domain_error of string [@@warn_on_literal_pattern]
+(** Exception raised when an interval is completely outside the domain
+   of a function.  The string is the name of the function and is meant
+   to help when running code in the REPL (aka toploop). *)
+
+(** Interval operations.  Locally open this module — using
+   e.g. [I.(...)] — to redefine classical arithmetic operators for
+   interval arithmetic. *)
+module I : sig
+  include T with type number = float and type t = t
 
   (** {2 Usual arithmetic operators} *)
 

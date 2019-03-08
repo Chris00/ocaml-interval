@@ -20,15 +20,79 @@
     If not, see <http://www.gnu.org/licenses/>.
 *)
 
+module type T = sig
+  type number
+  type t
+
+  val zero : t
+  val one : t
+  val pi: t
+  val two_pi : t
+  val half_pi : t
+  val e: t
+
+  val entire : t
+  val v : number -> number -> t
+  val of_int : int -> t
+
+  val to_string : ?fmt: (number -> 'b, 'a, 'b) format -> t -> string
+  val pr : out_channel -> t -> unit
+  val pp : Format.formatter -> t -> unit
+  val fmt : (number -> 'b, 'a, 'b) format -> (t -> 'c, 'd, 'e, 'c) format4
+
+  val compare_f: t -> number -> int
+  val is_bounded : t -> bool
+  val is_entire : t -> bool
+  val equal : t -> t -> bool
+  val ( = ) : t -> t -> bool
+  val subset : t -> t -> bool
+  val ( <= ) : t -> t -> bool
+  val ( >= ) : t -> t -> bool
+  val precedes : t -> t -> bool
+  val interior : t -> t -> bool
+  val ( < ) : t -> t -> bool
+  val ( > ) : t -> t -> bool
+  val strict_precedes : t -> t -> bool
+  val disjoint : t -> t -> bool
+
+  val size: t -> t
+  val size_high : t -> number
+  val size_low : t -> number
+  val sgn: t -> t
+  val truncate: t -> t
+  val abs: t -> t
+  val hull: t -> t -> t
+  val inter_exn : t -> t -> t
+  val inter : t -> t -> t option
+
+  val max: t -> t -> t
+  val min: t -> t -> t
+  val ( + ) : t -> t -> t
+  val ( +. ): t -> number -> t
+  val ( +: ): number -> t -> t
+  val ( - ): t -> t -> t
+  val ( -. ): t -> number -> t
+  val ( -: ): number -> t -> t
+  val ( ~- ): t -> t
+  val ( * ): t -> t -> t
+  val ( *. ): number -> t -> t
+  val ( *: ): t -> number -> t
+  val ( / ): t -> t -> t
+  val ( /. ): t -> number -> t
+  val ( /: ): number -> t -> t
+  val inv: t -> t
+  type 'a one_or_two = One of 'a | Two of 'a * 'a
+  val invx : t -> t one_or_two
+  val cancelminus : t -> t -> t
+  val cancelplus : t -> t -> t
+  val ( ** ): t -> int -> t
+end
+
+
 (* [min] and [max], specialized to floats (faster).
    NaN do dot need to be handled (see [I.v]). *)
 let fmin (a: float) (b: float) = if a <= b then a else b
 let fmax (a: float) (b: float) = if a <= b then b else a
-
-type t = {low: float; high: float}
-
-exception Division_by_zero
-exception Domain_error of string
 
 let[@inline] is_even x = x land 1 = 0
 
@@ -163,7 +227,15 @@ module High = struct
 end
 
 
+type t = {low: float; high: float}
+
+exception Division_by_zero
+exception Domain_error of string
+
 module I = struct
+  type number = float
+  type interval = t
+  type t = interval
   (* Save original operators *)
   module U = Interval__U
 
