@@ -34,9 +34,10 @@ doc:
 
 pin:
 #	Installation in the right order
-	opam pin -k path -y add interval_base .
-	opam pin -k path -y add interval_intel .
-	opam pin -k path -y add interval_crlibm .
+	opam pin -k path -y add interval_base.dev .
+	opam pin -k path -y add interval_intel.dev .
+	opam pin -k path -y add interval_crlibm.dev .
+	opam pin -k path -y add interval.dev .
 
 unpin:
 	opam pin remove -y $(PACKAGES)
