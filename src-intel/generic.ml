@@ -36,8 +36,7 @@ let fmin (a: float) (b: float) = if a <= b then a else b
 let fmax (a: float) (b: float) = if a <= b then b else a
 
 let log {low = a; high = b} =
-  let sb = compare b 0. in
-  if sb <= 0 then raise(Domain_error "log")
+  if b <= 0. then raise(Domain_error "log")
   else {low = if a <= 0. then neg_infinity else Low.log a; high = High.log b}
 
 let exp {low = a; high = b} =
@@ -51,8 +50,8 @@ let tan {low = a; high = b} =
     let ta = Low.tan a in
     let tb = High.tan b in
     if ta <= tb then {low = ta; high = tb}
-    else {low = neg_infinity; high = infinity})
-  else {low = neg_infinity; high = infinity}
+    else Interval.I.entire)
+  else Interval.I.entire
 
 let acos {low = a; high = b} =
   if a <= 1. && -1. <= b then

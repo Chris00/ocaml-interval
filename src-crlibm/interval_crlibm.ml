@@ -50,8 +50,10 @@ module I = struct
     let k = floor Low.(a /. High.pi) in
     let l = floor High.(b /. Low.pi) in
     if is_odd k then
-      if l = k then {low = Low.cos a;  high = High.cos b} (* increasing *)
-      else if l = l +. 1. then
+      if l = k then
+        (* It is guaranteed that kπ ≤ a ≤ b ≤ (k+1)π. *)
+        {low = Low.cos a;  high = High.cos b} (* increasing *)
+      else if l = k +. 1. then
         {low = fmin (Low.cos a) (Low.cos b);  high = 1.}
       else mone_one
     else (* k even *)
