@@ -21,6 +21,8 @@
 
 (** Interval library for OCaml (crlibm version).
 
+   @version %%VERSION%%
+
    This library is slightly slower than Interval but has the important
    property that the functions are proved correct (while Interval
    mostly uses the processor implementation, some of which are
@@ -28,8 +30,8 @@
    CRlibm.  *)
 
 type t = Interval.t = {
-    low: float; (** low bound, possibly = -∞ *)
-    high: float (** high bound, possibly = +∞ *)
+    low: float; (** lower bound, possibly = -∞ *)
+    high: float (** higher bound, possibly = +∞ *)
   }
 
 (** Interval operations.  Locally open this module — using
@@ -87,20 +89,22 @@ module I : sig
   (** {2 Hyperbolic functions} *)
 
   val cosh: t -> t
-  (** [cosh] is the proper extension of cosh to interval arithmetic. *)
+  (** [cosh] extends cosh to interval arithmetic. *)
 
   val sinh: t -> t
-  (** sinh is the proper extension of sinh to interval arithmetic. *)
+  (** [sinh] extends sinh to interval arithmetic. *)
 
   val tanh: t -> t
-  (** tanh is the proper extension of tanh to interval arithmetic. *)
+  (** [tanh] extends tanh to interval arithmetic. *)
 end
 
+(** Functions rounding down their results. *)
 module Low : sig
   include module type of Interval.Low
   include module type of Crlibm.Low
 end
 
+(** Functions rounding up their results. *)
 module High : sig
   include module type of Interval.High
   include module type of Crlibm.High

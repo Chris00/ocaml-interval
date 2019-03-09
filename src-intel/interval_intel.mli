@@ -22,10 +22,12 @@
 
 (** Interval library in OCaml.  ONLY FOR INTEL PROCESSORS.
 
+   @version %%VERSION%%
+
    All operations use correct rounding.
 
    It is recommended to open this module.  It will put into scope
-   the interval type and a module [I] (see {!Interval_base.I})
+   the interval type and a module [I] (see {!Interval.I})
    containing interval operations:
 {[open Interval_intel
 
@@ -98,19 +100,20 @@ let x = I.(v 0.5 1. + sin(v 3. 3.125))
    The library is implemented in x87 assembly mode and is quite
    efficient ({{:#perf}see below}).  *)
 
+(** {2 Intervals (for Intel processors)} *)
 
 (** The interval type. Be careful however when creating intervals. For
-   example, the following code: [let a = \{low=1./.3.; high=1./.3.\}]
+   example, the following code: [let a = {low=1./.3.; high=1./.3.}]
    creates an interval which does NOT contain the mathematical object
    1/3.
 
    If you want to create an interval representing 1/3, you have to
    write [let a = I.(inv(v 3. 3.))] because rounding will then be
-   properly handled and the resulting interval will indeed contain the
-   exact value of 1/3. *)
+   properly handled by {!I.inv} and the resulting interval will indeed
+   contain the exact value of 1/3. *)
 type t = Interval.t = {
-    low: float; (** low bound, possibly = -∞ *)
-    high: float (** high bound, possibly = +∞ *)
+    low: float; (** lower bound, possibly = -∞ *)
+    high: float (** higher bound, possibly = +∞ *)
   }
 
 exception Division_by_zero
@@ -125,7 +128,7 @@ module I : sig
   val mod_f: t -> float -> t
   (** [mod_f a f] returns [a] mod [f] according to interval arithmetic
      and OCaml [mod_float] definition.
-     Raise [Interval_base.Division_by_zero] if [f=0.0]. *)
+     Raise [Interval.Division_by_zero] if [f=0.0]. *)
 
   val sqrt: t -> t
   (** [sqrt x] returns
@@ -267,11 +270,13 @@ module Low = Fpu.Low
 module High = Fpu.High
 
 
+(** {2 Old interface (deprecated)} *)
+
 (** The functions below are the ones of the older versions of
    [Interval].  They will soon be removed. *)
 
-type interval = t [@@deprecated "Use Interval_base.t instead"]
-(** @deprecated Alias of {!Interval_base.t}. *)
+type interval = t [@@deprecated "Use Interval.t instead"]
+(** @deprecated Alias of {!Interval.t}. *)
 
 (** Neutral element for addition *)
 val zero_I : t [@@deprecated "Use I.zero instead"]
@@ -531,44 +536,40 @@ val pow_I_f : t -> float -> t  [@@deprecated "Use I.( **. ) instead"]
 val pow_I_I : t -> t -> t  [@@deprecated "Use I.( *** ) instead"]
 
 
-(* {2:perf Performance}
+[@@warning "-50"]
+(** {2:perf Performance}
 
 Intel Atom 230 Linux 32 bits:
-{ul
-{-      ftan speed (10000000 calls):2.528158}
-{-      fcos speed (10000000 calls):2.076129}
-{-      fsin speed (10000000 calls):1.972123}
-{-     tan_I speed (10000000 calls):4.416276}
-{-     cos_I speed (10000000 calls):4.936308}
-{-     sin_I speed (10000000 calls):5.396338}
-{-      fadd speed (10000000 calls):0.980062}
-{-      fsub speed (10000000 calls):0.980061}
-{-      fmul speed (10000000 calls):0.980061}
-{-      fdiv speed (10000000 calls):1.424089}
-{-        +$ speed (10000000 calls):1.656103}
-{-        -$ speed (10000000 calls):1.636103}
-{-        *$ speed (10000000 calls):4.568285}
-{-        /$ speed (10000000 calls):4.552285}
-}
+-      [ftan] speed (10000000 calls): 2.528158
+-      [fcos] speed (10000000 calls): 2.076129
+-      [fsin] speed (10000000 calls): 1.972123
+-     [tan_I] speed (10000000 calls): 4.416276
+-     [cos_I] speed (10000000 calls): 4.936308
+-     [sin_I] speed (10000000 calls): 5.396338
+-      [fadd] speed (10000000 calls): 0.980062
+-      [fsub] speed (10000000 calls): 0.980061
+-      [fmul] speed (10000000 calls): 0.980061
+-      [fdiv] speed (10000000 calls): 1.424089
+-        [+$] speed (10000000 calls): 1.656103
+-        [-$] speed (10000000 calls): 1.636103
+-        [*$] speed (10000000 calls): 4.568285
+-        [/$] speed (10000000 calls): 4.552285
 
 Intel 980X Linux 64 bits:
-{ul
-{-      ftan speed (10000000 calls):0.472029}
-{-      fcos speed (10000000 calls):0.400025}
-{-      fsin speed (10000000 calls):0.400025}
-{-     tan_I speed (10000000 calls):0.752047}
-{-     cos_I speed (10000000 calls):1.036065}
-{-     sin_I speed (10000000 calls):1.104069}
-{-      fadd speed (10000000 calls):0.124008}
-{-      fsub speed (10000000 calls):0.120008}
-{-      fmul speed (10000000 calls):0.128008}
-{-      fdiv speed (10000000 calls):0.156010}
-{-        +$ speed (10000000 calls):0.340021}
-{-        -$ speed (10000000 calls):0.332021}
-{-        *$ speed (10000000 calls):0.556035}
-{-        /$ speed (10000000 calls):0.468029}
-}
-
+-      [ftan] speed (10000000 calls): 0.472029
+-      [fcos] speed (10000000 calls): 0.400025
+-      [fsin] speed (10000000 calls): 0.400025
+-     [tan_I] speed (10000000 calls): 0.752047
+-     [cos_I] speed (10000000 calls): 1.036065
+-     [sin_I] speed (10000000 calls): 1.104069
+-      [fadd] speed (10000000 calls): 0.124008
+-      [fsub] speed (10000000 calls): 0.120008
+-      [fmul] speed (10000000 calls): 0.128008
+-      [fdiv] speed (10000000 calls): 0.156010
+-        [+$] speed (10000000 calls): 0.340021
+-        [-$] speed (10000000 calls): 0.332021
+-        [*$] speed (10000000 calls): 0.556035
+-        [/$] speed (10000000 calls): 0.468029
 
  *)
 ;;

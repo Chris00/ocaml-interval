@@ -20,6 +20,10 @@
     If not, see <http://www.gnu.org/licenses/>.
 *)
 
+(** Base module for interval arithmetic.
+
+   @version %%VERSION%% *)
+
 (** Basic signature for interval arithmetic packages. *)
 module type T = sig
   type number
@@ -47,11 +51,11 @@ module type T = sig
   (** [e] (Euler's constant) with bounds properly rounded. *)
 
   val entire : t
-  (** The entire set of real numbers.
+  (** The entire set of {!number}s.
      @since 1.5 *)
 
   val v : number -> number -> t
-  (** [v a b] returns [{low=a; high=b}].  BEWARE that, unless you take
+  (** [v a b] returns the interval \[[a], [b]\].  BEWARE that, unless you take
      care, if you use [v a b] with literal values for [a] and/or [b],
      the resulting interval may not contain these values because the
      compiler will round them to binary numbers before passing them to
@@ -73,7 +77,7 @@ module type T = sig
   val to_string : ?fmt: (number -> 'b, 'a, 'b) format -> t -> string
   (** [to_string i] return a string representation of the interval [i].
       @param fmt is the format used to print the two bounds of [i].
-                 Default: ["%g"]. *)
+                 Default: ["%g"] for float {!number}s. *)
 
   val pr : out_channel -> t -> unit
   (** Print the interval to the channel.  To be used with [Printf]
@@ -94,13 +98,13 @@ module type T = sig
 
   val compare_f: t -> number -> int
   (** [compare_f a x] returns
-      - [1] if [a.high < x],
-      - [0] if [a.low] ≤ [x] ≤ [a.high], i.e., if [x] ∈ [a], and
-      - [-1] if [x < a.low].  *)
+      - [1] if [high(a) < x],
+      - [0] if [low(a)] ≤ [x] ≤ [high(a)], i.e., if [x] ∈ [a], and
+      - [-1] if [x < low(a)].  *)
 
   val is_bounded : t -> bool
   (** [is_bounded x] says whether the interval is bounded, i.e.,
-      -∞ < [x.low] and [x.high] < ∞.
+      -∞ < [low(x)] and [high(x)] < ∞.
       @since 1.5 *)
 
   val is_entire : t -> bool
@@ -121,12 +125,12 @@ module type T = sig
 
   val ( <= ) : t -> t -> bool
   (** [x <= y] says whether [x] is weakly less than [y] i.e.,
-      ∀ξ ∈ x, ∃η ∈ y, ξ ≤ η and ∀η ∈ y, ∃ξ ∈ x, ξ ≤ η.
+      ∀ξ ∈ [x], ∃η ∈ [y], ξ ≤ η and ∀η ∈ [y], ∃ξ ∈ [x], ξ ≤ η.
       @since 1.5 *)
 
   val ( >= ) : t -> t -> bool
   (** [x >= y] says whether [x] is weakly greater than [y] i.e.,
-      ∀ξ ∈ x, ∃η ∈ y, ξ ≥ η and ∀η ∈ y, ∃ξ ∈ x, ξ ≥ η.
+      ∀ξ ∈ [x], ∃η ∈ [y], ξ ≥ η and ∀η ∈ [y], ∃ξ ∈ [x], ξ ≥ η.
       @since 1.5 *)
 
   val precedes : t -> t -> bool
@@ -140,7 +144,7 @@ module type T = sig
 
   val ( < ) : t -> t -> bool
   (** [x < y] says whether [x] is strictly weakly less than [y] i.e.,
-      ∀ξ ∈ x, ∃η ∈ y, ξ < η and ∀η ∈ y, ∃ξ ∈ x, ξ < η.
+      ∀ξ ∈ [x], ∃η ∈ [y], ξ < η and ∀η ∈ [y], ∃ξ ∈ [x], ξ < η.
       @since 1.5 *)
 
   val ( > ) : t -> t -> bool
@@ -161,33 +165,33 @@ module type T = sig
 
   val size: t -> t
   (** [size a] returns an interval containing the true length of the
-     interval [a.high - a.low]. *)
+     interval [high a - low a]. *)
 
   val size_high : t -> number
-  (** [size_high a] returns the length of the interval [a.high - a.low]
+  (** [size_high a] returns the length of the interval [high a - low a]
      rounded up. *)
 
   val size_low : t -> number
-  (** [size_low a] returns the length of the interval [a.high - a.low]
+  (** [size_low a] returns the length of the interval [high a - low a]
      rounded down. *)
 
   val sgn: t -> t
   (** [sgn a] returns the sign of each bound, e.g., for floats
-      [{low=float (compare a.low 0.);  high=float (compare a.high 0.)}]. *)
+      \[[float (compare (low a) 0.)], [float (compare (high a) 0.)]\]. *)
 
   val truncate: t -> t
   (** [truncate a] returns the integer interval containing [a], that is
-      [{low=floor a.low; high=ceil a.high}]. *)
+      \[[floor(low a)], [ceil(high a)]\]. *)
 
   val abs: t -> t
   (** [abs a] returns the absolute value of the interval, that is
-      - [a] if [a.low] ≥ [0.],
-      - [~- a] if [a.high] ≤ [0.], and
-      - [{low=0.; high=max (-a.low) a.high}] otherwise. *)
+      - [a] if [low a] ≥ [0.],
+      - [~- a] if [high a] ≤ [0.], and
+      - \[0, [max (- low a) (high a)]\] otherwise. *)
 
   val hull: t -> t -> t
   (** [hull a b] returns the smallest interval containing [a] and [b], that is
-      [{low=min a.low b.low; high=max a.high b.high}]. *)
+      \[[min (low a) (low b)], [max (high a) (high b)]\]. *)
 
   val inter_exn : t -> t -> t
   (** [inter_exn x y] returns the intersection of [x] and [y].
@@ -202,38 +206,38 @@ module type T = sig
 
   val max: t -> t -> t
   (** [max a b] returns the "maximum" of the intervals [a] and [b], that is
-      [{low=max a.low b.low; high=max a.high b.high}]. *)
+      \[[max (low a) (low b)], [max (high a) (high b)]\]. *)
 
   val min: t -> t -> t
   (** [min a b] returns the "minimum" of the intervals [a] and [b], that is
-      [{low=min a.low b.low;high=min a.high b.high}]. *)
+      \[[min (low a) (low b)], [min (high a) (high b)]\]. *)
 
   val ( + ) : t -> t -> t
-  (** [a + b] returns [{low=a.low +. b.low; high=a.high +. b.high}]
+  (** [a + b] returns \[[low a +. low b], [high a +. high b]\]
      properly rounded. *)
 
   val ( +. ): t -> number -> t
-  (** [a +. x] returns [{low = a.low +. x; high = a.high +. x}]
+  (** [a +. x] returns \[[low a +. x], [high a +. x]\]
       properly rounded. *)
 
   val ( +: ): number -> t -> t
-  (** [x +: a] returns [{low = a.low +. x; high = a.high +. x}]
+  (** [x +: a] returns \[[a +. low a], [x +. high a]\]
       properly rounded. *)
 
   val ( - ): t -> t -> t
-  (** [a - b] returns [{low = a.low -. b.high;  high = a.high -. b.low}]
+  (** [a - b] returns \[[low a -. high b], [high a -. low b]\]
       properly rounded. *)
 
   val ( -. ): t -> number -> t
-  (** [a -. x] returns [{low = a.low -. x;  high = a.high -. x}]
+  (** [a -. x] returns \[[low a -. x],  [high a -. x]\]
       properly rounded. *)
 
   val ( -: ): number -> t -> t
-  (** [x -: a] returns [{low = x -. a.high;  high = x -. a.low}]
+  (** [x -: a] returns \[[x -. high a], [x -. low a]\]
       properly rounded. *)
 
   val ( ~- ): t -> t
-  (** [~- a] is the unary negation, it returns [{low=-a.high; high=-a.low}]. *)
+  (** [~- a] is the unary negation, it returns \[[-high a], [-low a]\]. *)
 
   val ( * ): t -> t -> t
   (** [a * b] multiplies [a] by [b] according to interval arithmetic
@@ -272,7 +276,7 @@ module type T = sig
   val invx : t -> t one_or_two
   (** [invx a] is the extended division.  When 0 ∉ [a], the result is
      [One(inv a)].  If 0 ∈ [a], then the two natural intervals
-     (properly rounded) [Two](\[-∞, 1/a.low\], \[1/a.high, +∞\]) are
+     (properly rounded) [Two](\[-∞, 1/(low a)\], \[1/(high a), +∞\]) are
      returned.
      Raise [Interval.Division_by_zero] if [a=]{!zero}. *)
 
@@ -294,18 +298,20 @@ module type T = sig
 end
 
 
+(** {2 Intervals with float endpoints} *)
+
 (** The interval type. Be careful however when creating intervals. For
-   example, the following code: [let a = \{low=1./.3.; high=1./.3.\}]
+   example, the following code: [let a = {low=1./.3.; high=1./.3.}]
    creates an interval which does NOT contain the mathematical object
    1/3.
 
    If you want to create an interval representing 1/3, you have to
    write [let a = I.(inv(v 3. 3.))] because rounding will then be
-   properly handled and the resulting interval will indeed contain the
-   exact value of 1/3. *)
+   properly handled by {!I.inv} and the resulting interval will indeed
+   contain the exact value of 1/3. *)
 type t = {
-    low: float; (** low bound, possibly = -∞ *)
-    high: float (** high bound, possibly = +∞ *)
+    low: float; (** lower bound, possibly = -∞ *)
+    high: float (** higher bound, possibly = +∞ *)
   }
 
 exception Division_by_zero
@@ -356,6 +362,8 @@ module I : sig
     external ( >= ) : 'a -> 'a -> bool = "%greaterequal"
   end
 end
+
+(** {2 Rounding down and up} *)
 
 (** Functions rounding down their results. *)
 module Low : sig
@@ -453,7 +461,9 @@ end
    When setting the rounding mode to UPWARD or DOWNWARD, it is better
    to set it immediately back to NEAREST. However we have no guarantee
    on how the compiler will reorder the instructions generated.  It is
-   ALWAYS better to write: {[ let a = set_high(); let res = 1./.3. in
+   ALWAYS better to write:
+   {[
+   let a = set_high(); let res = 1./.3. in
    set_nearest (); res;; ]}
 
    The above code will NOT work on linux-x64 where many floating point
@@ -461,7 +471,8 @@ end
    functions should only be used when there is no other solution, and
    you really know what tou are doing, and this should never happen.
    Please use the regular functions of the fpu module for
-   computations.  For example prefer: {[ let a = High.(1. /. 3.)  ]}
+   computations.  For example prefer:
+   {[ let a = High.(1. /. 3.)  ]}
 
    PS: The Interval module and the fpu module functions correctly set and
    restore the rounding mode for all interval computations, so you

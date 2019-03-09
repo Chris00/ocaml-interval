@@ -41,7 +41,7 @@ module I = struct
 
   let mone_one = v (-1.) 1.
 
-  (* ASSUMING [x] is an integer value, [is_even x] says whether it is even. *)
+  (* ASSUMING [x] is an integer value, [is_odd x] says whether it is odd. *)
   external is_odd : (float [@unboxed]) -> bool
     = "interval_is_odd_bc" "interval_is_odd" [@@noalloc]
 

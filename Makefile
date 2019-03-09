@@ -27,10 +27,11 @@ clean:
 	dune clean
 
 doc:
-	sed -e 's/%%VERSION%%/$(PKGVERSION)/' --in-place \
-	  _build/default/src-intel/interval_intel.mli
 	dune build @doc
-	echo '.def { background: #f9f9de; }' >> _build/default/_doc/odoc.css
+	sed -e 's/%%VERSION%%/$(PKGVERSION)/' --in-place \
+	  _build/default/_doc/_html/interval_base/Interval/index.html \
+	  _build/default/_doc/_html/interval_intel/Interval_intel/index.html \
+	  _build/default/_doc/_html/interval_crlibm/Interval_crlibm/index.html
 
 pin:
 #	Installation in the right order
