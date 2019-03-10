@@ -62,10 +62,16 @@ Documentation
 
 To documentation is build using `dune build @doc` and will be in
 `_build/default/_doc/` in HTML format.  You can also consult the
-interfaces of [Interval](src/interval.mli) and [Fpu](src/fpu.mli) and
-[online](https://chris00.github.io/ocaml-interval/doc/interval/).
+interfaces of
+
+- [Interval](src-base/interval.mli),
+- [Interval_intel](src-intel/interval_intel.mli) and
+  [Fpu](src-intel/fpu.mli),
+- [Interval_crlibm](src-crlibm/interval_crlibm.mli),
+
+or [online](https://chris00.github.io/ocaml-interval/doc/interval/).
 It is extremely wise to read the whole documentation, even if you
-intend to only use the interval module.
+intend to only use the `Interval_intel` module.
 
 Some examples are available in the `examples/` directory.  There is a
 `B_AND_B` sub-directory with an example of a branch-and-bound
