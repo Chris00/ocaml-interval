@@ -41,6 +41,8 @@ Several [OPAM][] packages are provided by this repository:
   The package has been developed for Linux systems but works on
   MacOSX and Windows when compiled with GCC.
 
+- `interval` is a meta-package installing all the packages above.
+
 Happy interval programming...
 
 Installation
