@@ -43,6 +43,10 @@ Several [OPAM][] packages are provided by this repository:
 
 - `interval` is a meta-package installing all the packages above.
 
+Note that `ocamlopt` does float constant propagation in *round to the
+nearest* mode which may invalidate interval computations.  Use the
+compiler flag `-no-float-const-prop` to deactivate it.
+
 Happy interval programming...
 
 Installation

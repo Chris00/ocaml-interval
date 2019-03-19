@@ -1,11 +1,13 @@
 (executable
  (name    tests)
  (modules tests)
+ (ocamlopt_flags :standard -no-float-const-prop)
  (libraries interval_intel unix))
 
 (executable
  (name    accuracy)
  (modules accuracy)
+ (ocamlopt_flags :standard -no-float-const-prop)
  (libraries interval_intel interval_crlibm))
 
 (alias
@@ -18,6 +20,7 @@
 (executable
  (name      test_base)
  (modules   test_base)
+ (ocamlopt_flags :standard -no-float-const-prop)
  (libraries interval_base))
 
 (alias
@@ -28,6 +31,7 @@
 (executable
  (name      test_crlibm)
  (modules   test_crlibm)
+ (ocamlopt_flags :standard -no-float-const-prop)
  (libraries interval_crlibm))
 
 (alias
@@ -38,6 +42,7 @@
 (executable
  (name      graphs)
  (modules   graphs)
+ (ocamlopt_flags :standard -no-float-const-prop)
  (libraries interval_crlibm))
 
 (alias
