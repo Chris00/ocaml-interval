@@ -22,8 +22,6 @@
 
 (** Interval library in OCaml.  ONLY FOR INTEL PROCESSORS.
 
-   @version %%VERSION%%
-
    All operations use correct rounding.
 
    It is recommended to open this module.  It will put into scope
@@ -98,7 +96,9 @@ let x = I.(v 0.5 1. + sin(v 3. 3.125))
    The older deprecated interface is still available.
 
    The library is implemented in x87 assembly mode and is quite
-   efficient ({{:#perf}see below}).  *)
+   efficient ({{:#perf}see below}).
+
+   @version %%VERSION%%  *)
 
 (** {2 Intervals (for Intel processors)} *)
 
@@ -536,40 +536,39 @@ val pow_I_f : t -> float -> t  [@@deprecated "Use I.( **. ) instead"]
 val pow_I_I : t -> t -> t  [@@deprecated "Use I.( *** ) instead"]
 
 
-[@@warning "-50"]
+
 (** {2:perf Performance}
 
 Intel Atom 230 Linux 32 bits:
 -      [ftan] speed (10000000 calls): 2.528158
 -      [fcos] speed (10000000 calls): 2.076129
 -      [fsin] speed (10000000 calls): 1.972123
--     [tan_I] speed (10000000 calls): 4.416276
--     [cos_I] speed (10000000 calls): 4.936308
--     [sin_I] speed (10000000 calls): 5.396338
+-     [I.tan] speed (10000000 calls): 4.416276
+-     [I.cos] speed (10000000 calls): 4.936308
+-     [I.sin] speed (10000000 calls): 5.396338
 -      [fadd] speed (10000000 calls): 0.980062
 -      [fsub] speed (10000000 calls): 0.980061
 -      [fmul] speed (10000000 calls): 0.980061
 -      [fdiv] speed (10000000 calls): 1.424089
--        [+$] speed (10000000 calls): 1.656103
--        [-$] speed (10000000 calls): 1.636103
--        [*$] speed (10000000 calls): 4.568285
--        [/$] speed (10000000 calls): 4.552285
+-   [I.( + )] speed (10000000 calls): 1.656103
+-   [I.( - )] speed (10000000 calls): 1.636103
+-   [I.( * )] speed (10000000 calls): 4.568285
+-   [I.( / )] speed (10000000 calls): 4.552285
 
 Intel 980X Linux 64 bits:
 -      [ftan] speed (10000000 calls): 0.472029
 -      [fcos] speed (10000000 calls): 0.400025
 -      [fsin] speed (10000000 calls): 0.400025
--     [tan_I] speed (10000000 calls): 0.752047
--     [cos_I] speed (10000000 calls): 1.036065
--     [sin_I] speed (10000000 calls): 1.104069
+-     [I.tan] speed (10000000 calls): 0.752047
+-     [I.cos] speed (10000000 calls): 1.036065
+-     [I.sin] speed (10000000 calls): 1.104069
 -      [fadd] speed (10000000 calls): 0.124008
 -      [fsub] speed (10000000 calls): 0.120008
 -      [fmul] speed (10000000 calls): 0.128008
 -      [fdiv] speed (10000000 calls): 0.156010
--        [+$] speed (10000000 calls): 0.340021
--        [-$] speed (10000000 calls): 0.332021
--        [*$] speed (10000000 calls): 0.556035
--        [/$] speed (10000000 calls): 0.468029
+-   [I.( + )] speed (10000000 calls): 0.340021
+-   [I.( - )] speed (10000000 calls): 0.332021
+-   [I.( * )] speed (10000000 calls): 0.556035
+-   [I.( / )] speed (10000000 calls): 0.468029
 
  *)
-;;
