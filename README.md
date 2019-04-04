@@ -94,7 +94,7 @@ tests`) to check that everything is working properly for your machine.
 The `test` program runs also a speed test for your particular
 architecture.
 
-Bug reports should be open made at
+Bug reports should be open at
 https://github.com/Chris00/ocaml-interval/issues
 
 
