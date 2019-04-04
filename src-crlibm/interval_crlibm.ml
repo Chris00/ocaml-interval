@@ -26,14 +26,41 @@ let[@inline] fmax (a: float) (b: float) = if a <= b then b else a
 
 type t = Interval.t = { low: float;  high: float }
 
+module type DIRECTED = sig
+  include Interval.DIRECTED with type t = float
+  include Crlibm.S
+
+  val tanh : t -> t
+
+  module U = Interval.I.U
+end
+
 module Low = struct
   include Interval.Low  (* +, -,... *)
   include Crlibm.Low
+
+  (* [Crlibm.tanh] does not exists.  The bound here may not be the
+     tightest. *)
+  let tanh x =
+    if x >= 0. then
+      let em1 = Crlibm.High.expm1(-2. *. x) in
+      (-. em1) /. Interval.High.(2. +. em1)
+    else
+      let em1 = expm1(2. *. x) in
+      em1 /. (em1 +. 2.)
 end
 
 module High = struct
   include Interval.High
   include Crlibm.High
+
+  let tanh x =
+    if x >= 0. then
+      let em1 = Crlibm.Low.expm1(-2. *. x) in
+      (-. em1) /. Interval.Low.(2. +. em1)
+    else
+      let em1 = expm1(2. *. x) in
+      em1 /. (em1 +. 2.)
 end
 
 module I = struct
@@ -81,13 +108,7 @@ module I = struct
     { low = Low.atan a; high = High.atan b}
 
   let tanh {low = a; high = b} =
-    (* [Crlibm.tanh] does not exists.  The bounds here may not be the
-       tightest. *)
-    let low = if U.(a >= 0.) then Low.(sinh a /. High.cosh a)
-              else Low.(sinh a /. cosh a) in
-    let high = if U.(b >= 0.) then High.(sinh b /. Low.cosh b)
-               else High.(sinh b /. cosh b)in
-    { low; high }
+    { low = Low.tanh a; high = High.tanh b }
 
   include Generic (* Last because redefines [Low] and [High] as the
                      CRlibm ones (generated during build). *)

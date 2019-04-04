@@ -98,14 +98,22 @@ module I : sig
   (** [tanh] extends tanh to interval arithmetic. *)
 end
 
-(** Functions rounding down their results. *)
-module Low : sig
-  include module type of Interval.Low
-  include module type of Crlibm.Low
+
+(** {2 Directed rounding} *)
+
+module type DIRECTED = sig
+  include Interval.DIRECTED with type t = float
+  include Crlibm.S
+
+  val tanh : t -> t
+  (** Hyperbolic tangent.  This is not provided by CRlibm but is
+     defined here for usefulness. *)
+
+  module U = I.U
 end
 
+(** Functions rounding down their results. *)
+module Low : DIRECTED
+
 (** Functions rounding up their results. *)
-module High : sig
-  include module type of Interval.High
-  include module type of Crlibm.High
-end
+module High : DIRECTED
