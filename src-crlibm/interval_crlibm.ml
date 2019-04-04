@@ -66,7 +66,7 @@ end
 module I = struct
   include Interval.I  (* Redefines inequalities for intervals *)
 
-  let mone_one = v (-1.) 1.
+  let mone_one = { low = -1.;  high = 1. }
 
   (* ASSUMING [x] is an integer value, [is_odd x] says whether it is odd. *)
   external is_odd : (float [@unboxed]) -> bool
