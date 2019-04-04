@@ -228,6 +228,24 @@ module High = struct
   let pow_i = high_pow_i
 end
 
+module type DIRECTED = sig
+  type t
+  val zero : t
+  val one : t
+  val pi: t
+  val two_pi : t
+  val half_pi : t
+  val e: t
+  val float: int -> t
+  val ( +. ) : t -> t -> t
+  val ( -. ) : t -> t -> t
+  val ( *. ) : t -> t -> t
+  val ( /. ) : t -> t -> t
+  val sqr : t -> t
+  val cbr : t -> t
+  val pow_i : t -> int -> t
+end
+
 
 type t = {low: float; high: float}
 

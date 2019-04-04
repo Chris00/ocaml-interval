@@ -363,43 +363,51 @@ module I : sig
   end
 end
 
-(** {2 Rounding down and up} *)
+(** {2 Directed rounding} *)
+
+(** Interface for up and down roundings. *)
+module type DIRECTED = sig
+  type t        (** Type of numbers. *)
+
+  val zero : t  (** The neutral element for addition. *)
+
+  val one : t   (** The neutral element for multiplication. *)
+
+  val pi: t
+  (** Upper/lower bound on π. *)
+
+  val two_pi : t
+  (** Upper/lower bound on 2π. *)
+
+  val half_pi : t
+  (** Upper/lower bound on π/2. *)
+
+  val e: t
+  (** Upper/lower bound on [e] (Euler's constant). *)
+
+  val float: int -> t
+  (** When [t = float], the float function is exact on 32 bits machine
+     but not on 64 bits machine with ints larger than 53 bits. *)
+
+  val ( +. ) : t -> t -> t
+  val ( -. ) : t -> t -> t
+  val ( *. ) : t -> t -> t
+  val ( /. ) : t -> t -> t
+
+  val sqr : t -> t
+  (** [sqr x] returns an upper/lower bound on [x]². *)
+
+  val cbr : t -> t
+  (** [cbr x] returns an upper/lower bound on [x]³. *)
+
+  val pow_i : t -> int -> t
+  (** [pow_i x n] return a upper/lower bound on [x]ⁿ. *)
+end
+
 
 (** Functions rounding down their results. *)
 module Low : sig
-  type t = float
-  val zero : float
-  val one : float
-
-  val pi: float
-  (** Lower bound on π. *)
-
-  val two_pi : float
-  (** Lower bound on 2π. *)
-
-  val half_pi : float
-  (** Lower bound on π/2. *)
-
-  val e: float
-  (** Lower bound on [e] (Euler's constant). *)
-
-  val float: int -> float
-  (** The float function is exact on 32 bits machine but not on 64
-     bits machine with ints larger than 53 bits. *)
-
-  val ( +. ) : float -> float -> float
-  val ( -. ) : float -> float -> float
-  val ( *. ) : float -> float -> float
-  val ( /. ) : float -> float -> float
-
-  val sqr : float -> float
-  (** [sqr x] returns a lower bound on [x]². *)
-
-  val cbr : float -> float
-  (** [cbr x] returns a lower bound on [x]³. *)
-
-  val pow_i : float -> int -> float
-  (** [pow_i x n] return a lower bound on [x]ⁿ. *)
+  include DIRECTED with type t = float
 
   (** Locally open to restore standard integer and floating point
      operators. *)
@@ -408,39 +416,7 @@ end
 
 (** Functions rounding up their results. *)
 module High : sig
-  type t = float
-  val zero : float
-  val one : float
-
-  val pi: float
-  (** Upper bound on π. *)
-
-  val two_pi : float
-  (** Upper bound on 2π. *)
-
-  val half_pi : float
-  (** Upper bound on π/2. *)
-
-  val e: float
-  (** Upper bound on [e] (Euler's constant). *)
-
-  val float: int -> float
-  (** The float function is exact on 32 bits machine but not on 64
-     bits machine with ints larger than 53 bits. *)
-
-  val ( +. ) : float -> float -> float
-  val ( -. ) : float -> float -> float
-  val ( *. ) : float -> float -> float
-  val ( /. ) : float -> float -> float
-
-  val sqr : float -> float
-  (** [sqr x] returns an upper bound on [x]². *)
-
-  val cbr : float -> float
-  (** [cbr x] returns an upper bound on [x]³. *)
-
-  val pow_i : float -> int -> float
-  (** [pow_i x n] return an upper bound on [x]ⁿ. *)
+  include DIRECTED with type t = float
 
   (** Locally open to restore standard integer and floating point
      operators. *)
