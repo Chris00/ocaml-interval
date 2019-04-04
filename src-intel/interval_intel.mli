@@ -214,9 +214,9 @@ module I : sig
   val atan2mod: t -> t -> t
   (** [atan2mod y x] returns the proper extension of interval arithmetic
      to [atan2] but with values in \[-π, 2π\] instead of \[-π, π\].
-     This can happen when [y.low < 0] and [y.high > 0] and [x.high < 0]:
+     When [y.low < 0] and [y.high > 0] and [x.high < 0],
      then the returned interval is [{low=atan2 y.high x.high;
-     high=(atan2 y.low x.high)+2 pi}].  This preserves the best
+     high=(atan2 y.low x.high) + 2π}].  This preserves the best
      inclusion function possible but is not compatible with the standard
      definition of [atan2]. *)
 
