@@ -47,7 +47,7 @@ upgrade:
 	opam upgrade -y $(PACKAGES)
 
 lint:
-	@for p in $(PACKAGES); do opam lint $$p.opam; done
+	opam lint
 
 .PHONY: all build ocamlfpu install uninstall tests graphs \
   examples clean doc bistro pin unpin upgrade lint
