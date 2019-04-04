@@ -21,29 +21,6 @@
 
 open Printf
 
-let rnd_values = Array.init 1000 (fun _ -> 1000. -. Random.float 2000.)
-
-let speed_cmp1 loops (name, f) =
-  let l = Array.length rnd_values in
-  printf "%10s speed (%d calls): %!" name loops;
-  let top = (Unix.times ()).Unix.tms_utime in
-  for _ = 1 to loops / l do
-    Array.iter (fun x -> ignore (f x)) rnd_values
-  done;
-  let dt = (Unix.times ()).Unix.tms_utime -. top in
-  printf "%f\n%!" dt
-
-let speed_cmp2 loops (name, f) =
-  let l = Array.length rnd_values in
-  printf "%10s speed (%d calls): %!" name loops;
-  let top = (Unix.times ()).Unix.tms_utime in
-  for _ = 1 to loops / l do
-    Array.iter (fun x -> ignore (f x x)) rnd_values;
-  done;
-  let dt = (Unix.times ()).Unix.tms_utime -. top in
-  printf "%f\n%!" dt
-
-
 type test_mode = Exact | In | Mod2pi
 
 type test_infos = {
@@ -220,37 +197,6 @@ module Test (I: FLOAT_INTERVAL) (Low: DIRECTED) (High: DIRECTED) = struct
           List.iter (fun f -> add_result infos [x; ny] (f x ny)) f_list) values;
       print_test infos) valuesi) bounds
 
-  let rnd_values_I =
-    Array.init 1000 (fun _ ->
-        let x1 = 1000. -. Random.float 2000. and x2 = Random.float 10. in
-        I.v x1 (x1 +. x2))
-
-  let rnd_values_pos_I =
-    Array.init 1000 (fun _ ->
-        let x1 = Random.float 2000. and x2 = Random.float 10. in
-        I.v x1 (x1 +. x2))
-
-  let speed_cmp1_I ?(pos=false) loops (name, f) =
-    let l = Array.length rnd_values_I in
-    printf "%10s speed (%d calls): %!" name loops;
-    let rnd_I = if pos then rnd_values_pos_I else rnd_values_I in
-    let top = (Unix.times ()).Unix.tms_utime in
-    for _ = 1 to loops / l do
-      Array.iter (fun x -> ignore (f x)) rnd_I
-    done;
-    let dt = (Unix.times ()).Unix.tms_utime -. top in
-    printf "%f\n%!" dt
-
-  let speed_cmp2_I loops (name, f) =
-    let l = Array.length rnd_values_I in
-    printf "%10s speed (%d calls): %!" name loops;
-    let top = (Unix.times ()).Unix.tms_utime in
-    for _ = 1 to loops / l do
-      Array.iter (fun x -> ignore (f x x)) rnd_values_I
-    done;
-    let dt = (Unix.times ()).Unix.tms_utime -. top in
-    printf "%f\n%!" dt
-
   let inv x = 1. /. x
   let inv_low x = Low.(1. /. x)
   let inv_high x = High.(1. /. x)
@@ -317,24 +263,6 @@ module Test (I: FLOAT_INTERVAL) (Low: DIRECTED) (High: DIRECTED) = struct
       ("min I I", [ min; min; min], I.min)];
 
   printf "%f seconds.\n%!" (Sys.time () -. top);
-
-  List.iter (speed_cmp1 10000000) [
-      ("tan", tan); ("cos", cos); ("sin", sin);
-      ("exp", exp); ("log", log) ];
-
-  List.iter (speed_cmp1_I 10000000) [
-      ("I.tan", I.tan); ("I.cos", I.cos); ("I.sin", I.sin);
-      ("I.exp", I.exp); ];
-  List.iter (speed_cmp1_I 10000000 ~pos:true) [
-      ("I.log", I.log) ];
-
-  List.iter (speed_cmp2 10000000) [
-      ("+.", ( +. )); ("-.", ( -. )); ("*.", ( *. )); ("/.", ( /. ));
-      ("**", ( ** )); ("mod_float", mod_float)];
-
-  List.iter (speed_cmp2_I 20000000) [
-      ("I+I", I.( + )); ("I-I", I.( - ));
-      ("I*I", I.( * )); ("I/I", I.( / ))];
 end
 
 
@@ -373,15 +301,6 @@ module Test_Intel = struct
         ("I**I", [pospow; Low.pow; High.pow], I.( *** ) ) ];
     check_I_I Mod2pi values bounds
       ("I.atan2mod", [myatan2; myatan2_low; myatan2_high], I.atan2mod);
-
-    List.iter (speed_cmp1 10000000) [
-        ("ftan", Fpu.ftan); ("fcos", Fpu.fcos); ("fsin", Fpu.fsin);
-        ("fexp", Fpu.fexp); ("flog", Fpu.flog) ];
-    List.iter (speed_cmp2 10000000) [
-        ("fadd", Fpu.fadd); ("fsub", Fpu.fsub);
-        ("fmul", Fpu.fmul); ("fdiv", Fpu.fdiv);
-        ("fpow", Fpu.fpow);
-        ("fmod", Fpu.fmod)];
 end
 
 module Test_Crlibm = struct

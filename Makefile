@@ -19,6 +19,9 @@ tests: all
 	  echo "Tests: $$C errors (see _build/default/tests/tests.log)"; \
 	else echo "All tests passed successfully"; fi
 
+test-speed:
+	dune exec tests/tests_speed.exe
+
 graphs:
 	dune build @graphs
 	@echo See $(wildcard _build/default/tests/*.pdf)
@@ -49,5 +52,5 @@ upgrade:
 lint:
 	opam lint
 
-.PHONY: all build ocamlfpu install uninstall tests graphs \
+.PHONY: all build ocamlfpu install uninstall tests test-speed graphs \
   examples clean doc bistro pin unpin upgrade lint
