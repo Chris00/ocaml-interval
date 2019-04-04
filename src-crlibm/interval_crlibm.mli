@@ -21,13 +21,17 @@
 
 (** Interval library for OCaml (crlibm version).
 
-   This library is slightly slower than Interval but has the important
-   property that the functions are proved correct (while Interval
-   mostly uses the processor implementation, some of which are
-   flawed).  Some additional functions are also available, thanks to
-   CRlibm.
+   This library has the important property that the functions are
+   proved correct (while {!Interval_intel} mostly uses the processor
+   implementation, which is sometimes flawed).  It is sometimes
+   faster, sometimes slightly slower than {!Interval_intel}.  Some
+   additional functions are also available, thanks to CRlibm.
 
-   @version %%VERSION%%  *)
+   It is recommended to open this module.
+
+   @version %%VERSION%% *)
+
+(** {2 Interval sub-module} *)
 
 type t = Interval.t = {
     low: float; (** lower bound, possibly = -∞ *)
