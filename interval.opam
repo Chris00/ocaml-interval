@@ -9,6 +9,10 @@ bug-reports: "https://github.com/Chris00/ocaml-interval/issues"
 doc: "https://Chris00.github.io/ocaml-interval/doc"
 license: "LGPL-3.0"
 tags: ["interval" "science"]
+build: [
+  [make "test-speed"] {with-test}
+  [make "tests"] {with-test}
+]
 depends: [
   "ocaml"
   "interval_base" {= version}
