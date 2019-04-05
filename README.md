@@ -32,9 +32,9 @@ Several [OPAM][] packages are provided by this repository:
   so this is the library of choice for computer assisted proofs.
 
 - `interval_intel`: use Intel FPU instructions with directed rounding
-  to implement interval operations.  It is faster than
-  `interval_crlibm` but the Intel FPU operations may not always be
-  correctly rounded for, say, trigonometric functions.
+  to implement interval operations.  However, the Intel FPU operations
+  may not always be correctly rounded for, say, trigonometric
+  functions.
 
   `interval_intel` uses assembly code to compute all operations with
   proper rounding, and currently **ONLY** works on Intel processors.
