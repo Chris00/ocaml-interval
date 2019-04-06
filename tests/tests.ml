@@ -35,9 +35,8 @@ type test_infos = {
     mutable neg_inf: bool;
   }
 
-module type FLOAT_INTERVAL = sig
-  val name : string
-  include Interval.T with type number = float and type t = Interval.t
+module type TRIGS = sig
+  type t
   val log : t -> t
   val exp : t -> t
   val cos : t -> t
@@ -49,24 +48,21 @@ module type FLOAT_INTERVAL = sig
   val cosh : t -> t
   val sinh : t -> t
   val tanh : t -> t
+end
+
+module type FLOAT_INTERVAL = sig
+  val name : string
+  include Interval.T with type number = float and type t = Interval.t
+  include TRIGS with type t := Interval.t
 end
 
 module type DIRECTED = sig
   include Interval.DIRECTED with type t = float
-  val exp : t -> t
-  val log : t -> t
-  val cos : t -> t
-  val sin : t -> t
-  val tan : t -> t
-  val asin : t -> t
-  val acos : t -> t
-  val atan : t -> t
-  val cosh : t -> t
-  val sinh : t -> t
-  val tanh : t -> t
+  include TRIGS with type t := float
 end
 
-module Test (I: FLOAT_INTERVAL) (Low: DIRECTED) (High: DIRECTED) = struct
+module Test (I: FLOAT_INTERVAL) (Nearest: TRIGS with type t := float)
+         (Low: DIRECTED) (High: DIRECTED) = struct
 
   let create_test mode f x =
     flush stdout;
@@ -133,6 +129,8 @@ module Test (I: FLOAT_INTERVAL) (Low: DIRECTED) (High: DIRECTED) = struct
       else error "Should fail.")
     else if infos.res_low <= infos.res_high then error "Should be"
 
+  (** [iter f l] executes [f] on all intervals delimited by
+     consecutive elements of [l] (properly handling infinite values). *)
   let rec iter f = function
     | a::tl as l when a <> infinity ->
        let b_list = if a = neg_infinity then tl else l in
@@ -140,6 +138,7 @@ module Test (I: FLOAT_INTERVAL) (Low: DIRECTED) (High: DIRECTED) = struct
        iter f tl
     | _ -> ()
 
+  (** Execute [f] for all elements of [values] in [x_I]. *)
   let iter_in x_I f values =
     let open Interval in
     List.iter (fun x ->
@@ -235,19 +234,19 @@ module Test (I: FLOAT_INTERVAL) (Low: DIRECTED) (High: DIRECTED) = struct
     List.iter (check_I Exact values bounds)
       [ ("I.abs",  [abs_float], I.abs);
         ("I.inv",  [inv; inv_low; inv_high], I.inv);
-        ("I.log",  [log; Low.log; High.log], I.log);
-        ("I.exp",  [exp; Low.exp; High.exp], I.exp);
-        ("I.atan", [atan; Low.atan; High.atan], I.atan);
-        ("I.asin", [asin; Low.asin; High.asin], I.asin);
-        ("I.acos", [acos; Low.acos; High.acos], I.acos);
-        ("I.cosh", [cosh; Low.cosh; High.cosh], I.cosh);
-        ("I.sinh", [sinh; Low.sinh; High.sinh], I.sinh);
-        ("I.tanh", [tanh; Low.tanh; High.tanh], I.tanh); ];
+        ("I.log",  [Nearest.log; Low.log; High.log], I.log);
+        ("I.exp",  [Nearest.exp; Low.exp; High.exp], I.exp);
+        ("I.atan", [Nearest.atan; Low.atan; High.atan], I.atan);
+        ("I.asin", [Nearest.asin; Low.asin; High.asin], I.asin);
+        ("I.acos", [Nearest.acos; Low.acos; High.acos], I.acos);
+        ("I.cosh", [Nearest.cosh; Low.cosh; High.cosh], I.cosh);
+        ("I.sinh", [Nearest.sinh; Low.sinh; High.sinh], I.sinh);
+        ("I.tanh", [Nearest.tanh; Low.tanh; High.tanh], I.tanh); ];
 
     List.iter (check_I Exact pio2s angles)
-      [ ("I.cos", [cos; Low.cos; High.cos], I.cos);
-        ("I.sin", [sin; Low.sin; High.sin], I.sin)];
-    check_I In pio2s angles ("I.tan", [tan; Low.tan; High.tan], I.tan);
+      [ ("I.cos", [Nearest.cos; Low.cos; High.cos], I.cos);
+        ("I.sin", [Nearest.sin; Low.sin; High.sin], I.sin)];
+    check_I In pio2s angles ("I.tan", [Nearest.tan; Low.tan; High.tan], I.tan);
 
     List.iter (check_f_I Exact values bounds)
       [ ("f + I", [( +. ); Low.( +. ); High.( +. )], I.( +: ));
@@ -260,8 +259,8 @@ module Test (I: FLOAT_INTERVAL) (Low: DIRECTED) (High: DIRECTED) = struct
         ("I - I", [( -. ); Low.( -. ); High.( -. )], I.( - ));
         ("I * I", [( *. ); Low.( *. ); High.( *. )], I.( * ));
         ("I / I", [( /. ); Low.( /. ); High.( /. )], I.( / ));
-        ("max I I", [ max; max; max], I.max);
-        ("min I I", [ min; min; min], I.min)];
+        ("max I I", [max; max; max], I.max);
+        ("min I I", [min; min; min], I.min)];
 
     printf "%f seconds.\n%!" (Sys.time () -. top);
 end
@@ -277,7 +276,7 @@ module Test_Intel = struct
     include Interval_intel.I
   end
   module Fpu = Interval_intel.Fpu
-  include Test(I)(Interval_intel.Low)(Interval_intel.High)
+  include Test(I)(Pervasives)(Interval_intel.Low)(Interval_intel.High)
 
   let myatan2 y x = if y = 0.&& x = 0. then nan else atan2 y x
   let myatan2_low y x = if y = 0. && x = 0. then nan else Low.atan2 y x
@@ -315,5 +314,9 @@ module Test_Crlibm = struct
     let name = "CRlibm"
     include Interval_crlibm.I
   end
-  include Test(I)(Interval_crlibm.Low)(Interval_crlibm.High)
+  module Nearest = struct
+    include Crlibm
+    let tanh = Pervasives.tanh
+  end
+  include Test(I)(Nearest)(Interval_crlibm.Low)(Interval_crlibm.High)
 end
