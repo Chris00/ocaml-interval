@@ -19,6 +19,9 @@
   `interior`, `<`, `>`, `strict_precedes`, `disjoint`.
 - New predicates `is_bounded`, `is_entire`.
 - New constants `I.half_pi` ∋ π/2 and `I.entire` for [-∞, +∞].
+- `interval_crlibm`: functions `expm1`, `log1p`, `log2`, `log10`,
+  `cospi`, `sinpi`, `tanpi`, `acospi`, `asinpi`, `atanpi`, not present
+  in the Intel version.
 - The module `I.U` also restores inequality relations.
 - Speed and documentation improvements.
 

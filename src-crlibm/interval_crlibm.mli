@@ -55,21 +55,43 @@ module I : sig
 
       Raise [Domain_error] if [a.high] ≤ 0. *)
 
+  val log1p : t -> t
+  (** [log1p a] returns an enclosure of \{log(1 + x) | x ∈ [a]\}.
+      Raise [Domain_error] if [a.high] ≤ -1. *)
+
   val exp: t -> t
-  (** [exp a] returns [{low=exp a.high; high=exp b.high}], properly rounded. *)
+  (** [exp a] returns an enclosure of \{eˣ | x ∈ [a]\}. *)
+
+  val expm1 : t -> t
+  (** [expm1 a] returns an enclosure of \{eˣ-1 | x ∈ [a]\}. *)
+
+  val log2 : t -> t
+  (** [log2] is an interval extension of log₂. *)
+
+  val log10 : t -> t
+  (** [log10] is an interval extension of log₁₀. *)
 
 
   (** {2 Trigonometric functions} *)
 
   val cos: t -> t
-  (** [cos a] returns the proper extension of cos to interval arithmetic. *)
+  (** [cos] is an interval extension of cos. *)
+
+  val cospi: t -> t
+  (** [cospi a] is an interval extension of x ↦ cos(π·x). *)
 
   val sin: t -> t
-  (** [sin a] returns the proper extension of sin to interval arithmetic. *)
+  (** [sin] is interval extension of sin. *)
+
+  val sinpi: t -> t
+  (** [sinpi] is an interval extension of x ↦ sin(π·x). *)
 
   val tan: t -> t
-  (** [tan a]  returns the proper extension of tan to interval arithmetic.
+  (** [tan] is an interval extension of tan.
       Returns \[-∞,∞\] if one of the bounds is greater or lower than ±2⁵³. *)
+
+  val tanpi: t -> t
+  (** [tanpi] is an interval extension of x ↦ tan(π·x). *)
 
   val acos: t -> t
   (** [acos a] returns [{low=(if a.high<1. then acos a.high else 0);
@@ -78,6 +100,11 @@ module I : sig
 
      @raise Domain_error if [a.low > 1.] or [a.high < -1.] *)
 
+  val acospi: t -> t
+  (** [acospi a] returns an enclosure of \{acos(x)/π | x ∈ [a]\}.
+      All values are in \[0,1\].
+      @raise Domain_error if [a.low > 1.] or [a.high < -1.] *)
+
   val asin: t -> t
   (** [asin a] returns [{low=(if a.low > -1. then asin a.low else -pi/2);
      high=(if a.low < 1. then asin a.high else pi/2)}].
@@ -85,9 +112,18 @@ module I : sig
 
      @raise Domain_error if [a.low > 1.] or [a.high < -1.] *)
 
+  val asinpi: t -> t
+  (** [asinpi a] returns an enclosure of \{asin(x)/π | x ∈ [a]\}.
+      All values are in \[-1/2, 1/2\].
+      @raise Domain_error if [a.low > 1.] or [a.high < -1.] *)
+
   val atan: t -> t
   (** [atan a] returns [{low=atan a.low; high=atan a.high}] properly
      rounded. *)
+
+  val atanpi: t -> t
+  (** [atanpi a] returns an enclosure of \{atan(x)/π | x ∈ [a]\}.
+      All values are in \[-1/2, 1/2\]. *)
 
 
   (** {2 Hyperbolic functions} *)

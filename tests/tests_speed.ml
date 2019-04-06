@@ -83,6 +83,6 @@ let () =
   let open Interval_crlibm in
   List.iter (speed_cmp1_I 10000000) [
       ("CRlibm I.tan", I.tan); ("I.cos", I.cos); ("I.sin", I.sin);
-      ("I.exp", I.exp); ];
+      ("I.exp", I.exp); ("I.expm1", I.expm1);];
   List.iter (speed_cmp1_I 10000000 ~pos:true) [
-      ("I.log", I.log) ];
+      ("I.log", I.log); ("I.log1p", I.log1p) ];

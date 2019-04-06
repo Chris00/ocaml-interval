@@ -89,6 +89,23 @@ module I = struct
         {low = -1.;  high = fmax (High.cos a) (High.cos b)}
       else mone_one
 
+  let cospi { low = a; high = b } =
+    let open U in
+    let k = floor a in
+    let l = floor b in
+    if is_odd k then
+      if l = k then
+        (* It is guaranteed that k ≤ a ≤ b ≤ k+1. *)
+        {low = Low.cospi a;  high = High.cospi b} (* increasing *)
+      else if l = k +. 1. then
+        {low = fmin (Low.cospi a) (Low.cospi b);  high = 1.}
+      else mone_one
+    else (* k even *)
+      if l = k then {low = Low.cospi b;  high = High.cospi a} (* decreasing *)
+      else if l = k +. 1. then
+        {low = -1.;  high = fmax (High.cospi a) (High.cospi b)}
+      else mone_one
+
   let sin { low = a; high = b } =
     let open U in
     let k = floor Low.(a /. High.pi -. 0.5) in
@@ -104,11 +121,69 @@ module I = struct
         {low = -1.;  high = fmax (High.sin a) (High.sin b)}
       else mone_one
 
+  let sinpi { low = a; high = b } =
+    let open U in
+    let k = floor Low.(a -. 0.5) in
+    let l = floor High.(b -. 0.5) in
+    if is_odd k then
+      if l = k then {low = Low.sinpi a;  high = High.sinpi b} (* increasing *)
+      else if l = k +. 1. then
+        {low = fmin (Low.sinpi a) (Low.sinpi b);  high = 1.}
+      else mone_one
+    else
+      if l = k then {low = Low.sinpi b;  high = High.sinpi a } (* decreasing *)
+      else if l = k +. 1. then
+        {low = -1.;  high = fmax (High.sinpi a) (High.sinpi b)}
+      else mone_one
+
+  let max_63 = ldexp 1. 63
+
+  let tanpi {low = a; high = b} =
+    if U.(-.max_63 <= a && b <= max_63 && High.(b -. a < 1.)) then (
+      let ta = Low.tanpi a in
+      let tb = High.tanpi b in
+      if U.(ta <= tb) then {low = ta; high = tb}
+      else entire)
+    else entire
+
+  let acospi {low = a; high = b} =
+    if U.(a <= 1. && -1. <= b) then
+      {low = if U.(b < 1.) then Low.acospi b else 0.;
+       high = if U.(-1. < a) then High.acospi a else 1.}
+    else raise(Interval.Domain_error "acospi")
+
+  let asinpi {low = a; high = b} =
+    if U.(a <= 1. && -1. <= b) then
+      { low = if U.(-1. < a) then Low.asinpi a else -0.5;
+        high = if U.(b < 1.) then High.asinpi b else 0.5 }
+    else raise(Interval.Domain_error "asinpi")
+
   let atan {low = a; high = b} =
     { low = Low.atan a; high = High.atan b}
 
+  let atanpi {low = a; high = b} =
+    { low = Low.atanpi a; high = High.atanpi b}
+
   let tanh {low = a; high = b} =
     { low = Low.tanh a; high = High.tanh b }
+
+  let log1p {low = a; high = b} =
+    if U.(b <= -1.) then raise(Interval.Domain_error "log1p")
+    else {low = if U.(a <= -1.) then neg_infinity else Low.log1p a;
+          high = High.log1p b}
+
+  let log2 {low = a; high = b} =
+    if U.(b <= 0.) then raise(Interval.Domain_error "log2")
+    else {low = if U.(a <= 0.) then neg_infinity else Low.log2 a;
+          high = High.log2 b}
+
+  let log10 {low = a; high = b} =
+    if U.(b <= 0.) then raise(Interval.Domain_error "log10")
+    else {low = if U.(a <= 0.) then neg_infinity else Low.log10 a;
+          high = High.log10 b}
+
+  let expm1 {low = a; high = b} =
+    { low = Low.expm1 a; high = High.expm1 b}
 
   include Generic (* Last because redefines [Low] and [High] as the
                      CRlibm ones (generated during build). *)

@@ -21,6 +21,12 @@ let () =
   let c = I.(cos pi) in
   printf ("cos([π]) = " ^^ I.fmt "%.17f" ^^ " %s\n")
     c (singleton c.low c.high);
+  let c = I.(cospi one) in
+  printf ("cospi([1,1]) = " ^^ I.fmt "%.17f" ^^ " %s\n")
+    c (singleton c.low c.high);
   let s = I.(sin pi) in
   printf ("sin([π]) = " ^^ I.fmt "%g" ^^ " %s\n")
+    s (singleton s.low s.high);
+  let s = I.(sinpi one) in
+  printf ("sinpi([1,1]) = " ^^ I.fmt "%g" ^^ " %s\n")
     s (singleton s.low s.high)
