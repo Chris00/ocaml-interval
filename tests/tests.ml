@@ -36,6 +36,7 @@ type test_infos = {
   }
 
 module type FLOAT_INTERVAL = sig
+  val name : string
   include Interval.T with type number = float and type t = Interval.t
   val log : t -> t
   val exp : t -> t
@@ -154,7 +155,7 @@ module Test (I: FLOAT_INTERVAL) (Low: DIRECTED) (High: DIRECTED) = struct
 
   let check_I mode values bounds (name, f_list, f_I) =
     iter (fun x_I ->
-        printf "%s: %s =\n" name (I.to_string ~fmt:"%.25e" x_I);
+        printf "%s.%s: %s =\n" I.name name (I.to_string ~fmt:"%.25e" x_I);
         let infos = create_test mode f_I x_I in
         iter_in x_I (fun x ->
             List.iter (fun f -> add_result infos [x] (f x)) f_list) values;
@@ -162,7 +163,7 @@ module Test (I: FLOAT_INTERVAL) (Low: DIRECTED) (High: DIRECTED) = struct
 
   let check_I_f mode values bounds (name, f_list, f_I_f) =
     iter (fun x_I -> iter_finite (fun y ->
-      printf "%s: %s %e =\n" name (I.to_string ~fmt:"%e" x_I) y;
+      printf "%s.%s: %s %e =\n" I.name name (I.to_string ~fmt:"%e" x_I) y;
       let infos = create_test mode (f_I_f x_I) y in
       iter_in x_I (fun x ->
           if name = "pow" && x = 0. then
@@ -172,7 +173,7 @@ module Test (I: FLOAT_INTERVAL) (Low: DIRECTED) (High: DIRECTED) = struct
 
   let check_f_I mode values bounds (name, f_list, f_f_I) =
     iter_finite (fun x -> iter (fun y_I ->
-      printf "%s: %e %s =\n" name x (I.to_string ~fmt:"%e" y_I);
+      printf "%s.%s: %e %s =\n" I.name name x (I.to_string ~fmt:"%e" y_I);
       let infos = create_test mode (f_f_I x) y_I in
       iter_in y_I (fun y ->
           List.iter (fun f -> add_result infos [x; y] (f x y)) f_list) values;
@@ -180,7 +181,7 @@ module Test (I: FLOAT_INTERVAL) (Low: DIRECTED) (High: DIRECTED) = struct
 
   let check_I_I mode values bounds (name, f_list, f_I_I) =
     iter (fun x_I -> iter (fun y_I ->
-            printf "%s: %s %s =\n" name (I.to_string ~fmt:"%e" x_I)
+            printf "%s.%s: %s %s =\n" I.name name (I.to_string ~fmt:"%e" x_I)
             (I.to_string ~fmt:"%e" y_I);
       let infos = create_test mode (f_I_I x_I) y_I in
       iter_in x_I  (fun x -> iter_in y_I (fun y ->
@@ -190,7 +191,7 @@ module Test (I: FLOAT_INTERVAL) (Low: DIRECTED) (High: DIRECTED) = struct
 
   let check_I_i mode values bounds valuesi (name, f_list, f_I_i) =
     iter (fun x_I -> List.iter (fun n ->
-      printf "%s: %s %d =\n" name (I.to_string ~fmt:"%e" x_I) n;
+      printf "%s.%s: %s %d =\n" I.name name (I.to_string ~fmt:"%e" x_I) n;
       let infos = create_test mode (f_I_i x_I) n in
       let ny = float n in
       iter_in x_I (fun x ->
@@ -231,38 +232,38 @@ module Test (I: FLOAT_INTERVAL) (Low: DIRECTED) (High: DIRECTED) = struct
         ("I * f", [( *. ); Low.( *. ); High.( *. )], I.( *: ));
         ("I / f", [( /. ); Low.( /. ); High.( /. )], I.( /. )) ];
 
-  List.iter (check_I Exact values bounds)
-    [ ("I.abs",  [abs_float], I.abs);
-      ("I.inv",  [inv; inv_low; inv_high], I.inv);
-      ("I.log",  [log; Low.log; High.log], I.log);
-      ("I.exp",  [exp; Low.exp; High.exp], I.exp);
-      ("I.atan", [atan; Low.atan; High.atan], I.atan);
-      ("I.asin", [asin; Low.asin; High.asin], I.asin);
-      ("I.acos", [acos; Low.acos; High.acos], I.acos);
-      ("I.cosh", [cosh; Low.cosh; High.cosh], I.cosh);
-      ("I.sinh", [sinh; Low.sinh; High.sinh], I.sinh);
-      ("I.tanh", [tanh; Low.tanh; High.tanh], I.tanh); ];
+    List.iter (check_I Exact values bounds)
+      [ ("I.abs",  [abs_float], I.abs);
+        ("I.inv",  [inv; inv_low; inv_high], I.inv);
+        ("I.log",  [log; Low.log; High.log], I.log);
+        ("I.exp",  [exp; Low.exp; High.exp], I.exp);
+        ("I.atan", [atan; Low.atan; High.atan], I.atan);
+        ("I.asin", [asin; Low.asin; High.asin], I.asin);
+        ("I.acos", [acos; Low.acos; High.acos], I.acos);
+        ("I.cosh", [cosh; Low.cosh; High.cosh], I.cosh);
+        ("I.sinh", [sinh; Low.sinh; High.sinh], I.sinh);
+        ("I.tanh", [tanh; Low.tanh; High.tanh], I.tanh); ];
 
-  List.iter (check_I Exact pio2s angles)
-    [ ("I.cos", [cos; Low.cos; High.cos], I.cos);
-      ("I.sin", [sin; Low.sin; High.sin], I.sin)];
-  check_I In pio2s angles ("I.tan", [tan; Low.tan; High.tan], I.tan);
+    List.iter (check_I Exact pio2s angles)
+      [ ("I.cos", [cos; Low.cos; High.cos], I.cos);
+        ("I.sin", [sin; Low.sin; High.sin], I.sin)];
+    check_I In pio2s angles ("I.tan", [tan; Low.tan; High.tan], I.tan);
 
-  List.iter (check_f_I Exact values bounds)
-    [ ("f + I", [( +. ); Low.( +. ); High.( +. )], I.( +: ));
-      ("f - I", [( -. ); Low.( -. ); High.( -. )], I.( -: ));
-      ("f * I", [( *. ); Low.( *. ); High.( *. )], I.( *. ));
-      ("f / I", [( /. ); Low.( /. ); High.( /. )], I.( /: )) ];
+    List.iter (check_f_I Exact values bounds)
+      [ ("f + I", [( +. ); Low.( +. ); High.( +. )], I.( +: ));
+        ("f - I", [( -. ); Low.( -. ); High.( -. )], I.( -: ));
+        ("f * I", [( *. ); Low.( *. ); High.( *. )], I.( *. ));
+        ("f / I", [( /. ); Low.( /. ); High.( /. )], I.( /: )) ];
 
-  List.iter (check_I_I Exact values bounds)
-    [ ("I + I", [( +. ); Low.( +. ); High.( +. )], I.( + ));
-      ("I - I", [( -. ); Low.( -. ); High.( -. )], I.( - ));
-      ("I * I", [( *. ); Low.( *. ); High.( *. )], I.( * ));
-      ("I / I", [( /. ); Low.( /. ); High.( /. )], I.( / ));
-      ("max I I", [ max; max; max], I.max);
-      ("min I I", [ min; min; min], I.min)];
+    List.iter (check_I_I Exact values bounds)
+      [ ("I + I", [( +. ); Low.( +. ); High.( +. )], I.( + ));
+        ("I - I", [( -. ); Low.( -. ); High.( -. )], I.( - ));
+        ("I * I", [( *. ); Low.( *. ); High.( *. )], I.( * ));
+        ("I / I", [( /. ); Low.( /. ); High.( /. )], I.( / ));
+        ("max I I", [ max; max; max], I.max);
+        ("min I I", [ min; min; min], I.min)];
 
-  printf "%f seconds.\n%!" (Sys.time () -. top);
+    printf "%f seconds.\n%!" (Sys.time () -. top);
 end
 
 
@@ -271,7 +272,10 @@ module Test_Intel = struct
     printf "*** Test Interval_intel ***\n%!"
 
   open Interval_intel
-  module I = Interval_intel.I
+  module I = struct
+    let name = "Intel"
+    include Interval_intel.I
+  end
   module Fpu = Interval_intel.Fpu
   include Test(I)(Interval_intel.Low)(Interval_intel.High)
 
@@ -307,6 +311,9 @@ module Test_Crlibm = struct
   let () =
     printf "*** Test Interval_crlibm ***\n%!"
 
-  module I = Interval_crlibm.I
+  module I = struct
+    let name = "CRlibm"
+    include Interval_crlibm.I
+  end
   include Test(I)(Interval_crlibm.Low)(Interval_crlibm.High)
 end
