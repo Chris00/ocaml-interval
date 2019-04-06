@@ -1,2 +1,0 @@
-{1 Library interval}
-This library exposes the following toplevel modules: {!modules:Fpu Fpu_rename Fpu_rename_all Interval Interval__U}.
