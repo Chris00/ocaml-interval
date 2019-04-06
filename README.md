@@ -75,7 +75,7 @@ interfaces of
   [Fpu](src-intel/fpu.mli),
 - [Interval_crlibm](src-crlibm/interval_crlibm.mli),
 
-or [online](https://chris00.github.io/ocaml-interval/doc/interval/).
+or [online](https://chris00.github.io/ocaml-interval/doc/).
 It is extremely wise to read the whole documentation, even if you
 intend to only use the `Interval_intel` module.
 
