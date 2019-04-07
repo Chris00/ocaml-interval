@@ -14,7 +14,7 @@ build: [
   [make "tests"] {with-test}
 ]
 depends: [
-  "ocaml"
+  "ocaml" {>= "4.03"}
   "interval_base" {= version}
   "interval_intel" {= version}
   "interval_crlibm" {= version}

@@ -15,7 +15,7 @@ build: [
   ["dune" "build" "@doc"] {with-doc}
 ]
 depends: [
-  "ocaml"
+  "ocaml" {>= "4.03"}
   "dune" {build}
 ]
 synopsis: "An interval library for OCaml (base package)"

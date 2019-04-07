@@ -15,7 +15,7 @@ build: [
   ["dune" "build" "@doc"] {with-doc}
 ]
 depends: [
-  "ocaml" {>= "3.12"}
+  "ocaml" {>= "4.03"}
   "interval_base" {= version}
   "dune" {build}
 ]
