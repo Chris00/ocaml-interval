@@ -162,6 +162,12 @@ module H = struct
     else pos_pow_IN (a *. x) (x *. x) (n / 2)
 end
 
+let[@inline] low_cbr x =
+  if x >= 0. then L.(x *. x *. x) else L.(x *. H.(x *. x))
+
+let[@inline] high_cbr x =
+  if x >= 0. then H.(x *. x *. x) else H.(x *. L.(x *. x))
+
 let rec low_pow_IN x n = (* x ∈ ℝ, n ≥ 0 *)
   if is_even n then L.(pos_pow_IN 1. (x *. x) (n / 2))
   else if x >= 0. then x *. L.(pos_pow_IN 1. (x *. x) (n / 2))
@@ -170,7 +176,7 @@ and low_pow_i x = function
   | 0 -> 1.
   | 1 -> x
   | 2 -> L.(x *. x)
-  | 3 -> if x >= 0. then L.(x *. x *. x) else L.(x *. H.(x *. x))
+  | 3 -> low_cbr x
   | 4 -> L.(let x2 = x *. x in x2 *. x2)
   | n -> if n >= 0 then low_pow_IN x n
          else (* Since the rounding has the same sign than xⁿ, we can
@@ -184,7 +190,7 @@ and high_pow_i x = function
   | 0 -> 1.
   | 1 -> x
   | 2 -> H.(x *. x)
-  | 3 -> if x >= 0. then H.(x *. x *. x) else H.(x *. L.(x *. x))
+  | 3 -> high_cbr x
   | 4 -> H.(let x2 = x *. x in x2 *. x2)
   | n -> if n >= 0 then high_pow_IN x n else H.(1. /. low_pow_IN x (- n))
 
@@ -193,8 +199,7 @@ and high_pow_i x = function
 module Low = struct
   include L
 
-  let[@inline] cbr x =
-    if x >= 0. then x *. x *. x else x *. H.(x *. x)
+  let cbr = low_cbr
 
   (* xⁿ for x ≤ 0 and n ≥ 0.  Useful for the interval extension. *)
   let neg_pow_IN x = function
@@ -212,8 +217,7 @@ end
 module High = struct
   include H
 
-  let[@inline] cbr x =
-    if x >= 0. then x *. x *. x else x *. L.(x *. x)
+  let cbr = high_cbr
 
   (* xⁿ for x ≤ 0 and n ≥ 0.  Useful for the interval extension. *)
   let neg_pow_IN x = function
