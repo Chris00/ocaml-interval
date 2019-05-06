@@ -93,8 +93,8 @@ end
 
 (* [min] and [max], specialized to floats (faster).
    NaN do dot need to be handled (see [I.v]). *)
-let fmin (a: float) (b: float) = if a <= b then a else b
-let fmax (a: float) (b: float) = if a <= b then b else a
+let[@inline] fmin (a: float) (b: float) = if a <= b then a else b
+let[@inlne] fmax (a: float) (b: float) = if a <= b then b else a
 
 let[@inline] is_even x = x land 1 = 0
 
@@ -366,14 +366,14 @@ module I = struct
   let hull x y = {low = fmin x.low y.low; high = fmax x.high y.high}
 
   let inter_exn {low = a; high = b} {low = c; high = d} =
-    let low = if a >= c then a else c in (* no NaN *)
-    let high = if b <= d then b else d in
+    let low = fmax a c in
+    let high = fmin b d in
     if low <= high then {low; high}
     else raise(Domain_error "I.inter_exn")
 
   let inter {low = a; high = b} {low = c; high = d} =
-    let low = if a >= c then a else c in (* no NaN *)
-    let high = if b <= d then b else d in
+    let low = fmax a c in
+    let high = fmin b d in
     if low <= high then Some {low; high} else None
 
   let max x y = {low = fmax x.low y.low; high = fmax x.high y.high}
