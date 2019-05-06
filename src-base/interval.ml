@@ -170,7 +170,7 @@ let[@inline] high_cbr x =
 
 let rec low_pow_IN x n = (* x ∈ ℝ, n ≥ 0 *)
   if is_even n then L.(pos_pow_IN 1. (x *. x) (n / 2))
-  else if x >= 0. then x *. L.(pos_pow_IN 1. (x *. x) (n / 2))
+  else if x >= 0. then L.(pos_pow_IN x (x *. x) (n / 2))
   else L.(x *. H.(pos_pow_IN 1. (x *. x) (n / 2)))
 and low_pow_i x = function
   | 0 -> 1.
@@ -184,7 +184,7 @@ and low_pow_i x = function
            L.(1. /. high_pow_IN x (- n))
 and high_pow_IN x n =
   if is_even n then H.(pos_pow_IN 1. (x *. x) (n / 2))
-  else if x >= 0. then x *. H.(pos_pow_IN 1. (x *. x) (n / 2))
+  else if x >= 0. then H.(pos_pow_IN x (x *. x) (n / 2))
   else H.(x *. L.(pos_pow_IN 1. (x *. x) (n / 2)))
 and high_pow_i x = function
   | 0 -> 1.
@@ -202,14 +202,14 @@ module Low = struct
   let cbr = low_cbr
 
   (* xⁿ for x ≤ 0 and n ≥ 0.  Useful for the interval extension. *)
-  let neg_pow_IN x = function
+  let[@inline] neg_pow_IN x = function
     | 0 -> 1.
     | 1 -> x
     | 2 -> x *. x
     | 3 -> x *. H.(x *. x)
     | 4 -> let x2 = x *. x in x2 *. x2
     | n -> if is_even n then pos_pow_IN 1. (x *. x) (n / 2)
-           else x *. H.pos_pow_IN 1. (x *. x) (n / 2)
+           else x *. H.(pos_pow_IN 1. (x *. x) (n / 2))
 
   let pow_i = low_pow_i
 end
@@ -220,14 +220,14 @@ module High = struct
   let cbr = high_cbr
 
   (* xⁿ for x ≤ 0 and n ≥ 0.  Useful for the interval extension. *)
-  let neg_pow_IN x = function
+  let[@inline] neg_pow_IN x = function
     | 0 -> 1.
     | 1 -> x
     | 2 -> x *. x
     | 3 -> x *. L.(x *. x)
     | 4 -> let x2 = x *. x in x2 *. x2
     | n -> if is_even n then pos_pow_IN 1. (x *. x) (n / 2)
-           else x *. L.pos_pow_IN 1. (x *. x) (n / 2)
+           else x *. L.(pos_pow_IN 1. (x *. x) (n / 2))
 
   let pow_i = high_pow_i
 end
@@ -260,8 +260,11 @@ module I = struct
   type number = float
   type interval = t
   type t = interval
-  (* Save original operators *)
-  module U = Interval__U
+  (* Invariants (enforced by [I.v]:
+     - -∞ ≤ low ≤ high ≤ +∞.  In particular, no bound is NaN.
+     - [-∞,-∞] and [+∞,+∞] are not allowed. *)
+
+  module U = Interval__U   (* Save original operators *)
 
   let zero = {low=0.; high=0.}
   let one = {low=1.; high=1.}
@@ -533,7 +536,7 @@ module I = struct
            {low = 0.;  high = fmax High.(neg_pow_IN x.low n)
                                 High.(pos_pow_IN 1. x.high n)}
          else (* x.low ≤ x.high ≤ 0 *)
-           {low = High.neg_pow_IN x.low n;  high = Low.neg_pow_IN x.high n}
+           {low = Low.neg_pow_IN x.high n;  high = High.neg_pow_IN x.low n}
        else (* x ↦ xⁿ is increasing. *)
          {low = Low.pow_i x.low n;  high = High.pow_i x.high n}
 
