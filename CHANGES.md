@@ -3,6 +3,7 @@
 
 - Fix the implementation of exponentiation (xⁿ, n ∈ ℤ).
 - Deprecate the `size…` functions in favor of `width…`.
+- Add functions `mag` (magnitude) and `mig` (mignitude).
 
 1.5 2019-04-06
 --------------

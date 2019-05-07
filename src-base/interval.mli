@@ -175,6 +175,12 @@ module type T = sig
   (** [size_low a] returns the width of the interval [high a - low a]
      rounded down. *)
 
+  val mag : t -> number
+  (** [mag x] returns the magnitude of [x], that is sup\{ |x| : x ∈ [x] \}. *)
+
+  val mig : t -> number
+  (** [mig x] returns the mignitude of [x], that is inf\{ |x| : x ∈ [x] \}. *)
+
   val sgn: t -> t
   (** [sgn a] returns the sign of each bound, e.g., for floats
       \[[float (compare (low a) 0.)], [float (compare (high a) 0.)]\]. *)

@@ -60,6 +60,8 @@ module type T = sig
   val width: t -> t
   val width_high : t -> number
   val width_low : t -> number
+  val mag : t -> number
+  val mig : t -> number
   val sgn: t -> t
   val truncate: t -> t
   val abs: t -> t
@@ -358,6 +360,12 @@ module I = struct
   let size = width
   let size_low = width_low
   let size_high = width_high
+
+  let mag x = fmax (abs_float x.low) (abs_float x.high)
+
+  let mig x = if x.low >= 0. then x.low
+              else if x.high <= 0. then -. x.high
+              else (* x.low < 0 < x.high *) 0.
 
   let abs ({low = a; high = b} as x) =
     if 0. <= a then x
