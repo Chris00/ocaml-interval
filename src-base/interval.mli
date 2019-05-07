@@ -163,16 +163,16 @@ module type T = sig
 
   (** {2 Operations} *)
 
-  val size: t -> t
-  (** [size a] returns an interval containing the true length of the
+  val width: t -> t
+  (** [size a] returns an interval containing the true width of the
      interval [high a - low a]. *)
 
-  val size_high : t -> number
-  (** [size_high a] returns the length of the interval [high a - low a]
+  val width_high : t -> number
+  (** [size_high a] returns the width of the interval [high a - low a]
      rounded up. *)
 
-  val size_low : t -> number
-  (** [size_low a] returns the length of the interval [high a - low a]
+  val width_low : t -> number
+  (** [size_low a] returns the width of the interval [high a - low a]
      rounded down. *)
 
   val sgn: t -> t
@@ -327,6 +327,10 @@ exception Domain_error of string [@@warn_on_literal_pattern]
    interval arithmetic. *)
 module I : sig
   include T with type number = float and type t = t
+
+  val size : t -> t           [@@deprecated "Use I.width"]
+  val size_high : t -> number [@@deprecated "Use I.width_high"]
+  val size_low : t -> number  [@@deprecated "Use I.width_low"]
 
   (** {2 Usual arithmetic operators} *)
 

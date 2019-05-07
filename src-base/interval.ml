@@ -57,9 +57,9 @@ module type T = sig
   val strict_precedes : t -> t -> bool
   val disjoint : t -> t -> bool
 
-  val size: t -> t
-  val size_high : t -> number
-  val size_low : t -> number
+  val width: t -> t
+  val width_high : t -> number
+  val width_low : t -> number
   val sgn: t -> t
   val truncate: t -> t
   val abs: t -> t
@@ -349,11 +349,15 @@ module I = struct
     (* Intervals are not empty *)
     b < c || d < a
 
-  let size x =
+  let width x =
     { low = Low.(x.high -. x.low);  high = High.(x.high -. x.low) }
 
-  let size_low x = Low.(x.high -. x.low)
-  let size_high x = High.(x.high -. x.low)
+  let width_low x = Low.(x.high -. x.low)
+  let width_high x = High.(x.high -. x.low)
+
+  let size = width
+  let size_low = width_low
+  let size_high = width_high
 
   let abs ({low = a; high = b} as x) =
     if 0. <= a then x
