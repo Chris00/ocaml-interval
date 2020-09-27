@@ -2,8 +2,10 @@ PACKAGES = $(basename $(wildcard *.opam))
 PKGVERSION = $(shell git describe --always)
 
 all build:
-	dune build @install @examples
-	dune build @runtest --force
+	dune external-lib-deps --missing --workspace dune-workspace.dev \
+	  @install @examples
+	dune build --workspace dune-workspace.dev @install @examples
+	dune build --workspace dune-workspace.dev @runtest --force
 
 ocamlfpu: all
 	cd _build/default/src/ && ocamlmktop -I . -o ocamlfpu interval.cma
