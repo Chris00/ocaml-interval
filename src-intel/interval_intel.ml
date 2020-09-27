@@ -151,7 +151,7 @@ module I = struct
 
   let mod_f {low = a; high = b} y =
     (* assume that the result of fmod is exact *)
-    let sy = Pervasives.compare y 0. in
+    let sy = Stdlib.compare y 0. in
     let y = if U.(sy = 0) then raise Division_by_zero else abs_float y in
     if U.(0. <= a) then
       if U.(High.(b -. a) < y) then (
@@ -265,7 +265,7 @@ module I = struct
     let add_buffer b fmt v =
       Buffer.add_string b "[| ";
       pr_buffer b fmt v.(0);
-      for i = 1 to Pervasives.( - ) (Array.length v) 1 do
+      for i = 1 to Int.sub (Array.length v) 1 do
         Buffer.add_string b "; ";
         pr_buffer b fmt v.(i);
       done;

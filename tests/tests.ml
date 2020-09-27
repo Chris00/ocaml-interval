@@ -276,7 +276,7 @@ module Test_Intel = struct
     include Interval_intel.I
   end
   module Fpu = Interval_intel.Fpu
-  include Test(I)(Pervasives)(Interval_intel.Low)(Interval_intel.High)
+  include Test(I)(Stdlib)(Interval_intel.Low)(Interval_intel.High)
 
   let myatan2 y x = if y = 0.&& x = 0. then nan else atan2 y x
   let myatan2_low y x = if y = 0. && x = 0. then nan else Low.atan2 y x
@@ -316,7 +316,7 @@ module Test_Crlibm = struct
   end
   module Nearest = struct
     include Crlibm
-    let tanh = Pervasives.tanh
+    let tanh = Float.tanh
   end
   include Test(I)(Nearest)(Interval_crlibm.Low)(Interval_crlibm.High)
 end
