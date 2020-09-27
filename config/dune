@@ -1,4 +1,10 @@
 
-(executables
- (names     discover dispatch)
- (libraries dune.configurator str))
+(executable
+ (name      discover)
+ (modules   discover)
+ (libraries dune-configurator str))
+
+(executable
+ (name     dispatch)
+ (modules  dispatch)
+ (libraries str))
