@@ -251,8 +251,13 @@ module type T = sig
      {!zero} is returned. *)
 
   val ( *. ): number -> t -> t
-  (** [x *. a] multiplies [a] by [x] according to interval arithmetic
-     and returns the proper result.  If [x=0.] then {!zero} is returned. *)
+  (** [x *. a] returns the multiplication of [a] by [x] according to
+     interval arithmetic.  If [x=0.] then {!zero} is returned.
+
+     Note that the scalar comes first in this “dotted operator” (as
+     opposed to other ones) because it is customary in mathematics to
+     place scalars first in products and last in sums.
+     Example: [3. *. x**2 + 2. *. x +. 1.] *)
 
   val ( *: ): t -> number -> t
   (** [a *. x] multiplies [a] by [x] according to interval arithmetic
