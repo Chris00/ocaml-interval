@@ -292,7 +292,7 @@ end
 let zero_I = I.zero
 let one_I = I.one
 let pi_I = I.pi
-let e_I = I.e
+let e_I = I.euler
 
 let sprintf_I format i =
   Printf.sprintf "[%s, %s]"

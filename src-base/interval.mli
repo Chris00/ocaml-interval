@@ -47,8 +47,8 @@ module type T = sig
   val half_pi : t
   (** π/2 with bounds properly rounded. *)
 
-  val e: t
-  (** [e] (Euler's constant) with bounds properly rounded. *)
+  val euler: t
+  (** Euler's constant with bounds properly rounded. *)
 
   val entire : t
   (** The entire set of {!number}s.
@@ -397,8 +397,8 @@ module type DIRECTED = sig
   val half_pi : t
   (** Upper/lower bound on π/2. *)
 
-  val e: t
-  (** Upper/lower bound on [e] (Euler's constant). *)
+  val euler: t
+  (** Upper/lower bound on Euler's constant. *)
 
   val float: int -> t
   (** When [t = float], the float function is exact on 32 bits machine

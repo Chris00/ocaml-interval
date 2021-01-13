@@ -29,7 +29,7 @@ module type T = sig
   val pi: t
   val two_pi : t
   val half_pi : t
-  val e: t
+  val euler: t
 
   val entire : t
   val v : number -> number -> t
@@ -110,7 +110,7 @@ module L = struct
   let pi      = 0x1.921fb54442d18p1
   let two_pi  = 0x1.921fb54442d18p2
   let half_pi = 0x1.921fb54442d18p0
-  let e       = 0x1.5bf0a8b145769p1
+  let euler   = 0x1.5bf0a8b145769p1
 
   external float: (int [@untagged]) -> (float [@unboxed])
     = "ocaml_low_float_byte" "ocaml_low_float"
@@ -142,7 +142,7 @@ module H = struct
   let pi      = 0x1.921fb54442d19p1
   let two_pi  = 0x1.921fb54442d19p2
   let half_pi = 0x1.921fb54442d19p0
-  let e       = 0x1.5bf0a8b14576Ap1
+  let euler   = 0x1.5bf0a8b14576Ap1
 
   external float: (int [@untagged]) -> (float [@unboxed]) =
     "ocaml_high_float_byte" "ocaml_high_float"
@@ -241,7 +241,7 @@ module type DIRECTED = sig
   val pi: t
   val two_pi : t
   val half_pi : t
-  val e: t
+  val euler: t
   val float: int -> t
   val ( +. ) : t -> t -> t
   val ( -. ) : t -> t -> t
@@ -275,7 +275,7 @@ module I = struct
   let pi = {low = Low.pi; high = High.pi }
   let two_pi = {low = Low.two_pi; high = High.two_pi }
   let half_pi = {low = Low.half_pi; high = High.half_pi }
-  let e = {low = Low.e; high = High.e }
+  let euler = {low = Low.euler; high = High.euler }
 
 
   let v (a: float) (b: float) =
