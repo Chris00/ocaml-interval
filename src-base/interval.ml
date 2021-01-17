@@ -60,6 +60,8 @@ module type T = sig
   val width: t -> t
   val width_high : t -> number
   val width_low : t -> number
+  val dist : t -> t -> t
+  val dist_high : t -> t -> number
   val mag : t -> number
   val mig : t -> number
   val sgn: t -> t
@@ -360,6 +362,19 @@ module I = struct
   let size = width
   let size_low = width_low
   let size_high = width_high
+
+  let[@inline] fdist_low (x: float) (y: float) =
+    if x <= y then Low.(y -. x) else Low.(x -. y)
+
+  let[@inline] fdist_high (x: float) (y: float) =
+    if x <= y then High.(y -. x) else High.(x -. y)
+
+  let[@inline] dist_high x y =
+    fmax (fdist_high x.low y.low) (fdist_high x.high y.high)
+
+  let dist x y =
+    { low = fmax (fdist_low x.low y.low) (fdist_low x.high y.high);
+      high = dist_high x y }
 
   let mag x = fmax (abs_float x.low) (abs_float x.high)
 

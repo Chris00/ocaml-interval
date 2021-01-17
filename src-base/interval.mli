@@ -175,6 +175,15 @@ module type T = sig
   (** [size_low a] returns the width of the interval [high a - low a]
      rounded down. *)
 
+  val dist : t -> t -> t
+  (** [dist x y] is the Hausdorff distance between [x] and [y].
+      It is equal to max{ |[x.low] - [y.low]|, |[x.high] - [y.high]| }. *)
+
+  val dist_high : t -> t -> number
+  (** [dist_high x y] is the Hausdorff distance between [x] and [y],
+     rounded up.  (This satisfies the triangular inequality for a
+     rounded up [+.].) *)
+
   val mag : t -> number
   (** [mag x] returns the magnitude of [x], that is sup\{ |x| : x ∈ [x] \}. *)
 
