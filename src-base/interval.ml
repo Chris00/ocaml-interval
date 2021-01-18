@@ -132,6 +132,9 @@ module L = struct
     if n = 0 then a
     else if is_even n then pos_pow_IN a (x *. x) (n / 2)
     else pos_pow_IN (a *. x) (x *. x) (n / 2)
+
+  let[@inline] dist (x: float) (y: float) =
+    if x <= y then y -. x else x -. y
 end
 
 (* Base [High] module. *)
@@ -164,6 +167,9 @@ module H = struct
     if n = 0 then a
     else if is_even n then pos_pow_IN a (x *. x) (n / 2)
     else pos_pow_IN (a *. x) (x *. x) (n / 2)
+
+  let[@inline] dist (x: float) (y: float) =
+    if x <= y then y -. x else x -. y
 end
 
 let[@inline] low_cbr x =
@@ -363,17 +369,11 @@ module I = struct
   let size_low = width_low
   let size_high = width_high
 
-  let[@inline] fdist_low (x: float) (y: float) =
-    if x <= y then Low.(y -. x) else Low.(x -. y)
-
-  let[@inline] fdist_high (x: float) (y: float) =
-    if x <= y then High.(y -. x) else High.(x -. y)
-
   let[@inline] dist_high x y =
-    fmax (fdist_high x.low y.low) (fdist_high x.high y.high)
+    fmax (High.dist x.low y.low) (High.dist x.high y.high)
 
   let dist x y =
-    { low = fmax (fdist_low x.low y.low) (fdist_low x.high y.high);
+    { low = fmax (Low.dist x.low y.low) (Low.dist x.high y.high);
       high = dist_high x y }
 
   let mag x = fmax (abs_float x.low) (abs_float x.high)
