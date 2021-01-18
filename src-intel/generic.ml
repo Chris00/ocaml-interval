@@ -20,9 +20,10 @@
     If not, see <http://www.gnu.org/licenses/>.
 *)
 
-(** Implementation of interval functions that can be shared with the
-   Interval_crlibm library.  (Trigonometric functions depend on
-   argument reduction which is performed differently.) *)
+(** Implementation of interval functions that can be shared (see
+   config/dispatch.ml) with the Interval_crlibm library.
+   (Trigonometric functions depend on argument reduction which is
+   performed differently.) *)
 
 open Interval
 module Low = Fpu.Low
@@ -40,8 +41,7 @@ let log {low = a; high = b} =
   else {low = if a <= 0. then neg_infinity else Low.log a; high = High.log b}
 
 let exp {low = a; high = b} =
-  { low = if a = neg_infinity then 0. else Low.exp a;
-    high = if b = infinity then infinity else High.exp b}
+  { low = Low.exp a; high = High.exp b}
 
 let max_63 = ldexp 1. 63
 

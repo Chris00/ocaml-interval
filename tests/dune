@@ -35,6 +35,17 @@
  (action (run %{exe:test_base.exe})))
 
 (executable
+ (name      test_intel)
+ (modules   test_intel)
+ (ocamlopt_flags :standard -no-float-const-prop)
+ (libraries interval_intel))
+
+(alias
+ (name runtest)
+ (package interval_intel)
+ (action (run %{exe:test_intel.exe})))
+
+(executable
  (name      test_crlibm)
  (modules   test_crlibm)
  (ocamlopt_flags :standard -no-float-const-prop)
