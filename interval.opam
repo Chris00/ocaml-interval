@@ -10,6 +10,7 @@ doc: "https://Chris00.github.io/ocaml-interval/doc"
 license: "LGPL-3.0"
 tags: ["interval" "science"]
 build: [
+  ["dune" "build" "-p" name "-j" jobs]
   ["dune" "runtest" "-p" name "-j" jobs] {with-test}
 ]
 depends: [
