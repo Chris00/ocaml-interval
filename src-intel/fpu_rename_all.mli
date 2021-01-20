@@ -57,9 +57,6 @@ val ( *.) : float -> float -> float
 val mod_float : float -> float -> float
 (** Computes x mod y *)
 
-val sqrt : float -> float
-(** square root function*)
-
 val log : float -> float
 (** log function *)
 

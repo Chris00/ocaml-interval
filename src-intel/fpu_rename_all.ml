@@ -25,7 +25,6 @@ let (-.) = fsub
 let ( *.) = fmul
 let (/.) = fdiv
 let mod_float = fmod
-let sqrt = fsqrt
 let log = flog
 let exp = fexp
 let ( ** ) = fpow

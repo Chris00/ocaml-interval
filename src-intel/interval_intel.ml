@@ -32,11 +32,6 @@ module I = struct
   include Interval.I       (* Redefines =, <=,... *)
   include Generic
 
-  let sqrt {low = a; high = b} =
-    let open U in
-    if b < 0. then raise(Domain_error "sqrt")
-    else {low = if a < 0. then 0. else Low.sqrt a; high = High.sqrt b}
-
   (* Redefine ( ** ) from Interval_base to keep the version of the
      original library. *)
   let ( ** ) {low = a; high = b} n =

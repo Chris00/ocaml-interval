@@ -162,9 +162,6 @@ module Low : sig
   (** [pow x y] computes [x] at power [y], rounded down, for [0 < x < ∞]
       and [-∞ < y < ∞]. *)
 
-  val sqrt : float -> float
-  (** Floating point square root, rounded down. *)
-
   val exp : float -> float
   (** Floating point exponential, rounded down. *)
 
@@ -215,9 +212,6 @@ module High : sig
   val pow : float -> float -> float
   (** [pow x y] computes [x] at power [y], rounded up, for [0 < x < ∞]
       and [-∞ < y < infty]. *)
-
-  val sqrt : float -> float
-  (** Floating point square root, rounded up. *)
 
   val exp : float -> float
   (** Floating point exponential, rounded up. *)
@@ -289,11 +283,6 @@ val fdiv_high: float -> float -> float [@@deprecated "Use High.( /. )"]
 
 val fmod: float -> float -> float
 (** Modulo (result is supposed to be exact) *)
-
-val fsqrt: float -> float
-val fsqrt_low: float -> float  [@@deprecated "Use Low.sqrt"]
-val fsqrt_high: float -> float [@@deprecated "Use High.sqrt"]
-(** Floating point square root in nearest, low and high mode *)
 
 val fexp: float -> float
 val fexp_low: float -> float  [@@deprecated "Use Low.exp"]
@@ -394,9 +383,6 @@ module Rename : sig
   val mod_float : float -> float -> float
   (** Alias for {!Fpu.fmod}. *)
 
-  val sqrt : float -> float
-  (** Alias for {!Fpu.fsqrt}. *)
-
   val exp : float -> float
   (** Alias for {!Fpu.fexp}. *)
 
@@ -472,9 +458,6 @@ module Rename_all : sig
 
   val mod_float : float -> float -> float
   (** Alias for {!Fpu.fmod}. *)
-
-  val sqrt : float -> float
-  (** Alias for {!Fpu.fsqrt}. *)
 
   val exp : float -> float
   (** Alias for {!Fpu.fexp}. *)

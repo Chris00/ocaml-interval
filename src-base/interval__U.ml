@@ -14,6 +14,9 @@ external ( /. ) : float -> float -> float = "%divfloat"
 external ( ** ) : float -> float -> float = "caml_power_float" "pow"
                                               [@@unboxed] [@@noalloc]
 
+external sqrt : float -> float = "caml_sqrt_float" "sqrt"
+                                [@@unboxed] [@@noalloc]
+
 external ( = ) : 'a -> 'a -> bool = "%equal"
 external ( <> ) : 'a -> 'a -> bool = "%notequal"
 external ( < ) : 'a -> 'a -> bool = "%lessthan"

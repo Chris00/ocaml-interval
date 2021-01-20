@@ -92,6 +92,7 @@ module type T = sig
   val cancelminus : t -> t -> t
   val cancelplus : t -> t -> t
   val ( ** ): t -> int -> t
+  val sqrt : t -> t
 end
 
 
@@ -124,6 +125,8 @@ module L = struct
     = "ocaml_LOW_mul_byte" "ocaml_LOW_mul" [@@unboxed]
   external ( /. ): float -> float -> float
     = "ocaml_LOW_div_byte" "ocaml_LOW_div" [@@unboxed]
+  external sqrt: float -> float
+    = "ocaml_LOW_sqrt_byte" "ocaml_LOW_sqrt" [@@unboxed]
 
   let[@inline] sqr x = x *. x
 
@@ -159,6 +162,8 @@ module H = struct
     = "ocaml_HIGH_mul_byte" "ocaml_HIGH_mul" [@@unboxed]
   external ( /. ): float -> float -> float
     = "ocaml_HIGH_div_byte" "ocaml_HIGH_div" [@@unboxed]
+  external sqrt: float -> float
+    = "ocaml_HIGH_sqrt_byte" "ocaml_HIGH_sqrt" [@@unboxed]
 
   let[@inline] sqr x = x *. x
 
@@ -258,6 +263,7 @@ module type DIRECTED = sig
   val sqr : t -> t
   val cbr : t -> t
   val pow_i : t -> int -> t
+  val sqrt : t -> t
 end
 
 
@@ -569,6 +575,10 @@ module I = struct
 
   let ( ** ) x n =
     if n >= 0 then pow_IN x n else inv(pow_IN x U.(- n))
+
+  let sqrt {low = a; high = b} =
+    if b < 0. then raise(Domain_error "sqrt")
+    else {low = if a < 0. then 0. else Low.sqrt a; high = High.sqrt b}
 
   (* Infix aliases *)
   let ( = ) = equal

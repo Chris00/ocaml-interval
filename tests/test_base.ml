@@ -27,3 +27,10 @@ let () =
   assert(try I.(ignore(inter_exn (v 0. 1.) (v 2. 3.))); false
          with Domain_error _ -> true);
   assert(I.(inter (v 0. 1.) (v 2. 3.)) = None)
+
+let () =
+  (* √2 = 0x1.6A09E667F3BCC_908B2F... *)
+  assert(High.sqrt 2. = 0x1.6A09E667F3BCD);
+  assert(Low.sqrt 2.  = 0x1.6A09E667F3BCC);
+  assert(I.sqrt(I.v (-1.) 1.) = I.v 0. 1.)
+

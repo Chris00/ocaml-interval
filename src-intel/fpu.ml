@@ -57,7 +57,6 @@ module Low = struct
 
   external pow: float -> float -> float
     = "flog_pow_low_caml" "flog_pow_low" [@@unboxed]
-  external sqrt: float -> float = "fsqrt_low_caml" "fsqrt_low" [@@unboxed]
   external log: float -> float = "flog_low_caml" "flog_low" [@@unboxed]
   external exp: float -> float = "fexp_low_caml" "fexp_low" [@@unboxed]
   external sin: float -> float = "fsin_low_caml" "fsin_low" [@@unboxed]
@@ -92,7 +91,6 @@ module High = struct
 
   external pow: float -> float -> float
     = "flog_pow_high_caml" "flog_pow_high" [@@unboxed]
-  external sqrt: float -> float = "fsqrt_high_caml" "fsqrt_high" [@@unboxed]
   external log: float -> float = "flog_high_caml" "flog_high" [@@unboxed]
   external exp: float -> float = "fexp_high_caml" "fexp_high" [@@unboxed]
   external sin: float -> float = "fsin_high_caml" "fsin_high" [@@unboxed]
@@ -138,10 +136,6 @@ let fdiv_low = Low.( /. )
 let fdiv_high = High.( /. )
 
 external fmod: float -> float -> float = "fprem_caml" "fprem" [@@unboxed]
-
-external fsqrt: float -> float = "fsqrt_caml" "fsqrt" [@@unboxed]
-let fsqrt_low = Low.sqrt
-let fsqrt_high = High.sqrt
 
 external flog: float -> float = "flog_caml" "flog" [@@unboxed]
 let flog_low = Low.log
@@ -200,7 +194,6 @@ let fpow_high = High.( ** )
 
 module Rename = struct
   let mod_float = fmod
-  let sqrt = fsqrt
   let log = flog
   let exp = fexp
   let ( ** ) = fpow
@@ -222,7 +215,6 @@ module Rename_all = struct
   let ( *. ) = fmul
   let ( /. ) = fdiv
   let mod_float = fmod
-  let sqrt = fsqrt
   let log = flog
   let exp = fexp
   let ( ** ) = fpow

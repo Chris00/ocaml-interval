@@ -21,7 +21,6 @@
 
 open Fpu
 let mod_float = fmod
-let sqrt = fsqrt
 let log = flog
 let exp = fexp
 let ( ** ) = fpow

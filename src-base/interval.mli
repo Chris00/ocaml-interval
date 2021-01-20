@@ -315,6 +315,9 @@ module type T = sig
      to interval arithmetic.  If [n=0] then {!one} is returned.
 
      @raise Domain_error if [n < 0] and [a=]{!zero}. *)
+
+  val sqrt : t -> t
+  (** [sqrt x] returns an enclosure for the square root of [x]. *)
 end
 
 
@@ -377,6 +380,8 @@ module I : sig
     external ( /. ) : float -> float -> float = "%divfloat"
     external ( ** ) : float -> float -> float = "caml_power_float" "pow"
                                                   [@@unboxed] [@@noalloc]
+    external sqrt : float -> float = "caml_sqrt_float" "sqrt"
+                                    [@@unboxed] [@@noalloc]
 
     external ( = ) : 'a -> 'a -> bool = "%equal"
     external ( <> ) : 'a -> 'a -> bool = "%notequal"
@@ -426,6 +431,9 @@ module type DIRECTED = sig
 
   val pow_i : t -> int -> t
   (** [pow_i x n] return a upper/lower bound on [x]ⁿ. *)
+
+  val sqrt : t -> t
+  (** [sqrt x] return the square root of [x] rounded up/down. *)
 end
 
 

@@ -124,7 +124,25 @@ ARITH_OP(mul, HIGH)
 ARITH_OP(div, LOW)
 ARITH_OP(div, HIGH)
 
+/* sqrt */
 
+#define SQRT(rounding) \
+  CAMLexport double ocaml_##rounding##_sqrt(double x) { \
+    volatile double res;                                \
+    asm __volatile__(SET_##rounding(%2)                 \
+                     "fsqrt\n\t"                        \
+                     :"=t"(res)                         \
+                     :"0"(x),"m"(cw)                    \
+                     :"memory");                        \
+    asm __volatile__(SET_NEAREST(%0)                    \
+                     :"=m"(cw)                          \
+                     :"m"(cw)                           \
+                     :"memory");                        \
+    return(res);                                        \
+  }
+
+SQRT(LOW)
+SQRT(HIGH)
 
 #elif __STDC_VERSION__ >= 199901L
 /* Not INTEL_ARCH, use C99 ------------------------------------------- */
@@ -178,6 +196,18 @@ BIN_OP(HIGH_mul, FE_UPWARD,   x * y)
 BIN_OP(LOW_div,  FE_DOWNWARD, x / y)
 BIN_OP(HIGH_div, FE_UPWARD,   x / y)
 
+#define SQRT(name, round)                                   \
+  CAMLexport double ocaml_##name(double x) {                \
+    volatile double r;                                      \
+    fesetround(round);                                      \
+    r = sqrt(x);                                            \
+    fesetround(FE_TONEAREST);                               \
+    return(r);                                              \
+  }
+
+SQRT(LOW_sqrt, FE_DOWNWARD)
+SQRT(HIGH_sqrt, FE_UPWARD)
+
 #else  /* Not INTEL_ARCH, nor C99 */
 #error "An Intel architecture or a C99 standard library is required"
 /* FIXME: for basic arithmetic operations, one could add/substract 1
@@ -187,13 +217,15 @@ BIN_OP(HIGH_div, FE_UPWARD,   x / y)
 
 /* Bytecode ---------------------------------------------------------- */
 
-#define UNARY_BYTE(name) \
+#define UNARY_BYTE(name, of_val)                           \
   CAMLexport value ocaml_##name##_byte(value a) {          \
-    return(caml_copy_double(ocaml_##name(Long_val(a))));   \
+    return(caml_copy_double(ocaml_##name(of_val(a))));   \
   }
 
-UNARY_BYTE(low_float)
-UNARY_BYTE(high_float)
+UNARY_BYTE(low_float,  Long_val)
+UNARY_BYTE(high_float, Long_val)
+UNARY_BYTE(LOW_sqrt,  Double_val)
+UNARY_BYTE(HIGH_sqrt, Double_val)
 
 #define BIN_BYTE(name) \
   CAMLexport value ocaml_##name##_byte(value a, value b) {              \

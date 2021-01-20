@@ -322,55 +322,6 @@ static void fprem1_l(long double a, long double b, long double *r, int *q) {
   *q=((res2&0x100)>>6)+((res2&0x4000)>>13)+((res2&0x200)>>9);
 }
 
-/* fsqrt_l --------------------------------------------------------------------- */
-
-static long double fsqrt_l(long double a) {
-  long double res;
-  asm ("fsqrt":"=t"(res):"0"(a));
-  return(res);
-}
-
-CAMLexport
-double fsqrt(double a) {
-  return fsqrt_l(a);
-}
-
-static long double fsqrt_low_l(long double a) {
-  long double res;
-
-  asm __volatile__(SET_LOW(%2)
-		   "fsqrt\n\t"
-		   SET_NEAREST(%2)
-		   :"=t"(res)
-		   :"0"(a),"m"(cw)
-		   :"memory");
-
-  return(res);
-}
-
-CAMLexport
-double fsqrt_low(double a) {
-  return to_low(fsqrt_low_l(a));
-}
-
-static long double fsqrt_high_l(long double a) {
-  long double res;
-
-  asm __volatile__(SET_HIGH(%2)
-		   "fsqrt\n\t"
-		   SET_NEAREST(%2)
-		   :"=t"(res)
-		   :"0"(a),"m"(cw)
-		   :"memory");
-
-  return(res);
-}
-
-CAMLexport
-double fsqrt_high(double a) {
-  return to_high(fsqrt_high_l(a));
-}
-
 /* flog_l ---------------------------------------------------------------------- */
 
 static long double flog_l(long double a) {
@@ -1536,18 +1487,6 @@ value fmul_caml(value a, value b) {
 
 value fprem_caml(value a,value b) {
   return caml_copy_double(fprem_l(Double_val(a), Double_val(b)));
-}
-
-value fsqrt_caml(value a) {
-  return(caml_copy_double(fsqrt_l(Double_val(a))));
-}
-
-value fsqrt_low_caml(value a) {
-  return(caml_copy_double(to_low(fsqrt_low_l(Double_val(a)))));
-}
-
-value fsqrt_high_caml(value a) {
-  return(caml_copy_double(to_high(fsqrt_high_l(Double_val(a)))));
 }
 
 value flog_caml(value a) {
