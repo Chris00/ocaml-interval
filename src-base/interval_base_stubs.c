@@ -98,148 +98,32 @@ CAMLexport double ocaml_high_float(intnat a)
 
 /* Arithmetic operations */
 
-CAMLexport double ocaml_low_add(double a, double b) {
+#define ARITH_OP(op, rounding)                                          \
+  CAMLexport double ocaml_##rounding##_##op(double a, double b) {       \
+    volatile double res;                                                \
+                                                                        \
+    asm __volatile__(SET_##rounding(%3)                                 \
+                     "f" #op " %%st(1),%%st(0)\n\t"                     \
+                     :"=t"(res)                                         \
+                     :"0"(a),"u"(b),"m"(cw)                             \
+                     :"memory");                                        \
+                                                                        \
+    asm __volatile__(SET_NEAREST(%0)                                    \
+                     :"=m"(cw)                                          \
+                     :"m"(cw)                                           \
+                     :"memory");                                        \
+    return(res);                                                        \
+  }
 
-  volatile double res;
+ARITH_OP(add, LOW)
+ARITH_OP(add, HIGH)
+ARITH_OP(sub, LOW)
+ARITH_OP(sub, HIGH)
+ARITH_OP(mul, LOW)
+ARITH_OP(mul, HIGH)
+ARITH_OP(div, LOW)
+ARITH_OP(div, HIGH)
 
-  asm __volatile__(SET_LOW(%3)
-                   "fadd %%st(1),%%st(0)\n\t"
-                   :"=t"(res)
-                   :"0"(a),"u"(b),"m"(cw)
-                   :"memory");
-
-  asm __volatile__(SET_NEAREST(%0)
-                   :"=m"(cw)
-                   :"m"(cw)
-                   :"memory");
-
-  return(res);
-}
-
-CAMLexport double ocaml_high_add(double a, double b) {
-
-  volatile double res;
-
-  asm __volatile__(SET_HIGH(%3)
-                   "fadd %%st(1),%%st(0)\n\t"
-                   :"=t"(res)
-                   :"0"(a),"u"(b),"m"(cw)
-                   :"memory");
-
-  asm __volatile__(SET_NEAREST(%0)
-                   :"=m"(cw)
-                   :"m"(cw)
-                   :"memory");
-
-  return(res);
-}
-
-CAMLexport double ocaml_low_sub(double a, double b) {
-  volatile double res;
-
-  asm __volatile__(SET_LOW(%3)
-                   "fsub %%st(1),%%st(0)\n\t"
-                   :"=t"(res)
-                   :"0"(a),"u"(b),"m"(cw)
-                   :"memory");
-
-  asm __volatile__(SET_NEAREST(%0)
-                   :"=m"(cw)
-                   :"m"(cw)
-                   :"memory");
-
-  return(res);
-}
-
-CAMLexport double ocaml_high_sub(double a, double b) {
-
-  volatile double res;
-
-  asm __volatile__(SET_HIGH(%3)
-                   "fsub %%st(1),%%st(0)\n\t"
-                   :"=t"(res)
-                   :"0"(a),"u"(b),"m"(cw)
-                   :"memory");
-
-  asm __volatile__(SET_NEAREST(%0)
-                   :"=m"(cw)
-                   :"m"(cw)
-                   :"memory");
-
-  return(res);
-}
-
-CAMLexport double ocaml_low_mul(double a, double b) {
-
-  volatile double res;
-
-  asm __volatile__(SET_LOW(%3)
-                   "fmul %%st(1),%%st(0)\n\t"
-                   :"=t"(res)
-                   :"0"(a),"u"(b),"m"(cw)
-                   :"memory");
-
-  asm __volatile__(SET_NEAREST(%0)
-                   :"=m"(cw)
-                   :"m"(cw)
-                   :"memory");
-
-  return(res);
-}
-
-CAMLexport double ocaml_high_mul(double a, double b) {
-
-  volatile double res;
-
-  asm __volatile__(SET_HIGH(%3)
-                   "fmul %%st(1),%%st(0)\n\t"
-                   :"=t"(res)
-                   :"0"(a),"u"(b),"m"(cw)
-                   :"memory");
-
-  asm __volatile__(SET_NEAREST(%0)
-                   :"=m"(cw)
-                   :"m"(cw)
-                   :"memory");
-
-  return(res);
-}
-
-CAMLexport double ocaml_low_div(double a, double b) {
-
-  volatile double res;
-
-  asm __volatile__(SET_LOW(%3)
-                   "fdiv %%st(1),%%st(0)\n\t"
-                   :"=t"(res)
-                   :"0"(a),"u"(b),"m"(cw)
-                   :"memory");
-
-  asm __volatile__(SET_NEAREST(%0)
-                   :"=m"(cw)
-                   :"m"(cw)
-                   :"memory");
-
-  return(res);
-}
-
-CAMLexport double ocaml_high_div(double a, double b) {
-
-  volatile double res;
-
-  asm __volatile__(SET_HIGH(%3)
-                   "fdiv %%st(1),%%st(0)\n\t"
-                   :"=t"(res)
-                   :"0"(a),"u"(b),"m"(cw)
-                   :"memory");
-
-  asm __volatile__(SET_NEAREST(%0)
-                   :"=m"(cw)
-                   :"m"(cw)
-                   :"memory");
-
-  return(res);
-}
 
 
 #elif __STDC_VERSION__ >= 199901L
@@ -285,14 +169,14 @@ CAMLexport double ocaml_high_float(intnat a)
     return(r);                                          \
   }
 
-BIN_OP(low_add,  FE_DOWNWARD, x + y)
-BIN_OP(high_add, FE_UPWARD,   x + y)
-BIN_OP(low_sub,  FE_DOWNWARD, x - y)
-BIN_OP(high_sub, FE_UPWARD,   x - y)
-BIN_OP(low_mul,  FE_DOWNWARD, x * y)
-BIN_OP(high_mul, FE_UPWARD,   x * y)
-BIN_OP(low_div,  FE_DOWNWARD, x / y)
-BIN_OP(high_div, FE_UPWARD,   x / y)
+BIN_OP(LOW_add,  FE_DOWNWARD, x + y)
+BIN_OP(HIGH_add, FE_UPWARD,   x + y)
+BIN_OP(LOW_sub,  FE_DOWNWARD, x - y)
+BIN_OP(HIGH_sub, FE_UPWARD,   x - y)
+BIN_OP(LOW_mul,  FE_DOWNWARD, x * y)
+BIN_OP(HIGH_mul, FE_UPWARD,   x * y)
+BIN_OP(LOW_div,  FE_DOWNWARD, x / y)
+BIN_OP(HIGH_div, FE_UPWARD,   x / y)
 
 #else  /* Not INTEL_ARCH, nor C99 */
 #error "An Intel architecture or a C99 standard library is required"
@@ -316,11 +200,12 @@ UNARY_BYTE(high_float)
     return caml_copy_double(ocaml_##name(Double_val(a), Double_val(b))); \
   }
 
-BIN_BYTE(low_add)
-BIN_BYTE(high_add)
-BIN_BYTE(low_sub)
-BIN_BYTE(high_sub)
-BIN_BYTE(low_mul)
-BIN_BYTE(high_mul)
-BIN_BYTE(low_div)
-BIN_BYTE(high_div)
+BIN_BYTE(LOW_add)
+BIN_BYTE(HIGH_add)
+BIN_BYTE(LOW_sub)
+BIN_BYTE(HIGH_sub)
+BIN_BYTE(LOW_mul)
+BIN_BYTE(HIGH_mul)
+BIN_BYTE(LOW_div)
+BIN_BYTE(HIGH_div)
+

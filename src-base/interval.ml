@@ -117,13 +117,13 @@ module L = struct
   external float: (int [@untagged]) -> (float [@unboxed])
     = "ocaml_low_float_byte" "ocaml_low_float"
   external ( +. ): float -> float -> float
-    = "ocaml_low_add_byte" "ocaml_low_add" [@@unboxed]
+    = "ocaml_LOW_add_byte" "ocaml_LOW_add" [@@unboxed]
   external ( -. ): float -> float -> float
-    = "ocaml_low_sub_byte" "ocaml_low_sub" [@@unboxed]
+    = "ocaml_LOW_sub_byte" "ocaml_LOW_sub" [@@unboxed]
   external ( *. ): float -> float -> float
-    = "ocaml_low_mul_byte" "ocaml_low_mul" [@@unboxed]
+    = "ocaml_LOW_mul_byte" "ocaml_LOW_mul" [@@unboxed]
   external ( /. ): float -> float -> float
-    = "ocaml_low_div_byte" "ocaml_low_div" [@@unboxed]
+    = "ocaml_LOW_div_byte" "ocaml_LOW_div" [@@unboxed]
 
   let[@inline] sqr x = x *. x
 
@@ -152,13 +152,13 @@ module H = struct
   external float: (int [@untagged]) -> (float [@unboxed]) =
     "ocaml_high_float_byte" "ocaml_high_float"
   external ( +. ) : float -> float -> float
-    = "ocaml_high_add_byte" "ocaml_high_add" [@@unboxed]
+    = "ocaml_HIGH_add_byte" "ocaml_HIGH_add" [@@unboxed]
   external ( -. ): float -> float -> float
-    = "ocaml_high_sub_byte" "ocaml_high_sub" [@@unboxed]
+    = "ocaml_HIGH_sub_byte" "ocaml_HIGH_sub" [@@unboxed]
   external ( *. ): float -> float -> float
-    = "ocaml_high_mul_byte" "ocaml_high_mul" [@@unboxed]
+    = "ocaml_HIGH_mul_byte" "ocaml_HIGH_mul" [@@unboxed]
   external ( /. ): float -> float -> float
-    = "ocaml_high_div_byte" "ocaml_high_div" [@@unboxed]
+    = "ocaml_HIGH_div_byte" "ocaml_HIGH_div" [@@unboxed]
 
   let[@inline] sqr x = x *. x
 
