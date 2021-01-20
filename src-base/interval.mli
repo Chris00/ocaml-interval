@@ -83,7 +83,7 @@ module type T = sig
   (** Print the interval to the channel.  To be used with [Printf]
      format "%a". *)
 
-  val pp : Format.formatter -> t -> unit
+  val pp : ?precision: int -> Format.formatter -> t -> unit
   (** Print the interval to the formatter.  To be used with [Format]
      format "%a". *)
 
@@ -455,6 +455,20 @@ module High : sig
   module U = I.U
 end
 
+
+(** Toploop printer. *)
+module Toploop : sig
+  val set_precision : int option -> unit
+  (** Set the precision decimal used by {!pp}.  If [None], use as many
+     digits as needed to accurately print the interval. *)
+
+  val precision : unit -> int option
+  (** Return the decimal precision used by {!pp}, if any. *)
+
+  val pp : Format.formatter -> t -> unit
+  (** Print the interval to the formatter.  The precision is set by
+     {!set_precision}. *)
+end
 
 
 (** {2 Changing the rounding mode (DANGEROUS)} *)
