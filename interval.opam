@@ -14,7 +14,6 @@ build: [
   ["dune" "runtest" "-p" name "-j" jobs] {with-test}
 ]
 depends: [
-  "ocaml" {>= "4.08"}
   "interval_base" {= version}
   "interval_intel" {= version}
   "interval_crlibm" {= version}

@@ -83,16 +83,23 @@ module type T = sig
   (** Print the interval to the channel.  To be used with [Printf]
      format "%a". *)
 
-  val pp : ?precision: int -> Format.formatter -> t -> unit
+  val pr_fmt : ?fmt: (number -> 'b, 'a, 'b) format ->
+               out_channel -> t -> unit
+  (** Same as {!pr} but enables to choose the format. *)
+
+  val pp : Format.formatter -> t -> unit
   (** Print the interval to the formatter.  To be used with [Format]
      format "%a". *)
+
+  val pp_fmt : ?fmt: (number -> 'b, 'a, 'b) format ->
+               Format.formatter -> t -> unit
+  (** Same as {!pp} but enables to choose the format. *)
 
   val fmt : (number -> 'b, 'a, 'b) format -> (t -> 'c, 'd, 'e, 'c) format4
   (** [fmt number_fmt] returns a format to print intervals where each
      component is printed with [number_fmt].
 
      Example: [Printf.printf ("%s = " ^^ fmt "%.10f" ^^ "\n") name i]. *)
-
 
   (** {2 Boolean functions} *)
 
@@ -351,6 +358,19 @@ exception Domain_error of string [@@warn_on_literal_pattern]
 module I : sig
   include T with type number = float and type t = t
 
+
+
+  (** Global precision for the functions {!I.pr} and {!I.pp}. *)
+  module Precision : sig
+    val set : int option -> unit
+    (** Set the number of decimals used by {!pr} and {!pp}.  If
+       [None], use as many digits as needed to accurately print the
+       interval. *)
+
+    val get : unit -> int option
+    (** Return the decimal precision used by {!pp}, if any. *)
+  end
+
   val size : t -> t           [@@deprecated "Use I.width"]
   val size_high : t -> number [@@deprecated "Use I.width_high"]
   val size_low : t -> number  [@@deprecated "Use I.width_low"]
@@ -453,21 +473,6 @@ module High : sig
   (** Locally open to restore standard integer and floating point
      operators. *)
   module U = I.U
-end
-
-
-(** Toploop printer. *)
-module Toploop : sig
-  val set_precision : int option -> unit
-  (** Set the precision decimal used by {!pp}.  If [None], use as many
-     digits as needed to accurately print the interval. *)
-
-  val precision : unit -> int option
-  (** Return the decimal precision used by {!pp}, if any. *)
-
-  val pp : Format.formatter -> t -> unit
-  (** Print the interval to the formatter.  The precision is set by
-     {!set_precision}. *)
 end
 
 

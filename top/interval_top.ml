@@ -11,7 +11,7 @@ let load_interval() =
   require "interval_base"
   && require "interval_crlibm"
   && require "interval_intel"
-  && eval_string "#install_printer Interval.Toploop.pp;;"
+  && eval_string "#install_printer Interval.I.pp;;"
 
 
 let () =

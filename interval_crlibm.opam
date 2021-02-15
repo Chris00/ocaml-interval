@@ -15,7 +15,6 @@ build: [
   ["dune" "build" "@doc"] {with-doc}
 ]
 depends: [
-  "ocaml" {>= "4.08"}
   "interval_base" {= version}
   "dune"
   "crlibm"

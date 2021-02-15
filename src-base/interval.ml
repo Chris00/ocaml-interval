@@ -39,7 +39,11 @@ module type T = sig
 
   val to_string : ?fmt: (number -> 'b, 'a, 'b) format -> t -> string
   val pr : out_channel -> t -> unit
-  val pp : ?precision:int -> Format.formatter -> t -> unit
+  val pr_fmt : ?fmt: (number -> 'b, 'a, 'b) format ->
+               out_channel -> t -> unit
+  val pp : Format.formatter -> t -> unit
+  val pp_fmt : ?fmt: (number -> 'b, 'a, 'b) format ->
+               Format.formatter -> t -> unit
   val fmt : (number -> 'b, 'a, 'b) format -> (t -> 'c, 'd, 'e, 'c) format4
 
   val compare_f: t -> number -> int
@@ -138,9 +142,6 @@ module L = struct
 
   let[@inline] dist (x: float) (y: float) =
     if x <= y then y -. x else x -. y
-
-  let pp_precision precision fmt x =
-    Format.fprintf fmt "%.*f" precision x
 end
 
 (* Base [High] module. *)
@@ -178,9 +179,6 @@ module H = struct
 
   let[@inline] dist (x: float) (y: float) =
     if x <= y then y -. x else x -. y
-
-  let pp_precision precision fmt x =
-    Format.fprintf fmt "%.*f" precision x
 end
 
 let[@inline] low_cbr x =
@@ -316,25 +314,10 @@ module I = struct
 
   let of_int n = {low = Low.float n; high = High.float n}
 
-  let to_string_fmt fmt i =
+  let to_string_fmt fmt i =     (* FIXME: rounding *)
     Printf.sprintf "[%(%f%), %(%f%)]" fmt i.low fmt i.high
 
   let to_string ?(fmt=("%g": _ format)) i = to_string_fmt fmt i
-
-  let pr ch i =
-    Printf.fprintf ch "[%g, %g]" i.low i.high
-
-  let pp_precision p fmt i =
-    Format.pp_print_char fmt '[';
-    L.pp_precision p fmt i.low;
-    Format.pp_print_string fmt ", ";
-    H.pp_precision p fmt i.high;
-    Format.pp_print_char fmt ']'
-
-  let pp ?precision fmt i =
-    match precision with
-    | None -> pp_precision 18 fmt i
-    | Some p -> pp_precision p fmt i
 
   let fmt fmt_float =
     let open CamlinternalFormatBasics in
@@ -342,6 +325,35 @@ module I = struct
     let fmt = Custom(Custom_succ Custom_zero, to_string, End_of_format) in
     Format(fmt , "Inverval.t")
 
+  let pr_fmt ?fmt:fmt_float ch i = (* FIXME: temp string unneeded *)
+    output_string ch (to_string ?fmt:fmt_float i)
+
+  let pp_fmt ?fmt:fmt_float f i = (* FIXME: temp string unneeded *)
+    Format.fprintf f "%s" (to_string ?fmt:fmt_float i)
+
+  module Precision = struct
+    (* Global precision state.  [None] means: use as many digits as
+       needed to print the number. *)
+    let p = ref None
+
+    let get () = !p
+
+    let set = function
+      | None -> p := None
+      | Some p' as v -> if p' > 0 && p' <= 16 then p := v else p := None
+
+    let fmt () =
+      let open CamlinternalFormatBasics in
+      match !p with
+      | None -> None
+      | Some p ->
+         let conv = (Float_flag_, Float_g) in
+         Some(Format(Float(conv, No_padding, Lit_precision p, End_of_format),
+                     "Interval.t"))
+  end
+
+  let pr ch i = pr_fmt ?fmt:(Precision.fmt()) ch i
+  let pp f i = pp_fmt ?fmt:(Precision.fmt()) f i
 
   let compare_f {low = a; high = b} x =
     if b < x then 1 else if a <= x then 0 else -1
@@ -603,18 +615,6 @@ module I = struct
   let ( > ) x y = strict_less y x
 end
 
-
-module Toploop = struct
-  let p = ref None
-
-  let precision () = !p
-
-  let set_precision = function
-    | None -> p := None
-    | Some p' as v -> if p' > 0 && p' <= 16 then p := v else p := None
-
-  let pp fmt i = I.pp ?precision:!p fmt i
-end
 
 external set_low: unit -> unit = "ocaml_set_low" [@@noalloc]
 external set_high: unit -> unit = "ocaml_set_high" [@@noalloc]
