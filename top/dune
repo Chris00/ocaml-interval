@@ -2,4 +2,4 @@
  (name interval_top)
  (public_name interval.top)
  (modes byte)
- (libraries compiler-libs.toplevel))
+ (libraries compiler-libs.bytecomp))
