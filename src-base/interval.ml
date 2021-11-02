@@ -48,6 +48,7 @@ module type T = sig
   val fmt : (number -> 'b, 'a, 'b) format -> (t -> 'c, 'd, 'e, 'c) format4
 
   val compare_f: t -> number -> int
+  val belong : number -> t -> bool
   val is_bounded : t -> bool
   val is_entire : t -> bool
   val equal : t -> t -> bool
@@ -65,6 +66,7 @@ module type T = sig
   val width: t -> t
   val width_high : t -> number
   val width_low : t -> number
+  val diam : t -> number
   val dist : t -> t -> t
   val dist_high : t -> t -> number
   val mag : t -> number
@@ -373,6 +375,8 @@ module I = struct
   let compare_f {low = a; high = b} x =
     if b < x then 1 else if a <= x then 0 else -1
 
+  let belong x {low; high} = low <= x && x <= high
+
   let is_bounded {low; high} =
     neg_infinity < low && high < infinity
 
@@ -413,6 +417,7 @@ module I = struct
   let width_low x = Low.(x.high -. x.low)
   let width_high x = High.(x.high -. x.low)
 
+  let diam = width_high
   let size = width
   let size_low = width_low
   let size_high = width_high

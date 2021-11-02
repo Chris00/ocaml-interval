@@ -114,6 +114,9 @@ module type T = sig
       - [0] if [inf(a)] ≤ [x] ≤ [sup(a)], i.e., if [x] ∈ [a], and
       - [-1] if [x < inf(a)].  *)
 
+  val belong : number -> t -> bool
+  (** [belong x a] returns whether [x] ∈ [a]. *)
+
   val is_bounded : t -> bool
   (** [is_bounded x] says whether the interval is bounded, i.e.,
       -∞ < [inf(x)] and [sup(x)] < ∞.
@@ -186,6 +189,9 @@ module type T = sig
   val width_low : t -> number
   (** [size_low a] returns the width of the interval [high a - low a]
      rounded down. *)
+
+  val diam : t -> number
+  (** Alias for [width_high] (page 64 of IEEE1788). *)
 
   val dist : t -> t -> t
   (** [dist x y] is the Hausdorff distance between [x] and [y].
