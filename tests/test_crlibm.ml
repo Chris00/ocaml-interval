@@ -12,7 +12,7 @@ let () =
 
 let () =
   for i = 1 to 1000 do
-    let x = I.v Low.(float i /. 1000.) High.(float i /. 1000.) in
+    let x = I.v RoundDown.(float i /. 1000.) RoundUp.(float i /. 1000.) in
     assert(I.subset x I.(sin (asin x)));
   done;
   let y = I.(sin pi) in
@@ -20,7 +20,7 @@ let () =
 
 let () =
   for i = 1 to 1000 do
-    let x = I.v Low.(float i /. 1000.) High.(float i /. 1000.) in
+    let x = I.v RoundDown.(float i /. 1000.) RoundUp.(float i /. 1000.) in
     assert(I.subset x I.(cos (acos x)));
   done;
   let y = I.(cos pi) in

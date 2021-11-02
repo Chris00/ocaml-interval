@@ -26,8 +26,8 @@
    performed differently.) *)
 
 open Interval
-module Low = Fpu.Low
-module High = Fpu.High
+module RoundDown = Fpu.RoundDown
+module RoundUp = Fpu.RoundUp
 
 let[@inline] mod2 x = Fpu.fmod x 2.
 
@@ -38,37 +38,38 @@ let fmax (a: float) (b: float) = if a <= b then b else a
 
 let log {low = a; high = b} =
   if b <= 0. then raise(Domain_error "log")
-  else {low = if a <= 0. then neg_infinity else Low.log a; high = High.log b}
+  else {low = if a <= 0. then neg_infinity else RoundDown.log a;
+        high = RoundUp.log b}
 
 let exp {low = a; high = b} =
-  { low = Low.exp a; high = High.exp b}
+  { low = RoundDown.exp a; high = RoundUp.exp b}
 
 let max_63 = ldexp 1. 63
 
 let tan {low = a; high = b} =
-  if -.max_63 <= a && b <= max_63 && Interval.High.(b -. a < pi) then (
-    let ta = Low.tan a in
-    let tb = High.tan b in
+  if -.max_63 <= a && b <= max_63 && Interval.RoundUp.(b -. a < pi) then (
+    let ta = RoundDown.tan a in
+    let tb = RoundUp.tan b in
     if ta <= tb then {low = ta; high = tb}
     else Interval.I.entire)
   else Interval.I.entire
 
 let acos {low = a; high = b} =
   if a <= 1. && -1. <= b then
-    {low = if b < 1. then Low.acos b else 0.;
-     high = if -1. < a then High.acos a else Interval.High.pi}
+    {low = if b < 1. then RoundDown.acos b else 0.;
+     high = if -1. < a then RoundUp.acos a else Interval.RoundUp.pi}
   else raise(Domain_error "acos")
 
 let asin {low = a; high = b} =
   if a <= 1. && -1. <= b then
-    { low = if -1. < a then Low.asin a else -. Interval.High.half_pi;
-      high = if b < 1. then High.asin b else Interval.High.half_pi }
+    { low = if -1. < a then RoundDown.asin a else -. Interval.RoundUp.half_pi;
+      high = if b < 1. then RoundUp.asin b else Interval.RoundUp.half_pi }
   else raise(Domain_error "asin")
 
 
 let cosh {low = a; high = b} =
-  if b < 0. then {low = Low.cosh b; high = High.cosh a}
-  else if a < 0. then {low = 1.; high = High.cosh (fmax (-.a) b)}
-  else {low = Low.cosh a; high = High.cosh b}
+  if b < 0. then {low = RoundDown.cosh b; high = RoundUp.cosh a}
+  else if a < 0. then {low = 1.; high = RoundUp.cosh (fmax (-.a) b)}
+  else {low = RoundDown.cosh a; high = RoundUp.cosh b}
 
-let sinh {low = a; high = b} = {low = Low.sinh a; high = High.sinh b}
+let sinh {low = a; high = b} = {low = RoundDown.sinh a; high = RoundUp.sinh b}

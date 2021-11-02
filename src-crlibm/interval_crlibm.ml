@@ -35,8 +35,8 @@ module type DIRECTED = sig
   module U = Interval.I.U
 end
 
-module Low = struct
-  include Interval.Low  (* +, -,... *)
+module RoundDown = struct
+  include Interval.RoundDown  (* +, -,... *)
   include Crlibm.Low
 
   (* [Crlibm.tanh] does not exists.  The bound here may not be the
@@ -44,20 +44,20 @@ module Low = struct
   let tanh x =
     if x >= 0. then
       let em1 = Crlibm.High.expm1(-2. *. x) in
-      (-. em1) /. Interval.High.(2. +. em1)
+      (-. em1) /. Interval.RoundUp.(2. +. em1)
     else
       let em1 = expm1(2. *. x) in
       em1 /. (em1 +. 2.)
 end
 
-module High = struct
-  include Interval.High
+module RoundUp = struct
+  include Interval.RoundUp
   include Crlibm.High
 
   let tanh x =
     if x >= 0. then
       let em1 = Crlibm.Low.expm1(-2. *. x) in
-      (-. em1) /. Interval.Low.(2. +. em1)
+      (-. em1) /. Interval.RoundDown.(2. +. em1)
     else
       let em1 = expm1(2. *. x) in
       em1 /. (em1 +. 2.)
@@ -74,19 +74,20 @@ module I = struct
 
   let cos { low = a; high = b } =
     let open U in
-    let k = floor Low.(a /. High.pi) in
-    let l = floor High.(b /. Low.pi) in
+    let k = floor RoundDown.(a /. RoundUp.pi) in
+    let l = floor RoundUp.(b /. RoundDown.pi) in
     if is_odd k then
       if l = k then
         (* It is guaranteed that kπ ≤ a ≤ b ≤ (k+1)π. *)
-        {low = Low.cos a;  high = High.cos b} (* increasing *)
+        {low = RoundDown.cos a;  high = RoundUp.cos b} (* increasing *)
       else if l = k +. 1. then
-        {low = fmin (Low.cos a) (Low.cos b);  high = 1.}
+        {low = fmin (RoundDown.cos a) (RoundDown.cos b);  high = 1.}
       else mone_one
     else (* k even *)
-      if l = k then {low = Low.cos b;  high = High.cos a} (* decreasing *)
+      if l = k then {low = RoundDown.cos b;
+                     high = RoundUp.cos a} (* decreasing *)
       else if l = k +. 1. then
-        {low = -1.;  high = fmax (High.cos a) (High.cos b)}
+        {low = -1.;  high = fmax (RoundUp.cos a) (RoundUp.cos b)}
       else mone_one
 
   let cospi { low = a; high = b } =
@@ -96,95 +97,104 @@ module I = struct
     if is_odd k then
       if l = k then
         (* It is guaranteed that k ≤ a ≤ b ≤ k+1. *)
-        {low = Low.cospi a;  high = High.cospi b} (* increasing *)
+        {low = RoundDown.cospi a;  high = RoundUp.cospi b} (* increasing *)
       else if l = k +. 1. then
-        {low = fmin (Low.cospi a) (Low.cospi b);  high = 1.}
+        {low = fmin (RoundDown.cospi a) (RoundDown.cospi b);  high = 1.}
       else mone_one
     else (* k even *)
-      if l = k then {low = Low.cospi b;  high = High.cospi a} (* decreasing *)
+      if l = k then {low = RoundDown.cospi b;
+                     high = RoundUp.cospi a} (* decreasing *)
       else if l = k +. 1. then
-        {low = -1.;  high = fmax (High.cospi a) (High.cospi b)}
+        {low = -1.;  high = fmax (RoundUp.cospi a) (RoundUp.cospi b)}
       else mone_one
 
   let sin { low = a; high = b } =
     let open U in
-    let k = floor Low.(a /. High.pi -. 0.5) in
-    let l = floor High.(b /. Low.pi -. 0.5) in
+    let k = floor RoundDown.(a /. RoundUp.pi -. 0.5) in
+    let l = floor RoundUp.(b /. RoundDown.pi -. 0.5) in
     if is_odd k then
-      if l = k then {low = Low.sin a;  high = High.sin b} (* increasing *)
+      if l = k then {low = RoundDown.sin a;
+                     high = RoundUp.sin b} (* increasing *)
       else if l = k +. 1. then
-        {low = fmin (Low.sin a) (Low.sin b);  high = 1.}
+        {low = fmin (RoundDown.sin a) (RoundDown.sin b);  high = 1.}
       else mone_one
     else
-      if l = k then {low = Low.sin b;  high = High.sin a } (* decreasing *)
+      if l = k then {low = RoundDown.sin b;
+                     high = RoundUp.sin a } (* decreasing *)
       else if l = k +. 1. then
-        {low = -1.;  high = fmax (High.sin a) (High.sin b)}
+        {low = -1.;  high = fmax (RoundUp.sin a) (RoundUp.sin b)}
       else mone_one
 
   let sinpi { low = a; high = b } =
     let open U in
-    let k = floor Low.(a -. 0.5) in
-    let l = floor High.(b -. 0.5) in
+    let k = floor RoundDown.(a -. 0.5) in
+    let l = floor RoundUp.(b -. 0.5) in
     if is_odd k then
-      if l = k then {low = Low.sinpi a;  high = High.sinpi b} (* increasing *)
+      if l = k then {low = RoundDown.sinpi a;
+                     high = RoundUp.sinpi b} (* increasing *)
       else if l = k +. 1. then
-        {low = fmin (Low.sinpi a) (Low.sinpi b);  high = 1.}
+        {low = fmin (RoundDown.sinpi a) (RoundDown.sinpi b);  high = 1.}
       else mone_one
     else
-      if l = k then {low = Low.sinpi b;  high = High.sinpi a } (* decreasing *)
+      if l = k then {low = RoundDown.sinpi b;
+                     high = RoundUp.sinpi a } (* decreasing *)
       else if l = k +. 1. then
-        {low = -1.;  high = fmax (High.sinpi a) (High.sinpi b)}
+        {low = -1.;  high = fmax (RoundUp.sinpi a) (RoundUp.sinpi b)}
       else mone_one
 
   let max_63 = ldexp 1. 63
 
   let tanpi {low = a; high = b} =
-    if U.(-.max_63 <= a && b <= max_63 && High.(b -. a < 1.)) then (
-      let ta = Low.tanpi a in
-      let tb = High.tanpi b in
+    if U.(-.max_63 <= a && b <= max_63 && RoundUp.(b -. a < 1.)) then (
+      let ta = RoundDown.tanpi a in
+      let tb = RoundUp.tanpi b in
       if U.(ta <= tb) then {low = ta; high = tb}
       else entire)
     else entire
 
   let acospi {low = a; high = b} =
     if U.(a <= 1. && -1. <= b) then
-      {low = if U.(b < 1.) then Low.acospi b else 0.;
-       high = if U.(-1. < a) then High.acospi a else 1.}
+      {low = if U.(b < 1.) then RoundDown.acospi b else 0.;
+       high = if U.(-1. < a) then RoundUp.acospi a else 1.}
     else raise(Interval.Domain_error "acospi")
 
   let asinpi {low = a; high = b} =
     if U.(a <= 1. && -1. <= b) then
-      { low = if U.(-1. < a) then Low.asinpi a else -0.5;
-        high = if U.(b < 1.) then High.asinpi b else 0.5 }
+      { low = if U.(-1. < a) then RoundDown.asinpi a else -0.5;
+        high = if U.(b < 1.) then RoundUp.asinpi b else 0.5 }
     else raise(Interval.Domain_error "asinpi")
 
   let atan {low = a; high = b} =
-    { low = Low.atan a; high = High.atan b}
+    { low = RoundDown.atan a; high = RoundUp.atan b}
 
   let atanpi {low = a; high = b} =
-    { low = Low.atanpi a; high = High.atanpi b}
+    { low = RoundDown.atanpi a; high = RoundUp.atanpi b}
 
   let tanh {low = a; high = b} =
-    { low = Low.tanh a; high = High.tanh b }
+    { low = RoundDown.tanh a; high = RoundUp.tanh b }
 
   let log1p {low = a; high = b} =
     if U.(b <= -1.) then raise(Interval.Domain_error "log1p")
-    else {low = if U.(a <= -1.) then neg_infinity else Low.log1p a;
-          high = High.log1p b}
+    else {low = if U.(a <= -1.) then neg_infinity else RoundDown.log1p a;
+          high = RoundUp.log1p b}
 
   let log2 {low = a; high = b} =
     if U.(b <= 0.) then raise(Interval.Domain_error "log2")
-    else {low = if U.(a <= 0.) then neg_infinity else Low.log2 a;
-          high = High.log2 b}
+    else {low = if U.(a <= 0.) then neg_infinity else RoundDown.log2 a;
+          high = RoundUp.log2 b}
 
   let log10 {low = a; high = b} =
     if U.(b <= 0.) then raise(Interval.Domain_error "log10")
-    else {low = if U.(a <= 0.) then neg_infinity else Low.log10 a;
-          high = High.log10 b}
+    else {low = if U.(a <= 0.) then neg_infinity else RoundDown.log10 a;
+          high = RoundUp.log10 b}
 
   let expm1 {low = a; high = b} =
-    { low = Low.expm1 a; high = High.expm1 b}
+    { low = RoundDown.expm1 a; high = RoundUp.expm1 b}
 
   include Generic (* Last because redefines [Low] and [High] as the
                      CRlibm ones (generated during build). *)
 end
+
+
+module Low = RoundDown
+module High = RoundUp

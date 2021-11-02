@@ -182,23 +182,23 @@ module type T = sig
   (** [size a] returns an interval containing the true width of the
      interval [sup a - inf a]. *)
 
-  val width_high : t -> number
-  (** [size_high a] returns the width of the interval [high a - low a]
+  val width_up : t -> number
+  (** [width_up a] returns the width of the interval [sup a - inf a]
      rounded up. *)
 
-  val width_low : t -> number
-  (** [size_low a] returns the width of the interval [high a - low a]
+  val width_dw : t -> number
+  (** [width_dw a] returns the width of the interval [sup a - inf a]
      rounded down. *)
 
   val diam : t -> number
-  (** Alias for [width_high] (page 64 of IEEE1788). *)
+  (** Alias for [width_up] (page 64 of IEEE1788). *)
 
   val dist : t -> t -> t
   (** [dist x y] is the Hausdorff distance between [x] and [y].
       It is equal to max\{ |[inf x] - [inf y]|, |[sup x] - [sup y]| \}. *)
 
-  val dist_high : t -> t -> number
-  (** [dist_high x y] is the Hausdorff distance between [x] and [y],
+  val dist_up : t -> t -> number
+  (** [dist_up x y] is the Hausdorff distance between [x] and [y],
      rounded up.  (This satisfies the triangular inequality for a
      rounded up [+.].) *)
 
@@ -375,6 +375,8 @@ module I : sig
   val high : t -> number  [@@deprecated "Use I.sup"]
   (** [high t] returns the higher bound of the interval. *)
 
+  val width_high : t -> number [@@deprecated "Use I.width_up"]
+  val width_low : t -> number  [@@deprecated "Use I.width_dw"]
 
   (** Global precision for the functions {!I.pr} and {!I.pp}. *)
   module Precision : sig
@@ -388,8 +390,8 @@ module I : sig
   end
 
   val size : t -> t           [@@deprecated "Use I.width"]
-  val size_high : t -> number [@@deprecated "Use I.width_high"]
-  val size_low : t -> number  [@@deprecated "Use I.width_low"]
+  val size_high : t -> number [@@deprecated "Use I.width_up"]
+  val size_low : t -> number  [@@deprecated "Use I.width_dw"]
 
   (** {2 Usual arithmetic operators} *)
 
@@ -474,7 +476,7 @@ end
 
 
 (** Functions rounding down their results. *)
-module Low : sig
+module RoundDown : sig
   include DIRECTED with type t = float
 
   (** Locally open to restore standard integer and floating point
@@ -483,13 +485,16 @@ module Low : sig
 end
 
 (** Functions rounding up their results. *)
-module High : sig
+module RoundUp : sig
   include DIRECTED with type t = float
 
   (** Locally open to restore standard integer and floating point
      operators. *)
   module U = I.U
 end
+
+module Low = RoundDown [@@deprecated "Use Interval.RoundDown"]
+module High = RoundUp [@@deprecated "Use Interval.RoundUp"]
 
 
 (** {2 Changing the rounding mode (DANGEROUS)} *)
@@ -506,8 +511,8 @@ end
    on how the compiler will reorder the instructions generated.  It is
    ALWAYS better to write:
    {[
-   let a = set_high(); let res = 1./.3. in
-   set_nearest (); res;; ]}
+   let a = set_round_up(); let res = 1./.3. in
+   set_round_nearest (); res;; ]}
 
    The above code will NOT work on linux-x64 where many floating point
    functions are implemented using SSE instructions.  These three
@@ -515,7 +520,7 @@ end
    you really know what tou are doing, and this should never happen.
    Please use the regular functions of the fpu module for
    computations.  For example prefer:
-   {[ let a = High.(1. /. 3.)  ]}
+   {[ let a = RoundUp.(1. /. 3.)  ]}
 
    PS: The Interval module and the fpu module functions correctly set and
    restore the rounding mode for all interval computations, so you
@@ -523,11 +528,11 @@ end
 
    PPS: Please, don't use them...  *)
 
-val set_low: unit -> unit
+val set_round_dw: unit -> unit
 (** Sets the rounding mod to DOWNWARD (towards minus infinity) *)
 
-val set_high: unit -> unit
+val set_round_up: unit -> unit
 (** Sets the rounding mod to UPWARD (towards infinity) *)
 
-val set_nearest: unit -> unit
+val set_round_nearest: unit -> unit
 (** Sets the rounding mod to NEAREST (default mode) *)

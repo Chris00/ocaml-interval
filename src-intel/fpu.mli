@@ -27,8 +27,8 @@ Every function, say cos, come in three flavors:
 - [fcos] which is an implementation of cos that is correct (contrary to
   the standard functions, see below) and which result lies inside
   the interval defined by the following two funtions.
-- [Low.cos] a lower bound on the (true) value of cos.
-- [High.cos] an upper bound on the (true) value of cos.
+- [RoundDown.cos] a lower bound on the (true) value of cos.
+- [RoundUp.cos] an upper bound on the (true) value of cos.
 
 Almost all low
 level functions are implemented using the x87 functions and x87 rounding
@@ -146,13 +146,13 @@ Intel 980X Linux 64 bits
 
 (** {2 Rounding down and up standard functions}
 
-   The following sub-modules {!Low} and {!High} implement the same
-   functions but with different roundings (down for {!Low} and up
-   for {!High}).  *)
+   The following sub-modules {!RoundDown} and {!RoundUp} implement the same
+   functions but with different roundings (down for {!RoundDown} and up
+   for {!RoundUp}).  *)
 
 (** Functions rounding down their results. *)
-module Low : sig
-  include module type of Interval.Low
+module RoundDown : sig
+  include module type of Interval.RoundDown
 
   val ( ** ) : float -> float -> float
   (** [x**y] computes [x] at power [y], rounded down, expanded to its
@@ -202,8 +202,8 @@ module Low : sig
 end
 
 (** Functions rounding up their results. *)
-module High : sig
-  include module type of Interval.High
+module RoundUp : sig
+  include module type of Interval.RoundUp
 
   val ( ** ) : float -> float -> float
   (** [x**y] computes [x] at power [y], rounded up, expanded to its
@@ -251,6 +251,9 @@ module High : sig
   val tanh: float -> float
   (** Computes the hyperbolic tangent, tanh(x). *)
 end
+
+module Low = RoundDown [@@deprecated "Use Fpu.RoundDown"]
+module High = RoundUp  [@@deprecated "Use Fpu.RoundUp"]
 
 
 (** {2 Improving standard functions} *)

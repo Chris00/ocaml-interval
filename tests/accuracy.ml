@@ -7,17 +7,21 @@ let () =
   let open Interval_intel.Fpu in
   let pi = acos(-1.) in
   printf "Fpu:\ncos(%.10f) ≈ [%.17f, %.17f] %s\n"
-    pi (Low.cos pi) (High.cos pi) (singleton (Low.cos pi) (High.cos pi));
+    pi (RoundDown.cos pi) (RoundUp.cos pi)
+    (singleton (RoundDown.cos pi) (RoundUp.cos pi));
   printf "sin(%.10f) ≈ [%g, %e] %s\n"
-    pi (Low.sin pi) (High.sin pi) (singleton (Low.sin pi) (High.sin pi))
+    pi (RoundDown.sin pi) (RoundUp.sin pi)
+    (singleton (RoundDown.sin pi) (RoundUp.sin pi))
 
 let () =
   let open Interval_crlibm in
   let pi = acos(-1.) in
   printf "CRLibm:\ncos(%.10f) ∈ [%.17f, %.17f] %s\n"
-    pi (Low.cos pi) (High.cos pi) (singleton (Low.cos pi) (High.cos pi));
+    pi (RoundDown.cos pi) (RoundUp.cos pi)
+    (singleton (RoundDown.cos pi) (RoundUp.cos pi));
   printf "sin(%.10f) ∈ [%g, %g] %s\n"
-    pi (Low.sin pi) (High.sin pi) (singleton (Low.sin pi) (High.sin pi));
+    pi (RoundDown.sin pi) (RoundUp.sin pi)
+    (singleton (RoundDown.sin pi) (RoundUp.sin pi));
   let c = I.(cos pi) in
   printf ("cos([π]) = " ^^ I.fmt "%.17f" ^^ " %s\n")
     c (singleton c.low c.high);

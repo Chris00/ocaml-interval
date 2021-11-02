@@ -62,7 +62,7 @@ module type DIRECTED = sig
 end
 
 module Test (I: FLOAT_INTERVAL) (Nearest: TRIGS with type t := float)
-         (Low: DIRECTED) (High: DIRECTED) = struct
+         (RoundDown: DIRECTED) (RoundUp: DIRECTED) = struct
 
   let create_test mode f x =
     flush stdout;
@@ -198,8 +198,8 @@ module Test (I: FLOAT_INTERVAL) (Nearest: TRIGS with type t := float)
       print_test infos) valuesi) bounds
 
   let inv x = 1. /. x
-  let inv_low x = Low.(1. /. x)
-  let inv_high x = High.(1. /. x)
+  let inv_dw x = RoundDown.(1. /. x)
+  let inv_up x = RoundUp.(1. /. x)
 
   let o3 = 1./.3. and o7 = 1./.7. and e = exp 1.
   let m1 = 1. -. epsilon_float and p1 = 1. +. epsilon_float
@@ -226,39 +226,39 @@ module Test (I: FLOAT_INTERVAL) (Nearest: TRIGS with type t := float)
              (add_mul I.half_pi.low I.half_pi.high da 994 1006 [infinity])) in
 
     List.iter (check_I_f Exact values bounds)
-      [ ("I + f", [( +. ); Low.( +. ); High.( +. )], I.( +. ));
-        ("I - f", [( -. ); Low.( -. ); High.( -. )], I.( -. ));
-        ("I * f", [( *. ); Low.( *. ); High.( *. )], I.( *: ));
-        ("I / f", [( /. ); Low.( /. ); High.( /. )], I.( /. )) ];
+      [ ("I + f", [( +. ); RoundDown.( +. ); RoundUp.( +. )], I.( +. ));
+        ("I - f", [( -. ); RoundDown.( -. ); RoundUp.( -. )], I.( -. ));
+        ("I * f", [( *. ); RoundDown.( *. ); RoundUp.( *. )], I.( *: ));
+        ("I / f", [( /. ); RoundDown.( /. ); RoundUp.( /. )], I.( /. )) ];
 
     List.iter (check_I Exact values bounds)
       [ ("I.abs",  [abs_float], I.abs);
-        ("I.inv",  [inv; inv_low; inv_high], I.inv);
-        ("I.log",  [Nearest.log; Low.log; High.log], I.log);
-        ("I.exp",  [Nearest.exp; Low.exp; High.exp], I.exp);
-        ("I.atan", [Nearest.atan; Low.atan; High.atan], I.atan);
-        ("I.asin", [Nearest.asin; Low.asin; High.asin], I.asin);
-        ("I.acos", [Nearest.acos; Low.acos; High.acos], I.acos);
-        ("I.cosh", [Nearest.cosh; Low.cosh; High.cosh], I.cosh);
-        ("I.sinh", [Nearest.sinh; Low.sinh; High.sinh], I.sinh);
-        ("I.tanh", [Nearest.tanh; Low.tanh; High.tanh], I.tanh); ];
+        ("I.inv",  [inv; inv_dw; inv_up], I.inv);
+        ("I.log",  [Nearest.log; RoundDown.log; RoundUp.log], I.log);
+        ("I.exp",  [Nearest.exp; RoundDown.exp; RoundUp.exp], I.exp);
+        ("I.atan", [Nearest.atan; RoundDown.atan; RoundUp.atan], I.atan);
+        ("I.asin", [Nearest.asin; RoundDown.asin; RoundUp.asin], I.asin);
+        ("I.acos", [Nearest.acos; RoundDown.acos; RoundUp.acos], I.acos);
+        ("I.cosh", [Nearest.cosh; RoundDown.cosh; RoundUp.cosh], I.cosh);
+        ("I.sinh", [Nearest.sinh; RoundDown.sinh; RoundUp.sinh], I.sinh);
+        ("I.tanh", [Nearest.tanh; RoundDown.tanh; RoundUp.tanh], I.tanh); ];
 
     List.iter (check_I Exact pio2s angles)
-      [ ("I.cos", [Nearest.cos; Low.cos; High.cos], I.cos);
-        ("I.sin", [Nearest.sin; Low.sin; High.sin], I.sin)];
-    check_I In pio2s angles ("I.tan", [Nearest.tan; Low.tan; High.tan], I.tan);
+      [ ("I.cos", [Nearest.cos; RoundDown.cos; RoundUp.cos], I.cos);
+        ("I.sin", [Nearest.sin; RoundDown.sin; RoundUp.sin], I.sin)];
+    check_I In pio2s angles ("I.tan", [Nearest.tan; RoundDown.tan; RoundUp.tan], I.tan);
 
     List.iter (check_f_I Exact values bounds)
-      [ ("f + I", [( +. ); Low.( +. ); High.( +. )], I.( +: ));
-        ("f - I", [( -. ); Low.( -. ); High.( -. )], I.( -: ));
-        ("f * I", [( *. ); Low.( *. ); High.( *. )], I.( *. ));
-        ("f / I", [( /. ); Low.( /. ); High.( /. )], I.( /: )) ];
+      [ ("f + I", [( +. ); RoundDown.( +. ); RoundUp.( +. )], I.( +: ));
+        ("f - I", [( -. ); RoundDown.( -. ); RoundUp.( -. )], I.( -: ));
+        ("f * I", [( *. ); RoundDown.( *. ); RoundUp.( *. )], I.( *. ));
+        ("f / I", [( /. ); RoundDown.( /. ); RoundUp.( /. )], I.( /: )) ];
 
     List.iter (check_I_I Exact values bounds)
-      [ ("I + I", [( +. ); Low.( +. ); High.( +. )], I.( + ));
-        ("I - I", [( -. ); Low.( -. ); High.( -. )], I.( - ));
-        ("I * I", [( *. ); Low.( *. ); High.( *. )], I.( * ));
-        ("I / I", [( /. ); Low.( /. ); High.( /. )], I.( / ));
+      [ ("I + I", [( +. ); RoundDown.( +. ); RoundUp.( +. )], I.( + ));
+        ("I - I", [( -. ); RoundDown.( -. ); RoundUp.( -. )], I.( - ));
+        ("I * I", [( *. ); RoundDown.( *. ); RoundUp.( *. )], I.( * ));
+        ("I / I", [( /. ); RoundDown.( /. ); RoundUp.( /. )], I.( / ));
         ("max I I", [max; max; max], I.max);
         ("min I I", [min; min; min], I.min)];
 
@@ -276,11 +276,11 @@ module Test_Intel = struct
     include Interval_intel.I
   end
   module Fpu = Interval_intel.Fpu
-  include Test(I)(Stdlib)(Interval_intel.Low)(Interval_intel.High)
+  include Test(I)(Stdlib)(Interval_intel.RoundDown)(Interval_intel.RoundUp)
 
   let myatan2 y x = if y = 0.&& x = 0. then nan else atan2 y x
-  let myatan2_low y x = if y = 0. && x = 0. then nan else Low.atan2 y x
-  let myatan2_high y x = if y = 0. && x = 0. then nan else High.atan2 y x
+  let myatan2_low y x = if y = 0. && x = 0. then nan else RoundDown.atan2 y x
+  let myatan2_high y x = if y = 0. && x = 0. then nan else RoundUp.atan2 y x
 
   let pospow x y =
     if x = 0. then Fpu.fpow 0. y
@@ -291,17 +291,17 @@ module Test_Intel = struct
 
   let () =
     check_I_f Exact values bounds
-      ("I**f", [Fpu.fpow; Low.( ** ); High.( ** )], I.( **. ));
+      ("I**f", [Fpu.fpow; RoundDown.( ** ); RoundUp.( ** )], I.( **. ));
     check_f_I Exact values bounds
-      ("f**I", [pospow; Low.pow; High.pow], I.( **: ));
+      ("f**I", [pospow; RoundDown.pow; RoundUp.pow], I.( **: ));
     check_I Exact values bounds
-      ("I.sqrt", [sqrt; Low.sqrt; High.sqrt], I.sqrt);
+      ("I.sqrt", [sqrt; RoundDown.sqrt; RoundUp.sqrt], I.sqrt);
     check_I_f In values bounds ("I.mod_f", [Fpu.fmod; mod_float], I.mod_f);
     check_I_i Exact values bounds valuesi
-      ("I.( ** )", [Fpu.fpow; Low.( ** ); High.( ** )], I.( ** ));
+      ("I.( ** )", [Fpu.fpow; RoundDown.( ** ); RoundUp.( ** )], I.( ** ));
     List.iter (check_I_I Exact values bounds)
       [ ("I.atan2", [myatan2; myatan2_low; myatan2_high], I.atan2);
-        ("I**I", [pospow; Low.pow; High.pow], I.( *** ) ) ];
+        ("I**I", [pospow; RoundDown.pow; RoundUp.pow], I.( *** ) ) ];
     check_I_I Mod2pi values bounds
       ("I.atan2mod", [myatan2; myatan2_low; myatan2_high], I.atan2mod);
 end
@@ -318,5 +318,5 @@ module Test_Crlibm = struct
     include Crlibm
     let tanh = Float.tanh
   end
-  include Test(I)(Nearest)(Interval_crlibm.Low)(Interval_crlibm.High)
+  include Test(I)(Nearest)(Interval_crlibm.RoundDown)(Interval_crlibm.RoundUp)
 end

@@ -153,7 +153,12 @@ module type DIRECTED = sig
 end
 
 (** Functions rounding down their results. *)
-module Low : DIRECTED
+module RoundDown : DIRECTED
+
+module Low = RoundDown [@@deprecated "Use Interval_crlibm.RoundDown"]
+
 
 (** Functions rounding up their results. *)
-module High : DIRECTED
+module RoundUp : DIRECTED
+
+module High = RoundUp [@@deprecated "Use Interval_crlibm.RoundUp"]

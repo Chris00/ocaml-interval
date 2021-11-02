@@ -20,8 +20,10 @@
 *)
 
 module Fpu = Fpu
-module Low = Fpu.Low
-module High = Fpu.High
+module RoundDown = Fpu.RoundDown
+module RoundUp = Fpu.RoundUp
+module Low = RoundDown
+module High = RoundUp
 
 type t = Interval.t = {low: float; high: float}
 
@@ -39,10 +41,10 @@ module I = struct
     let nf = of_int n in
     let[@inline] pow_l x =
       if x = infinity then 0.
-      else Low.pow x (if x < 1.0 then nf.high else nf.low) in
+      else RoundDown.pow x (if x < 1.0 then nf.high else nf.low) in
     let[@inline] pow_h x =
       if x = infinity then infinity
-      else High.pow x (if x < 1.0 then nf.low else nf.high) in
+      else RoundUp.pow x (if x < 1.0 then nf.low else nf.high) in
     let sn = compare n 0 and sa = compare a 0. and sb = compare b 0. in
     if sn = 0 then if a = 0. && b = 0. then raise(Domain_error "**") else one
     else if sb < 0 then
@@ -70,21 +72,21 @@ module I = struct
 
   let ( **. ) {low = a; high = b} nf =
     let open U in
-    let[@inline] pow_l x = if x = infinity then 0. else Low.pow x nf in
-    let[@inline] pow_h x = if x = infinity then infinity else High.pow x nf in
+    let[@inline] pow_l x = if x = infinity then 0. else RoundDown.pow x nf in
+    let[@inline] pow_h x = if x = infinity then infinity else RoundUp.pow x nf in
     let sn = compare nf 0. and sa = compare a 0. and sb = compare b 0. in
     if sn = 0 then if a = 0. && b = 0. then raise(Domain_error "**.")
                    else one
     else if sb < 0 then
       if floor nf <> nf then raise(Domain_error "**.")
       else if mod2 nf = 0. then
-        if 0 < sn then {low = Low.pow (-.b) nf; high = pow_h (-.a)}
-        else {low = pow_l (-.a); high = High.pow (-.b) nf}
-      else if 0 < sn then {low = -.pow_h (-.a); high = -. Low.pow (-.b) nf}
-      else {low = -. High.pow (-.b) nf; high = -.pow_l (-.a)}
+        if 0 < sn then {low = RoundDown.pow (-.b) nf; high = pow_h (-.a)}
+        else {low = pow_l (-.a); high = RoundUp.pow (-.b) nf}
+      else if 0 < sn then {low = -.pow_h (-.a); high = -. RoundDown.pow (-.b) nf}
+      else {low = -. RoundUp.pow (-.b) nf; high = -.pow_l (-.a)}
     else if 0 < sa then
-      if 0 < sn then {low = Low.pow a nf; high = pow_h b}
-      else {low = pow_l b; high = High.pow a nf}
+      if 0 < sn then {low = RoundDown.pow a nf; high = pow_h b}
+      else {low = pow_l b; high = RoundUp.pow a nf}
     else if floor nf <> nf then
       if 0 < sn then {low = 0.; high = if sb = 0 then 0. else pow_h b}
       else if sb = 0 then raise(Domain_error "**.")
@@ -112,20 +114,20 @@ module I = struct
     else if a = 0. then
       if 0. <= c then
         {low = if d = 0. then 1. else 0.;
-         high = High.(b**(if b < 1. then c else d))}
+         high = RoundUp.(b**(if b < 1. then c else d))}
       else if d <= 0. then
-        {low = Low.(b**(if b < 1. then d else c)); high = infinity}
+        {low = RoundDown.(b**(if b < 1. then d else c)); high = infinity}
       else {low = 0.; high = infinity}
     else if 0. <= c then
-      { low = Low.(a**(if a < 1. then d else c));
-        high = High.(b**(if b < 1. then c else d)) }
+      { low = RoundDown.(a**(if a < 1. then d else c));
+        high = RoundUp.(b**(if b < 1. then c else d)) }
     else if d <= 0. then
-      { low = Low.(b**(if b < 1. then d else c));
-        high = High.(a**(if a < 1. then c else d)) }
-    else if b < 1. then {low = Low.(a**d); high = High.(a**c)}
-    else if 1. < a then {low = Low.(b**c); high = High.(b**d)}
-    else { low = fmin Low.(a**d) Low.(b**c);
-           high = fmax High.(a**c) High.(b**d)}
+      { low = RoundDown.(b**(if b < 1. then d else c));
+        high = RoundUp.(a**(if a < 1. then c else d)) }
+    else if b < 1. then {low = RoundDown.(a**d); high = RoundUp.(a**c)}
+    else if 1. < a then {low = RoundDown.(b**c); high = RoundUp.(b**d)}
+    else { low = fmin RoundDown.(a**d) RoundDown.(b**c);
+           high = fmax RoundUp.(a**c) RoundUp.(b**d)}
 
   let ( **: ) x {low = a; high = b} =
     let open U in
@@ -134,27 +136,27 @@ module I = struct
     else if x < 1. then
       if a = neg_infinity then
         if b = infinity then {low = 0.; high = infinity}
-        else {low = Low.pow x b; high = infinity}
-      else if b = infinity then {low = 0.; high = High.pow x a}
-      else {low = Low.pow x b; high = High.pow x a}
+        else {low = RoundDown.pow x b; high = infinity}
+      else if b = infinity then {low = 0.; high = RoundUp.pow x a}
+      else {low = RoundDown.pow x b; high = RoundUp.pow x a}
     else if x = 1. then {low = 1.; high = 1.}
     else if a = neg_infinity then
       if b = infinity then {low = 0.; high = infinity}
-      else {low = 0.; high = High.pow x b}
-    else if b = infinity then {low = Low.pow x a; high = infinity}
-    else {low = Low.pow x a; high = High.pow x b}
+      else {low = 0.; high = RoundUp.pow x b}
+    else if b = infinity then {low = RoundDown.pow x a; high = infinity}
+    else {low = RoundDown.pow x a; high = RoundUp.pow x b}
 
   let mod_f {low = a; high = b} y =
     (* assume that the result of fmod is exact *)
     let sy = Stdlib.compare y 0. in
     let y = if U.(sy = 0) then raise Division_by_zero else abs_float y in
     if U.(0. <= a) then
-      if U.(High.(b -. a) < y) then (
+      if U.(RoundUp.(b -. a) < y) then (
         let ma = Fpu.fmod a y and mb = Fpu.fmod b y in
         if U.(ma <= mb) then {low = ma; high = mb} else {low = 0.; high = y})
       else {low = 0.; high = y}
     else if U.(b <= 0.) then
-      if U.(High.(b -. a) < y) then (
+      if U.(RoundUp.(b -. a) < y) then (
         let ma = Fpu.fmod a y and mb = Fpu.fmod b y in
         if U.(ma <= mb) then {low = ma; high = mb} else {low = -.y; high = 0.})
       else {low = -.y; high = 0.}
@@ -166,34 +168,37 @@ module I = struct
   external sin: t -> t = "fsin_I_caml"
 
   let atan {low = a; high = b} =
-    { low = Low.atan2 a 1.; high = High.atan2 b 1.}
+    { low = RoundDown.atan2 a 1.; high = RoundUp.atan2 b 1.}
 
   let atan2mod {low = ya; high = yb} {low = xa; high = xb} =
     let open U in
     let sya = compare ya 0. and syb = compare yb 0. in
     let sxa = compare xa 0. and sxb = compare xb 0. in
     if syb < 0 then
-      if sxb <= 0 then {low = Low.atan2 yb xa; high = High.atan2 ya xb}
-      else if 0 <= sxa then {low = Low.atan2 ya xa; high = High.atan2 yb xb}
-      else {low = Low.atan2 yb xa; high = High.atan2 yb xb}
+      if sxb <= 0 then {low = RoundDown.atan2 yb xa; high = RoundUp.atan2 ya xb}
+      else if 0 <= sxa then {low = RoundDown.atan2 ya xa;
+                            high = RoundUp.atan2 yb xb}
+      else {low = RoundDown.atan2 yb xa; high = RoundUp.atan2 yb xb}
     else if 0 < sya then
-      if sxb <= 0 then {low = Low.atan2 yb xb; high = High.atan2 ya xa}
-      else if 0 <= sxa then {low = Low.atan2 ya xb; high = High.atan2 yb xa}
-      else {low = Low.atan2 ya xb; high = High.atan2 ya xa}
+      if sxb <= 0 then {low = RoundDown.atan2 yb xb; high = RoundUp.atan2 ya xa}
+      else if 0 <= sxa then {low = RoundDown.atan2 ya xb;
+                            high = RoundUp.atan2 yb xa}
+      else {low = RoundDown.atan2 ya xb; high = RoundUp.atan2 ya xa}
     else if sya = syb (* = 0. *) then
       if sxa = 0 && sxb = 0 then raise(Domain_error "atan2mod")
       else if 0 <= sxa then zero
       else if sxb <= 0 then pi
       else {low = 0.; high = pi.high}
     else if sya = 0 then
-      { low = if sxb <= 0 then Low.atan2 yb xb else 0.;
-        high = if 0 <= sxa then High.atan2 yb xa else pi.high}
+      { low = if sxb <= 0 then RoundDown.atan2 yb xb else 0.;
+        high = if 0 <= sxa then RoundUp.atan2 yb xa else pi.high}
     else if syb = 0 then
-      { low = if 0 <= sxa then Low.atan2 ya xa else -.pi.high;
-        high = if sxb <= 0 then High.atan2 ya xb else 0. }
+      { low = if 0 <= sxa then RoundDown.atan2 ya xa else -.pi.high;
+        high = if sxb <= 0 then RoundUp.atan2 ya xb else 0. }
     else if sxb <= 0 then
-      {low = Low.atan2 yb xb; high = High.(atan2 ya xb +. two_pi)}
-    else if 0 <= sxa then {low = Low.atan2 ya xa; high = High.atan2 yb xa}
+      {low = RoundDown.atan2 yb xb; high = RoundUp.(atan2 ya xb +. two_pi)}
+    else if 0 <= sxa then {low = RoundDown.atan2 ya xa;
+                          high = RoundUp.atan2 yb xa}
     else {low = -.pi.high; high = pi.high}
 
   let atan2 {low = ya; high = yb} {low = xa; high = xb} =
@@ -201,13 +206,15 @@ module I = struct
     let sya = compare ya 0. and syb = compare yb 0. in
     let sxa = compare xa 0. and sxb = compare xb 0. in
     if syb < 0 then
-      if sxb <= 0 then {low = Low.atan2 yb xa; high = High.atan2 ya xb}
-      else if 0 <= sxa then {low = Low.atan2 ya xa; high = High.atan2 yb xb}
-      else {low = Low.atan2 yb xa; high = High.atan2 yb xb}
+      if sxb <= 0 then {low = RoundDown.atan2 yb xa; high = RoundUp.atan2 ya xb}
+      else if 0 <= sxa then {low = RoundDown.atan2 ya xa;
+                            high = RoundUp.atan2 yb xb}
+      else {low = RoundDown.atan2 yb xa; high = RoundUp.atan2 yb xb}
     else if 0 < sya then
-      if sxb <= 0 then {low = Low.atan2 yb xb; high = High.atan2 ya xa}
-      else if 0 <= sxa then {low = Low.atan2 ya xb; high = High.atan2 yb xa}
-      else {low = Low.atan2 ya xb; high = High.atan2 ya xa}
+      if sxb <= 0 then {low = RoundDown.atan2 yb xb; high = RoundUp.atan2 ya xa}
+      else if 0 <= sxa then {low = RoundDown.atan2 ya xb;
+                            high = RoundUp.atan2 yb xa}
+      else {low = RoundDown.atan2 ya xb; high = RoundUp.atan2 ya xa}
     else if sya = syb then
       if sxb <= 0 then
         if sxa = 0 then raise(Domain_error "atan2")
@@ -215,24 +222,26 @@ module I = struct
       else if 0 <= sxa then {low = 0.; high = 0.}
       else {low = 0.; high = pi.high}
     else if sya = 0 then
-      { low = if 0 < sxb then 0. else Low.atan2 yb xb;
-        high = if sxa < 0 then pi.high else High.atan2 yb xa }
+      { low = if 0 < sxb then 0. else RoundDown.atan2 yb xb;
+        high = if sxa < 0 then pi.high else RoundUp.atan2 yb xa }
     else if syb = 0 then
-      { low = if sxa < 0 then -.pi.high else Low.atan2 ya xa;
-        high = if 0 < sxb then 0. else High.atan2 ya xb }
-    else if 0 <= sxa then {low = Low.atan2 ya xa; high = High.atan2 yb xa}
+      { low = if sxa < 0 then -.pi.high else RoundDown.atan2 ya xa;
+        high = if 0 < sxb then 0. else RoundUp.atan2 ya xb }
+    else if 0 <= sxa then {low = RoundDown.atan2 ya xa;
+                          high = RoundUp.atan2 yb xa}
     else {low = -.pi.high; high = pi.high}
 
-  let tanh {low = a; high = b} = {low = Low.tanh a; high = High.tanh b}
+  let tanh {low = a; high = b} = {low = RoundDown.tanh a;
+                                  high = RoundUp.tanh b}
 
   module Arr = struct
 
     let size_mean v =
-      let add sum {low = a; high = b} = High.(sum +. (b -. a)) in
+      let add sum {low = a; high = b} = RoundUp.(sum +. (b -. a)) in
       U.(Array.fold_left add 0. v /. float (Array.length v))
 
     let size_max v =
-      Array.fold_left (fun m {low = a; high = b} -> fmax m High.(b -. a)) 0. v
+      Array.fold_left (fun m {low; high} -> fmax m RoundUp.(high -. low)) 0. v
 
     let pr ch v =
       if U.(Array.length v = 0) then Printf.fprintf ch "[| |]"

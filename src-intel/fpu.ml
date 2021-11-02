@@ -52,8 +52,8 @@ external flog_pow_high: float -> float -> float
 
 
 (* Operations rounded down. *)
-module Low = struct
-  include Interval.Low
+module RoundDown = struct
+  include Interval.RoundDown
 
   external pow: float -> float -> float
     = "flog_pow_low_caml" "flog_pow_low" [@@unboxed]
@@ -86,8 +86,8 @@ module Low = struct
 end
 
 (* Operations rounded up. *)
-module High = struct
-  include Interval.High
+module RoundUp = struct
+  include Interval.RoundUp
 
   external pow: float -> float -> float
     = "flog_pow_high_caml" "flog_pow_high" [@@unboxed]
@@ -118,6 +118,9 @@ module High = struct
     else if mod_float y 2. = 0. then flog_pow_high (-.x) y
     else -.flog_pow_low (-.x) y
 end
+
+module Low = RoundDown
+module High = RoundUp
 
 external ffloat: int -> float = "ffloat_caml"
 let ffloat_high = High.float

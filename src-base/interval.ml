@@ -64,11 +64,11 @@ module type T = sig
   val disjoint : t -> t -> bool
 
   val width: t -> t
-  val width_high : t -> number
-  val width_low : t -> number
+  val width_up : t -> number
+  val width_dw : t -> number
   val diam : t -> number
   val dist : t -> t -> t
-  val dist_high : t -> t -> number
+  val dist_up : t -> t -> number
   val mag : t -> number
   val mig : t -> number
   val sgn: t -> t
@@ -110,8 +110,8 @@ let[@inlne] fmax (a: float) (b: float) = if a <= b then b else a
 
 let[@inline] is_even x = x land 1 = 0
 
-(* Base [Low] module. *)
-module L = struct
+(** Base [RoundDown] module *)
+module RD = struct
   module U = Interval__U
 
   type t = float
@@ -147,8 +147,8 @@ module L = struct
     if x <= y then y -. x else x -. y
 end
 
-(* Base [High] module. *)
-module H = struct
+(** Base [RoundUp] module? *)
+module RU = struct
   module U = Interval__U
 
   type t = float
@@ -184,75 +184,78 @@ module H = struct
     if x <= y then y -. x else x -. y
 end
 
-let[@inline] low_cbr x =
-  if x >= 0. then L.(x *. x *. x) else L.(x *. H.(x *. x))
+let[@inline] cbr_dw x =
+  if x >= 0. then RD.(x *. x *. x) else RD.(x *. RU.(x *. x))
 
-let[@inline] high_cbr x =
-  if x >= 0. then H.(x *. x *. x) else H.(x *. L.(x *. x))
+let[@inline] cbr_up x =
+  if x >= 0. then RU.(x *. x *. x) else RU.(x *. RD.(x *. x))
 
-let rec low_pow_IN x n = (* x ∈ ℝ, n ≥ 0 *)
-  if is_even n then L.(pos_pow_IN 1. (x *. x) (n / 2))
-  else if x >= 0. then L.(pos_pow_IN x (x *. x) (n / 2))
-  else L.(x *. H.(pos_pow_IN 1. (x *. x) (n / 2)))
-and low_pow_i x = function
+let rec pow_IN_dw x n = (* x ∈ ℝ, n ≥ 0 *)
+  if is_even n then RD.(pos_pow_IN 1. (x *. x) (n / 2))
+  else if x >= 0. then RD.(pos_pow_IN x (x *. x) (n / 2))
+  else RD.(x *. RU.(pos_pow_IN 1. (x *. x) (n / 2)))
+and pow_i_dw x = function
   | 0 -> 1.
   | 1 -> x
-  | 2 -> L.(x *. x)
-  | 3 -> low_cbr x
-  | 4 -> L.(let x2 = x *. x in x2 *. x2)
-  | n -> if n >= 0 then low_pow_IN x n
+  | 2 -> RD.(x *. x)
+  | 3 -> cbr_dw x
+  | 4 -> RD.(let x2 = x *. x in x2 *. x2)
+  | n -> if n >= 0 then pow_IN_dw x n
          else (* Since the rounding has the same sign than xⁿ, we can
                  treat u ↦ 1/u as decreasing. *)
-           L.(1. /. high_pow_IN x (- n))
-and high_pow_IN x n =
-  if is_even n then H.(pos_pow_IN 1. (x *. x) (n / 2))
-  else if x >= 0. then H.(pos_pow_IN x (x *. x) (n / 2))
-  else H.(x *. L.(pos_pow_IN 1. (x *. x) (n / 2)))
-and high_pow_i x = function
+           RD.(1. /. pow_IN_up x (- n))
+and pow_IN_up x n =
+  if is_even n then RU.(pos_pow_IN 1. (x *. x) (n / 2))
+  else if x >= 0. then RU.(pos_pow_IN x (x *. x) (n / 2))
+  else RU.(x *. RD.(pos_pow_IN 1. (x *. x) (n / 2)))
+and pow_i_up x = function
   | 0 -> 1.
   | 1 -> x
-  | 2 -> H.(x *. x)
-  | 3 -> high_cbr x
-  | 4 -> H.(let x2 = x *. x in x2 *. x2)
-  | n -> if n >= 0 then high_pow_IN x n else H.(1. /. low_pow_IN x (- n))
+  | 2 -> RU.(x *. x)
+  | 3 -> cbr_up x
+  | 4 -> RU.(let x2 = x *. x in x2 *. x2)
+  | n -> if n >= 0 then pow_IN_up x n else RU.(1. /. pow_IN_dw x (- n))
 
-(* The [Low] and [High] modules below depend on both the previous
-   [Low0] and [High0]. *)
-module Low = struct
-  include L
+(* The [RoundDown] and [RoundUp] modules below depend on both the previous
+   [RD] and [RU]. *)
+module RoundDown = struct
+  include RD
 
-  let cbr = low_cbr
-
-  (* xⁿ for x ≤ 0 and n ≥ 0.  Useful for the interval extension. *)
-  let[@inline] neg_pow_IN x = function
-    | 0 -> 1.
-    | 1 -> x
-    | 2 -> x *. x
-    | 3 -> x *. H.(x *. x)
-    | 4 -> let x2 = x *. x in x2 *. x2
-    | n -> if is_even n then pos_pow_IN 1. (x *. x) (n / 2)
-           else x *. H.(pos_pow_IN 1. (x *. x) (n / 2))
-
-  let pow_i = low_pow_i
-end
-
-module High = struct
-  include H
-
-  let cbr = high_cbr
+  let cbr = cbr_dw
 
   (* xⁿ for x ≤ 0 and n ≥ 0.  Useful for the interval extension. *)
   let[@inline] neg_pow_IN x = function
     | 0 -> 1.
     | 1 -> x
     | 2 -> x *. x
-    | 3 -> x *. L.(x *. x)
+    | 3 -> x *. RU.(x *. x)
     | 4 -> let x2 = x *. x in x2 *. x2
     | n -> if is_even n then pos_pow_IN 1. (x *. x) (n / 2)
-           else x *. L.(pos_pow_IN 1. (x *. x) (n / 2))
+           else x *. RU.(pos_pow_IN 1. (x *. x) (n / 2))
 
-  let pow_i = high_pow_i
+  let pow_i = pow_i_dw
 end
+
+module RoundUp = struct
+  include RU
+
+  let cbr = cbr_up
+
+  (* xⁿ for x ≤ 0 and n ≥ 0.  Useful for the interval extension. *)
+  let[@inline] neg_pow_IN x = function
+    | 0 -> 1.
+    | 1 -> x
+    | 2 -> x *. x
+    | 3 -> x *. RD.(x *. x)
+    | 4 -> let x2 = x *. x in x2 *. x2
+    | n -> if is_even n then pos_pow_IN 1. (x *. x) (n / 2)
+           else x *. RD.(pos_pow_IN 1. (x *. x) (n / 2))
+
+  let pow_i = pow_i_up
+end
+
+module Low = RoundDown
+module High = RoundUp
 
 module type DIRECTED = sig
   type t
@@ -293,10 +296,10 @@ module I = struct
   let one = {low=1.; high=1.}
   let entire = {low = neg_infinity;  high = infinity}
 
-  let pi = {low = Low.pi; high = High.pi }
-  let two_pi = {low = Low.two_pi; high = High.two_pi }
-  let half_pi = {low = Low.half_pi; high = High.half_pi }
-  let euler = {low = Low.euler; high = High.euler }
+  let pi = {low = RoundDown.pi; high = RoundUp.pi }
+  let two_pi = {low = RoundDown.two_pi; high = RoundUp.two_pi }
+  let half_pi = {low = RoundDown.half_pi; high = RoundUp.half_pi }
+  let euler = {low = RoundDown.euler; high = RoundUp.euler }
 
 
   let v (a: float) (b: float) =
@@ -329,7 +332,7 @@ module I = struct
   let low i = i.low
   let high i = i.high
 
-  let of_int n = {low = Low.float n; high = High.float n}
+  let of_int n = {low = RoundDown.float n; high = RoundUp.float n}
 
   let to_string_fmt fmt i =     (* FIXME: rounding *)
     Printf.sprintf "[%(%f%), %(%f%)]" fmt i.low fmt i.high
@@ -412,22 +415,24 @@ module I = struct
     b < c || d < a
 
   let width x =
-    { low = Low.(x.high -. x.low);  high = High.(x.high -. x.low) }
+    { low = RoundDown.(x.high -. x.low);  high = RoundUp.(x.high -. x.low) }
 
-  let width_low x = Low.(x.high -. x.low)
-  let width_high x = High.(x.high -. x.low)
+  let width_dw x = RoundDown.(x.high -. x.low)
+  let width_up x = RoundUp.(x.high -. x.low)
+  let width_low = width_dw
+  let width_high = width_up
 
   let diam = width_high
   let size = width
   let size_low = width_low
   let size_high = width_high
 
-  let[@inline] dist_high x y =
-    fmax (High.dist x.low y.low) (High.dist x.high y.high)
+  let[@inline] dist_up x y =
+    fmax (RoundUp.dist x.low y.low) (RoundUp.dist x.high y.high)
 
   let dist x y =
-    { low = fmax (Low.dist x.low y.low) (Low.dist x.high y.high);
-      high = dist_high x y }
+    { low = fmax (RoundDown.dist x.low y.low) (RoundDown.dist x.high y.high);
+      high = dist_up x y }
 
   let mag x = fmax (abs_float x.low) (abs_float x.high)
 
@@ -464,22 +469,22 @@ module I = struct
   let min x y = {low = fmin x.low y.low; high = fmin x.high y.high}
 
   let ( + ) {low = a; high = b} {low = c; high = d} =
-    { low = Low.(a +. c);  high = High.(b +. d) }
+    { low = RoundDown.(a +. c);  high = RoundUp.(b +. d) }
 
   let ( - ) {low = a; high = b} {low = c; high = d} =
-    { low = Low.(a -. d);  high = High.(b -. c) }
+    { low = RoundDown.(a -. d);  high = RoundUp.(b -. c) }
 
   let ( +. ) {low = a; high = b} x =
-    { low = Low.(a +. x);  high = High.(b +. x) }
+    { low = RoundDown.(a +. x);  high = RoundUp.(b +. x) }
 
   let ( +: ) x {low = a; high = b} =
-    { low = Low.(a +. x);  high = High.(b +. x) }
+    { low = RoundDown.(a +. x);  high = RoundUp.(b +. x) }
 
   let ( -. ) {low = a; high = b} x =
-    { low = Low.(a -. x);  high = High.(b -. x) }
+    { low = RoundDown.(a -. x);  high = RoundUp.(b -. x) }
 
   let ( -: ) x {low = c; high = d} =
-    { low = Low.(x -. d);  high = High.(x -. c) }
+    { low = RoundDown.(x -. d);  high = RoundUp.(x -. c) }
 
   let ( ~- ) {low = a; high = b} = {low = -.b; high = -.a}
 
@@ -488,24 +493,24 @@ module I = struct
     let sc = compare c 0. and sd = compare d 0. in
     if (sa = 0 && sb = 0) || (sc = 0 && sd = 0) then {low = 0.; high = 0.}
     else if sb <= 0 then
-      if sd <= 0 then {low = Low.(b *. d); high = High.(a *. c)}
-      else if 0 <= sc then {low = Low.(a *. d); high = High.(b *. c)}
-      else {low = Low.(a *. d); high = High.(a *. c)}
+      if sd <= 0 then {low = RoundDown.(b *. d); high = RoundUp.(a *. c)}
+      else if 0 <= sc then {low = RoundDown.(a *. d); high = RoundUp.(b *. c)}
+      else {low = RoundDown.(a *. d); high = RoundUp.(a *. c)}
     else if 0 <= sa then
-      if sd <= 0 then {low = Low.(b *. c); high = High.(a *. d)}
-      else if 0 <= sc then {low = Low.(a *. c); high = High.(b *. d)}
-      else {low = Low.(b *. c); high = High.(b *. d)}
-    else if 0 <= sc then {low = Low.(a *. d); high = High.(b *. d)}
-    else if sd <= 0 then {low = Low.(b *. c); high = High.(a *. c)}
+      if sd <= 0 then {low = RoundDown.(b *. c); high = RoundUp.(a *. d)}
+      else if 0 <= sc then {low = RoundDown.(a *. c); high = RoundUp.(b *. d)}
+      else {low = RoundDown.(b *. c); high = RoundUp.(b *. d)}
+    else if 0 <= sc then {low = RoundDown.(a *. d); high = RoundUp.(b *. d)}
+    else if sd <= 0 then {low = RoundDown.(b *. c); high = RoundUp.(a *. c)}
     else
-      { low = fmin Low.(a *. d) Low.(b *. c);
-        high = fmax High.(a *. c) High.(b *. d) }
+      { low = fmin RoundDown.(a *. d) RoundDown.(b *. c);
+        high = fmax RoundUp.(a *. c) RoundUp.(b *. d) }
 
   let ( *. ) y {low = a; high = b} =
     let sy = compare y 0. in
     if sy = 0 then {low = 0.; high = 0.}
-    else if sy < 0 then {low = Low.(b *. y); high = High.(a *. y)}
-    else {low = Low.(a *. y); high = High.(b *. y)}
+    else if sy < 0 then {low = RoundDown.(b *. y); high = RoundUp.(a *. y)}
+    else {low = RoundDown.(a *. y); high = RoundUp.(b *. y)}
 
   let ( *: ) a y = y *. a
 
@@ -514,28 +519,28 @@ module I = struct
     if sd = 0 then
       if sc = 0 then raise Division_by_zero
       else if b <= 0. then
-        {low = Low.(b /. c); high = if a = 0. then 0. else infinity}
-      else if 0. <= a then {low = neg_infinity; high = High.(a /. c)}
+        {low = RoundDown.(b /. c); high = if a = 0. then 0. else infinity}
+      else if 0. <= a then {low = neg_infinity; high = RoundUp.(a /. c)}
       else {low = neg_infinity; high = infinity}
     else if sd < 0 then
-      { low = if b <= 0. then Low.(b /. c) else Low.(b /. d);
-        high = if 0. <= a then High.(a /. c) else High.(a /. d) }
+      { low = if b <= 0. then RoundDown.(b /. c) else RoundDown.(b /. d);
+        high = if 0. <= a then RoundUp.(a /. c) else RoundUp.(a /. d) }
     else if sc = 0 then
       if b <= 0. then
-        {low = if a = 0. then 0. else neg_infinity; high = High.(b /. d)}
-      else if 0. <= a then {low = Low.(a /. d); high = infinity}
+        {low = if a = 0. then 0. else neg_infinity; high = RoundUp.(b /. d)}
+      else if 0. <= a then {low = RoundDown.(a /. d); high = infinity}
       else {low = neg_infinity; high = infinity}
     else if 0 < sc then
-      { low = if a <= 0. then Low.(a /. c) else Low.(a /. d);
-        high = if b <= 0. then High.(b /. d) else High.(b /. c) }
+      { low = if a <= 0. then RoundDown.(a /. c) else RoundDown.(a /. d);
+        high = if b <= 0. then RoundUp.(b /. d) else RoundUp.(b /. c) }
     else if a = 0. && b = 0. then {low = 0.; high = 0.}
     else {low = neg_infinity; high = infinity}
 
   let ( /. ) {low = a; high = b} y =
     let sy = compare y 0. in
     if sy = 0 then raise Division_by_zero
-    else if 0 < sy then {low = Low.(a /. y); high = High.(b /. y)}
-    else {low = Low.(b /. y); high = High.(a /. y)}
+    else if 0 < sy then {low = RoundDown.(a /. y); high = RoundUp.(b /. y)}
+    else {low = RoundDown.(b /. y); high = RoundUp.(a /. y)}
 
   let ( /: ) x {low = a; high = b} =
     let sx = compare x 0. and sa = compare a 0. and sb = compare b 0. in
@@ -543,25 +548,26 @@ module I = struct
       if sa = 0 && sb = 0 then raise Division_by_zero
       else {low = 0.; high = 0.}
     else if 0 < sa || sb < 0 then
-      if 0 < sx then {low = Low.(x /. b); high = High.(x /. a)}
-      else {low = Low.(x /. a); high = High.(x /. b)}
+      if 0 < sx then {low = RoundDown.(x /. b); high = RoundUp.(x /. a)}
+      else {low = RoundDown.(x /. a); high = RoundUp.(x /. b)}
     else if sa = 0 then
       if sb = 0 then raise Division_by_zero
-      else if 0 <= sx then {low = Low.(x /. b); high = infinity}
-      else {low = neg_infinity; high = High.(x /. b)}
+      else if 0 <= sx then {low = RoundDown.(x /. b); high = infinity}
+      else {low = neg_infinity; high = RoundUp.(x /. b)}
     else if sb = 0 then
       if sx = 0 then {low = 0.; high = 0.}
-      else if 0 <= sx then {low = neg_infinity; high = High.(x /. a)}
-      else {low = Low.(x /. a); high = infinity}
+      else if 0 <= sx then {low = neg_infinity; high = RoundUp.(x /. a)}
+      else {low = RoundDown.(x /. a); high = infinity}
     else {low = neg_infinity; high = infinity}
 
   let inv {low = a; high = b} =
     let sa = compare a 0. and sb = compare b 0. in
     if sa = 0 then
       if sb = 0 then raise Division_by_zero
-      else {low = Low.(1. /. b); high = infinity}
-    else if 0 < sa || sb < 0 then {low = Low.(1. /. b); high = High.(1. /. a)}
-    else if sb = 0 then {low = neg_infinity; high = High.(1. /. a)}
+      else {low = RoundDown.(1. /. b); high = infinity}
+    else if 0 < sa || sb < 0 then {low = RoundDown.(1. /. b);
+                                  high = RoundUp.(1. /. a)}
+    else if sb = 0 then {low = neg_infinity; high = RoundUp.(1. /. a)}
     else {low =  neg_infinity; high = infinity}
 
   type 'a one_or_two = One of 'a | Two of 'a * 'a
@@ -570,37 +576,38 @@ module I = struct
     let sa = compare a 0. and sb = compare b 0. in
     if sa = 0 then
       if sb = 0 then raise Division_by_zero
-      else One {low = Low.(1. /. b); high = infinity}
-    else if 0 < sa || sb < 0 then One {low = Low.(1. /. b); high = High.(1. /. a)}
-    else if sb = 0 then One {low = neg_infinity; high = High.(1. /. a)}
-    else Two({low = neg_infinity;  high = High.(1. /. a) },
-             {low = Low.(1. /. b);  high = infinity})
+      else One {low = RoundDown.(1. /. b); high = infinity}
+    else if 0 < sa || sb < 0 then One {low = RoundDown.(1. /. b);
+                                      high = RoundUp.(1. /. a)}
+    else if sb = 0 then One {low = neg_infinity; high = RoundUp.(1. /. a)}
+    else Two({low = neg_infinity;  high = RoundUp.(1. /. a) },
+             {low = RoundDown.(1. /. b);  high = infinity})
 
   let cancelminus x y =
     (* Intervals here cannot be empty. *)
     if is_bounded x && is_bounded y then
-      let low = Low.(x.low -. y.low) in
-      let high = High.(x.high -. y.high) in
+      let low = RoundDown.(x.low -. y.low) in
+      let high = RoundUp.(x.high -. y.high) in
       if low <= high (* thus not NaN *) then {low; high}
       else entire
     else entire
 
   let cancelplus x y = (* = cancelminus x (-y) *)
     if is_bounded x && is_bounded y then
-      let low = Low.(x.low +. y.high) in
-      let high = High.(x.high +. y.low) in
+      let low = RoundDown.(x.low +. y.high) in
+      let high = RoundUp.(x.high +. y.low) in
       if low <= high (* thus not NaN *) then {low; high}
       else entire
     else entire
 
   let sqr {low = a; high = b} =
-    if a >= 0. then {low = Low.(a *. a); high = High.(b *. b)}
+    if a >= 0. then {low = RoundDown.(a *. a); high = RoundUp.(b *. b)}
     else (* a < 0; a is not NaN *)
-      if b >= 0. then {low = 0.; high = fmax High.(a *. a) High.(b *. b)}
-      else {low = Low.(b *. b); high = High.(a *. a)}
+      if b >= 0. then {low = 0.; high = fmax RoundUp.(a *. a) RoundUp.(b *. b)}
+      else {low = RoundDown.(b *. b); high = RoundUp.(a *. a)}
 
   let cbr {low = a; high = b} =
-    {low = Low.cbr a; high = High.cbr b}
+    {low = RoundDown.cbr a; high = RoundUp.cbr b}
 
   let pow_IN x = function
     | 0 -> one
@@ -610,22 +617,23 @@ module I = struct
     | n  -> (* n ≥ 0 assumed *)
        if is_even n then
          if x.low >= 0. then
-           {low = Low.pos_pow_IN 1. x.low n;
-            high = High.pos_pow_IN 1. x.high n}
+           {low = RoundDown.pos_pow_IN 1. x.low n;
+            high = RoundUp.pos_pow_IN 1. x.high n}
          else if x.high > 0. then (* x.low < 0 < x.high *)
-           {low = 0.;  high = fmax High.(neg_pow_IN x.low n)
-                                High.(pos_pow_IN 1. x.high n)}
+           {low = 0.;  high = fmax RoundUp.(neg_pow_IN x.low n)
+                                RoundUp.(pos_pow_IN 1. x.high n)}
          else (* x.low ≤ x.high ≤ 0 *)
-           {low = Low.neg_pow_IN x.high n;  high = High.neg_pow_IN x.low n}
+           {low = RoundDown.neg_pow_IN x.high n;
+            high = RoundUp.neg_pow_IN x.low n}
        else (* x ↦ xⁿ is increasing. *)
-         {low = Low.pow_i x.low n;  high = High.pow_i x.high n}
+         {low = RoundDown.pow_i x.low n;  high = RoundUp.pow_i x.high n}
 
   let ( ** ) x n =
     if n >= 0 then pow_IN x n else inv(pow_IN x U.(- n))
 
   let sqrt {low = a; high = b} =
     if b < 0. then raise(Domain_error "sqrt")
-    else {low = if a < 0. then 0. else Low.sqrt a; high = High.sqrt b}
+    else {low = if a < 0. then 0. else RoundDown.sqrt a; high = RoundUp.sqrt b}
 
   (* Infix aliases *)
   let ( = ) = equal
@@ -636,6 +644,6 @@ module I = struct
 end
 
 
-external set_low: unit -> unit = "ocaml_set_low" [@@noalloc]
-external set_high: unit -> unit = "ocaml_set_high" [@@noalloc]
-external set_nearest: unit -> unit = "ocaml_set_nearest" [@@noalloc]
+external set_round_dw: unit -> unit = "ocaml_set_low" [@@noalloc]
+external set_round_up: unit -> unit = "ocaml_set_high" [@@noalloc]
+external set_round_nearest: unit -> unit = "ocaml_set_nearest" [@@noalloc]

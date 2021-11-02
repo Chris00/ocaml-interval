@@ -266,8 +266,10 @@ module I : sig
 end
 
 module Fpu = Fpu
-module Low = Fpu.Low
-module High = Fpu.High
+module RoundDown = Fpu.RoundDown
+module RoundUp = Fpu.RoundUp
+module Low = RoundDown [@@deprecated "Use Interval_intel.RoundDown"]
+module High = RoundUp  [@@deprecated "Use Interval_intel.RoundUp"]
 
 
 (** {2 Old interface (deprecated)} *)
@@ -316,7 +318,7 @@ val float_i: int -> t  [@@deprecated "Use I.of_int instead"]
 val compare_I_f: t -> float -> int  [@@deprecated "Use I.compare_f instead"]
 
 (** [size_I a] returns [a.high-a.low] *)
-val size_I: t -> float  [@@deprecated "Use I.size_high instead"]
+val size_I: t -> float  [@@deprecated "Use I.size_up instead"]
 
 (** [sgn a] returns [{low=float (compare a.low 0.);high=float
    (compare a.high 0.)}] *)
