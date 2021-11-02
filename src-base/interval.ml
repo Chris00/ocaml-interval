@@ -35,6 +35,7 @@ module type T = sig
   val v : number -> number -> t
   val inf : t -> number
   val sup : t -> number
+  val singleton : number -> t
   val of_int : int -> t
 
   val to_string : ?fmt: (number -> 'b, 'a, 'b) format -> t -> string
@@ -308,6 +309,18 @@ module I = struct
     else (* a > b or one of them is NaN *)
       invalid_arg("Interval.I.v: [" ^ string_of_float a ^ ", "
                   ^ string_of_float b ^ "] not allowed")
+
+  let min_neg_float = -. Float.max_float
+
+  let singleton (x: float) =
+    if x < infinity then
+      if x > neg_infinity then { low = x; high = x }
+      else { low = neg_infinity; high = min_neg_float }
+    else (* x = infinity or NaN *)
+      if x = x then { low = Float.max_float; high = infinity }
+      else
+        let sx = string_of_float x in
+        invalid_arg("Interval.I.v: [" ^ sx ^ ", " ^ sx ^ "] not allowed")
 
   let inf i = i.low
   let sup i = i.high

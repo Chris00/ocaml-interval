@@ -70,6 +70,11 @@ module type T = sig
   val sup : t -> number
   (** [sup t] returns the higher bound of the interval. *)
 
+  val singleton : number -> t
+  (** [singleton x] returns the same as [{!v} x x] except that checks
+     on [x] are only performed once and infinite values of [x] work
+     according to the specification of intervals. *)
+
   val of_int : int -> t
   (** Returns the interval containing the conversion of an integer to
      the number type. *)
