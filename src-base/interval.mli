@@ -64,11 +64,11 @@ module type T = sig
      @raise Invalid_argument if the interval \[[a], [b]\] is equal to
      \[-∞,-∞\] or \[+∞,+∞\] or one of the bounds is NaN. *)
 
-  val low : t -> number
-  (** [low t] returns the lower bound of the interval. *)
+  val inf : t -> number
+  (** [inf t] returns the lower bound of the interval. *)
 
-  val high : t -> number
-  (** [high t] returns the higher bound of the interval. *)
+  val sup : t -> number
+  (** [sup t] returns the higher bound of the interval. *)
 
   val of_int : int -> t
   (** Returns the interval containing the conversion of an integer to
@@ -105,13 +105,13 @@ module type T = sig
 
   val compare_f: t -> number -> int
   (** [compare_f a x] returns
-      - [1] if [high(a) < x],
-      - [0] if [low(a)] ≤ [x] ≤ [high(a)], i.e., if [x] ∈ [a], and
-      - [-1] if [x < low(a)].  *)
+      - [1] if [sup(a) < x],
+      - [0] if [inf(a)] ≤ [x] ≤ [sup(a)], i.e., if [x] ∈ [a], and
+      - [-1] if [x < inf(a)].  *)
 
   val is_bounded : t -> bool
   (** [is_bounded x] says whether the interval is bounded, i.e.,
-      -∞ < [low(x)] and [high(x)] < ∞.
+      -∞ < [inf(x)] and [sup(x)] < ∞.
       @since 1.5 *)
 
   val is_entire : t -> bool
@@ -172,7 +172,7 @@ module type T = sig
 
   val width: t -> t
   (** [size a] returns an interval containing the true width of the
-     interval [high a - low a]. *)
+     interval [sup a - inf a]. *)
 
   val width_high : t -> number
   (** [size_high a] returns the width of the interval [high a - low a]
@@ -184,7 +184,7 @@ module type T = sig
 
   val dist : t -> t -> t
   (** [dist x y] is the Hausdorff distance between [x] and [y].
-      It is equal to max{ |[x.low] - [y.low]|, |[x.high] - [y.high]| }. *)
+      It is equal to max\{ |[inf x] - [inf y]|, |[sup x] - [sup y]| \}. *)
 
   val dist_high : t -> t -> number
   (** [dist_high x y] is the Hausdorff distance between [x] and [y],
@@ -199,21 +199,21 @@ module type T = sig
 
   val sgn: t -> t
   (** [sgn a] returns the sign of each bound, e.g., for floats
-      \[[float (compare (low a) 0.)], [float (compare (high a) 0.)]\]. *)
+      \[[float (compare (inf a) 0.)], [float (compare (sup a) 0.)]\]. *)
 
   val truncate: t -> t
   (** [truncate a] returns the integer interval containing [a], that is
-      \[[floor(low a)], [ceil(high a)]\]. *)
+      \[[floor(inf a)], [ceil(sup a)]\]. *)
 
   val abs: t -> t
   (** [abs a] returns the absolute value of the interval, that is
-      - [a] if [low a] ≥ [0.],
-      - [~- a] if [high a] ≤ [0.], and
-      - \[0, [max (- low a) (high a)]\] otherwise. *)
+      - [a] if [inf a] ≥ [0.],
+      - [~- a] if [sup a] ≤ [0.], and
+      - \[0, [max (- inf a) (sup a)]\] otherwise. *)
 
   val hull: t -> t -> t
   (** [hull a b] returns the smallest interval containing [a] and [b], that is
-      \[[min (low a) (low b)], [max (high a) (high b)]\]. *)
+      \[[min (inf a) (inf b)], [max (sup a) (sup b)]\]. *)
 
   val inter_exn : t -> t -> t
   (** [inter_exn x y] returns the intersection of [x] and [y].
@@ -228,38 +228,38 @@ module type T = sig
 
   val max: t -> t -> t
   (** [max a b] returns the "maximum" of the intervals [a] and [b], that is
-      \[[max (low a) (low b)], [max (high a) (high b)]\]. *)
+      \[[max (inf a) (inf b)], [max (sup a) (sup b)]\]. *)
 
   val min: t -> t -> t
   (** [min a b] returns the "minimum" of the intervals [a] and [b], that is
-      \[[min (low a) (low b)], [min (high a) (high b)]\]. *)
+      \[[min (inf a) (inf b)], [min (sup a) (sup b)]\]. *)
 
   val ( + ) : t -> t -> t
-  (** [a + b] returns \[[low a +. low b], [high a +. high b]\]
+  (** [a + b] returns \[[inf a +. inf b], [sup a +. sup b]\]
      properly rounded. *)
 
   val ( +. ): t -> number -> t
-  (** [a +. x] returns \[[low a +. x], [high a +. x]\]
+  (** [a +. x] returns \[[inf a +. x], [sup a +. x]\]
       properly rounded. *)
 
   val ( +: ): number -> t -> t
-  (** [x +: a] returns \[[a +. low a], [x +. high a]\]
+  (** [x +: a] returns \[[a +. inf a], [x +. sup a]\]
       properly rounded. *)
 
   val ( - ): t -> t -> t
-  (** [a - b] returns \[[low a -. high b], [high a -. low b]\]
+  (** [a - b] returns \[[inf a -. sup b], [sup a -. inf b]\]
       properly rounded. *)
 
   val ( -. ): t -> number -> t
-  (** [a -. x] returns \[[low a -. x],  [high a -. x]\]
+  (** [a -. x] returns \[[inf a -. x],  [sup a -. x]\]
       properly rounded. *)
 
   val ( -: ): number -> t -> t
-  (** [x -: a] returns \[[x -. high a], [x -. low a]\]
+  (** [x -: a] returns \[[x -. sup a], [x -. inf a]\]
       properly rounded. *)
 
   val ( ~- ): t -> t
-  (** [~- a] is the unary negation, it returns \[[-high a], [-low a]\]. *)
+  (** [~- a] is the unary negation, it returns \[[-sup a], [-inf a]\]. *)
 
   val ( * ): t -> t -> t
   (** [a * b] multiplies [a] by [b] according to interval arithmetic
@@ -303,7 +303,7 @@ module type T = sig
   val invx : t -> t one_or_two
   (** [invx a] is the extended division.  When 0 ∉ [a], the result is
      [One(inv a)].  If 0 ∈ [a], then the two natural intervals
-     (properly rounded) [Two](\[-∞, 1/(low a)\], \[1/(high a), +∞\]) are
+     (properly rounded) [Two](\[-∞, 1/(inf a)\], \[1/(sup a), +∞\]) are
      returned.
      Raise [Interval.Division_by_zero] if [a=]{!zero}. *)
 
@@ -358,6 +358,11 @@ exception Domain_error of string [@@warn_on_literal_pattern]
 module I : sig
   include T with type number = float and type t = t
 
+  val low : t -> number   [@@deprecated "Use I.inf"]
+  (** [low t] returns the lower bound of the interval. *)
+
+  val high : t -> number  [@@deprecated "Use I.sup"]
+  (** [high t] returns the higher bound of the interval. *)
 
 
   (** Global precision for the functions {!I.pr} and {!I.pp}. *)

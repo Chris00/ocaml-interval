@@ -33,8 +33,8 @@ module type T = sig
 
   val entire : t
   val v : number -> number -> t
-  val low : t -> number
-  val high : t -> number
+  val inf : t -> number
+  val sup : t -> number
   val of_int : int -> t
 
   val to_string : ?fmt: (number -> 'b, 'a, 'b) format -> t -> string
@@ -309,6 +309,8 @@ module I = struct
       invalid_arg("Interval.I.v: [" ^ string_of_float a ^ ", "
                   ^ string_of_float b ^ "] not allowed")
 
+  let inf i = i.low
+  let sup i = i.high
   let low i = i.low
   let high i = i.high
 

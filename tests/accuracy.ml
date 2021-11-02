@@ -1,7 +1,7 @@
 open Format
 
-let singleton x_low x_high =
-  if x_low = x_high then "= {•}" else "≠ {•}"
+let singleton x_inf x_sup =
+  if x_inf = x_sup then "= {•}" else "≠ {•}"
 
 let () =
   let open Interval_intel.Fpu in
