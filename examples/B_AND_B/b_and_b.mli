@@ -20,7 +20,7 @@
 
 val branch_and_bound :
   (float array -> float) ->
-  (Interval.t array -> Interval.t) ->
-  Interval.t array ->
+  (Interval_base.t array -> Interval_base.t) ->
+  Interval_base.t array ->
   float ->
-  float -> Interval.t array * Interval.t * float array * float
+  float -> Interval_base.t array * Interval_base.t * float array * float

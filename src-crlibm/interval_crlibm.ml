@@ -24,19 +24,19 @@
 let[@inline] fmin (a: float) (b: float) = if a <= b then a else b
 let[@inline] fmax (a: float) (b: float) = if a <= b then b else a
 
-type t = Interval.t = { low: float;  high: float }
+type t = Interval_base.t = { low: float;  high: float }
 
 module type DIRECTED = sig
-  include Interval.DIRECTED with type t = float
+  include Interval_base.DIRECTED with type t = float
   include Crlibm.S
 
   val tanh : t -> t
 
-  module U = Interval.I.U
+  module U = Interval_base.I.U
 end
 
 module RoundDown = struct
-  include Interval.RoundDown  (* +, -,... *)
+  include Interval_base.RoundDown  (* +, -,... *)
   include Crlibm.Low
 
   (* [Crlibm.tanh] does not exists.  The bound here may not be the
@@ -44,27 +44,27 @@ module RoundDown = struct
   let tanh x =
     if x >= 0. then
       let em1 = Crlibm.High.expm1(-2. *. x) in
-      (-. em1) /. Interval.RoundUp.(2. +. em1)
+      (-. em1) /. Interval_base.RoundUp.(2. +. em1)
     else
       let em1 = expm1(2. *. x) in
       em1 /. (em1 +. 2.)
 end
 
 module RoundUp = struct
-  include Interval.RoundUp
+  include Interval_base.RoundUp
   include Crlibm.High
 
   let tanh x =
     if x >= 0. then
       let em1 = Crlibm.Low.expm1(-2. *. x) in
-      (-. em1) /. Interval.RoundDown.(2. +. em1)
+      (-. em1) /. Interval_base.RoundDown.(2. +. em1)
     else
       let em1 = expm1(2. *. x) in
       em1 /. (em1 +. 2.)
 end
 
 module I = struct
-  include Interval.I  (* Redefines inequalities for intervals *)
+  include Interval_base.I  (* Redefines inequalities for intervals *)
 
   let mone_one = { low = -1.;  high = 1. }
 
@@ -156,13 +156,13 @@ module I = struct
     if U.(a <= 1. && -1. <= b) then
       {low = if U.(b < 1.) then RoundDown.acospi b else 0.;
        high = if U.(-1. < a) then RoundUp.acospi a else 1.}
-    else raise(Interval.Domain_error "acospi")
+    else raise(Interval_base.Domain_error "acospi")
 
   let asinpi {low = a; high = b} =
     if U.(a <= 1. && -1. <= b) then
       { low = if U.(-1. < a) then RoundDown.asinpi a else -0.5;
         high = if U.(b < 1.) then RoundUp.asinpi b else 0.5 }
-    else raise(Interval.Domain_error "asinpi")
+    else raise(Interval_base.Domain_error "asinpi")
 
   let atan {low = a; high = b} =
     { low = RoundDown.atan a; high = RoundUp.atan b}
@@ -174,17 +174,17 @@ module I = struct
     { low = RoundDown.tanh a; high = RoundUp.tanh b }
 
   let log1p {low = a; high = b} =
-    if U.(b <= -1.) then raise(Interval.Domain_error "log1p")
+    if U.(b <= -1.) then raise(Interval_base.Domain_error "log1p")
     else {low = if U.(a <= -1.) then neg_infinity else RoundDown.log1p a;
           high = RoundUp.log1p b}
 
   let log2 {low = a; high = b} =
-    if U.(b <= 0.) then raise(Interval.Domain_error "log2")
+    if U.(b <= 0.) then raise(Interval_base.Domain_error "log2")
     else {low = if U.(a <= 0.) then neg_infinity else RoundDown.log2 a;
           high = RoundUp.log2 b}
 
   let log10 {low = a; high = b} =
-    if U.(b <= 0.) then raise(Interval.Domain_error "log10")
+    if U.(b <= 0.) then raise(Interval_base.Domain_error "log10")
     else {low = if U.(a <= 0.) then neg_infinity else RoundDown.log10 a;
           high = RoundUp.log10 b}
 

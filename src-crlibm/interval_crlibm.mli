@@ -33,7 +33,7 @@
 
 (** {2 Interval sub-module} *)
 
-type t = Interval.t = {
+type t = Interval_base.t = {
     low: float; (** lower bound, possibly = -∞ *)
     high: float (** higher bound, possibly = +∞ *)
   }
@@ -42,7 +42,7 @@ type t = Interval.t = {
    e.g. [I.(...)] — to redefine classical arithmetic operators for
    interval arithmetic. *)
 module I : sig
-  include module type of Interval.I
+  include module type of Interval_base.I
 
   (* val mod_f: t -> float -> t *)
 
@@ -142,7 +142,7 @@ end
 (** {2 Directed rounding} *)
 
 module type DIRECTED = sig
-  include Interval.DIRECTED with type t = float
+  include Interval_base.DIRECTED with type t = float
   include Crlibm.S
 
   val tanh : t -> t

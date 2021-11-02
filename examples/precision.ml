@@ -1,6 +1,6 @@
 (* Ill conditioned function *)
 
-open Interval
+open Interval_base
 
 let f_I x y =
   I.(333.75 *. y**6

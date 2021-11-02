@@ -1,4 +1,4 @@
-open Interval
+open Interval_base
 
 let () =
   assert(RoundDown.pow_i 2. 3 = 8.);

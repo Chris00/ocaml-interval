@@ -25,13 +25,13 @@ module RoundUp = Fpu.RoundUp
 module Low = RoundDown
 module High = RoundUp
 
-type t = Interval.t = {low: float; high: float}
+type t = Interval_base.t = {low: float; high: float}
 
-exception Division_by_zero = Interval.Division_by_zero
-exception Domain_error = Interval.Domain_error
+exception Division_by_zero = Interval_base.Division_by_zero
+exception Domain_error = Interval_base.Domain_error
 
 module I = struct
-  include Interval.I       (* Redefines =, <=,... *)
+  include Interval_base.I       (* Redefines =, <=,... *)
   include Generic
 
   (* Redefine ( ** ) from Interval_base to keep the version of the

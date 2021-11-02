@@ -25,7 +25,7 @@
    (Trigonometric functions depend on argument reduction which is
    performed differently.) *)
 
-open Interval
+open Interval_base
 module RoundDown = Fpu.RoundDown
 module RoundUp = Fpu.RoundUp
 
@@ -47,23 +47,25 @@ let exp {low = a; high = b} =
 let max_63 = ldexp 1. 63
 
 let tan {low = a; high = b} =
-  if -.max_63 <= a && b <= max_63 && Interval.RoundUp.(b -. a < pi) then (
+  if -.max_63 <= a && b <= max_63 && Interval_base.RoundUp.(b -. a < pi) then (
     let ta = RoundDown.tan a in
     let tb = RoundUp.tan b in
     if ta <= tb then {low = ta; high = tb}
-    else Interval.I.entire)
-  else Interval.I.entire
+    else Interval_base.I.entire)
+  else Interval_base.I.entire
 
 let acos {low = a; high = b} =
   if a <= 1. && -1. <= b then
     {low = if b < 1. then RoundDown.acos b else 0.;
-     high = if -1. < a then RoundUp.acos a else Interval.RoundUp.pi}
+     high = if -1. < a then RoundUp.acos a else Interval_base.RoundUp.pi}
   else raise(Domain_error "acos")
 
 let asin {low = a; high = b} =
   if a <= 1. && -1. <= b then
-    { low = if -1. < a then RoundDown.asin a else -. Interval.RoundUp.half_pi;
-      high = if b < 1. then RoundUp.asin b else Interval.RoundUp.half_pi }
+    { low = if -1. < a then RoundDown.asin a
+            else -. Interval_base.RoundUp.half_pi;
+      high = if b < 1. then RoundUp.asin b
+             else Interval_base.RoundUp.half_pi }
   else raise(Domain_error "asin")
 
 

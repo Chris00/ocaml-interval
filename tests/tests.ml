@@ -25,7 +25,7 @@ type test_mode = Exact | In | Mod2pi
 
 type test_infos = {
     mode: test_mode;
-    res_I: Interval.t;
+    res_I: Interval_base.t;
     msg: string;
     mutable res_low: float;
     mutable res_high: float;
@@ -52,12 +52,12 @@ end
 
 module type FLOAT_INTERVAL = sig
   val name : string
-  include Interval.T with type number = float and type t = Interval.t
-  include TRIGS with type t := Interval.t
+  include Interval_base.T with type number = float and type t = Interval_base.t
+  include TRIGS with type t := Interval_base.t
 end
 
 module type DIRECTED = sig
-  include Interval.DIRECTED with type t = float
+  include Interval_base.DIRECTED with type t = float
   include TRIGS with type t := float
 end
 
@@ -79,7 +79,7 @@ module Test (I: FLOAT_INTERVAL) (Nearest: TRIGS with type t := float)
     inf = false;
     neg_inf = false; }
 
-  let test_I {Interval.low = a; high = b} =
+  let test_I {Interval_base.low = a; high = b} =
     a = a && b = b && a <= b && a <> infinity && b <> neg_infinity
 
   let add_result infos args res =
@@ -140,7 +140,7 @@ module Test (I: FLOAT_INTERVAL) (Nearest: TRIGS with type t := float)
 
   (** Execute [f] for all elements of [values] in [x_I]. *)
   let iter_in x_I f values =
-    let open Interval in
+    let open Interval_base in
     List.iter (fun x ->
         if x_I.low <= x && x <= x_I.high then
           if x = 0. then (

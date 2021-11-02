@@ -1,5 +1,5 @@
 (library
- (name        interval)
+ (name        interval_base)
  (public_name interval_base)
  (ocamlopt_flags :standard -no-float-const-prop)
  (c_names     interval_base_stubs)
