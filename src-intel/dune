@@ -4,7 +4,7 @@
  (ocamlopt_flags :standard -no-float-const-prop)
  (c_names     interval_stubs)
  (libraries   interval_base)
- (synopsis  "Interval arithmetic library"))
+ (synopsis  "Interval arithmetic library for Intel processors"))
 
 (rule
  (targets interval_intel.h)
