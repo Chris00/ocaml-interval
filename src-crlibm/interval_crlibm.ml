@@ -37,13 +37,13 @@ end
 
 module RoundDown = struct
   include Interval_base.RoundDown  (* +, -,... *)
-  include Crlibm.Low
+  include Crlibm.RoundDown
 
   (* [Crlibm.tanh] does not exists.  The bound here may not be the
      tightest. *)
   let tanh x =
     if x >= 0. then
-      let em1 = Crlibm.High.expm1(-2. *. x) in
+      let em1 = Crlibm.RoundUp.expm1(-2. *. x) in
       (-. em1) /. Interval_base.RoundUp.(2. +. em1)
     else
       let em1 = expm1(2. *. x) in
@@ -52,11 +52,11 @@ end
 
 module RoundUp = struct
   include Interval_base.RoundUp
-  include Crlibm.High
+  include Crlibm.RoundUp
 
   let tanh x =
     if x >= 0. then
-      let em1 = Crlibm.Low.expm1(-2. *. x) in
+      let em1 = Crlibm.RoundDown.expm1(-2. *. x) in
       (-. em1) /. Interval_base.RoundDown.(2. +. em1)
     else
       let em1 = expm1(2. *. x) in

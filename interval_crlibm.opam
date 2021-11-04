@@ -17,7 +17,7 @@ build: [
 depends: [
   "interval_base" {= version}
   "dune"
-  "crlibm"
+  "crlibm" { >= "0.5" }
 ]
 synopsis: "An interval library for OCaml (crlibm version)"
 description: "
