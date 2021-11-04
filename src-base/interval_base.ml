@@ -327,8 +327,8 @@ module I = struct
         let sx = string_of_float x in
         invalid_arg("Interval.I.v: [" ^ sx ^ ", " ^ sx ^ "] not allowed")
 
-  let inf i = i.low
-  let sup i = i.high
+  let[@inline] inf i = i.low
+  let[@inline] sup i = i.high
   let low i = i.low
   let high i = i.high
 
