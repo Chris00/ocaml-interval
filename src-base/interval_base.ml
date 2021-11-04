@@ -100,6 +100,7 @@ module type T = sig
   val cancelplus : t -> t -> t
   val ( ** ): t -> int -> t
   val sqrt : t -> t
+  val hypot : t -> t -> t
 end
 
 
@@ -145,6 +146,32 @@ module RD = struct
 
   let[@inline] dist (x: float) (y: float) =
     if x <= y then y -. x else x -. y
+
+  (* Assume x ≥ |y| and x ≠ 0 and, if x = +∞, then y ≠ ±∞. *)
+  let[@inline] hypot_base x y = x *. sqrt(1. +. sqr(y /. x))
+
+  (* Assume x ≥ 0 and y ≥ 0 and are not NaN (but possibly infinite). *)
+  let hypot_pos (x: float) (y: float) =
+    if x >= y then if x = 0. then 0.
+                  else if x = infinity then infinity
+                  else hypot_base x y
+    else (* 0 ≤ x < y *) hypot_base y x
+
+  let hypot (x: float) (y: float) =
+    if x >= y then (* ⇒ x, y are not NaN *)
+      if x >= -. y then (* x ≥ |y| *)
+        if x = 0. then 0.
+        else if x = infinity then infinity
+        else hypot_base x y
+      else (* y ≤ x < -y, thus -y ≥ |x| and y ≠ 0 (and x ≠ +∞). *)
+        if y = neg_infinity then infinity
+        else hypot_base (-. y) x
+    else (* x < y or NaN *)
+      if y <= -. x then (* x < y ≤ -x not NaN, thus -x ≥ |y| and x ≠ 0. *)
+        if x = neg_infinity then infinity
+        else hypot_base (-. x) y
+      else (* y > |x| or NaN *)
+        hypot_base y x
 end
 
 (** Base [RoundUp] module? *)
@@ -182,6 +209,32 @@ module RU = struct
 
   let[@inline] dist (x: float) (y: float) =
     if x <= y then y -. x else x -. y
+
+  (* Assume x ≥ |y| and x ≠ 0 and, if x = +∞, then y ≠ ±∞. *)
+  let[@inline] hypot_base x y = x *. sqrt(1. +. sqr(y /. x))
+
+  (* Assume x ≥ 0 and y ≥ 0 and are not NaN (but possibly infinite). *)
+  let hypot_pos (x: float) (y: float) =
+    if x >= y then if x = 0. then 0.
+                  else if x = infinity then infinity
+                  else hypot_base x y
+    else (* 0 ≤ x < y *) hypot_base y x
+
+  let hypot (x: float) (y: float) =
+    if x >= y then (* ⇒ x, y are not NaN *)
+      if x >= -. y then (* x ≥ |y| *)
+        if x = 0. then 0.
+        else if x = infinity then infinity
+        else hypot_base x y
+      else (* y ≤ x < -y, thus -y ≥ |x| and y ≠ 0 (and x ≠ +∞). *)
+        if y = neg_infinity then infinity
+        else hypot_base (-. y) x
+    else (* x < y or NaN *)
+      if y <= -. x then (* x < y ≤ -x not NaN, thus -x ≥ |y| and x ≠ 0. *)
+        if x = neg_infinity then infinity
+        else hypot_base (-. x) y
+      else (* y > |x| or NaN *)
+        hypot_base y x
 end
 
 let[@inline] cbr_dw x =
@@ -274,6 +327,7 @@ module type DIRECTED = sig
   val cbr : t -> t
   val pow_i : t -> int -> t
   val sqrt : t -> t
+  val hypot : t -> t -> t
 end
 
 
@@ -634,6 +688,31 @@ module I = struct
   let sqrt {low = a; high = b} =
     if b < 0. then raise(Domain_error "sqrt")
     else {low = if a < 0. then 0. else RoundDown.sqrt a; high = RoundUp.sqrt b}
+
+  let hypot {low = a; high = b} {low = c; high = d} =
+    if 0. <= a then
+      if 0. <= c then {low = RoundDown.hypot_pos a c;
+                      high = RoundUp.hypot_pos b d}
+      else if d <= 0. then {low = RoundDown.hypot_pos a (-. d);
+                           high = RoundUp.hypot_pos b (-. c)}
+      else (* c < 0 < d *) {low = a; (* = √(a² + 0²) *)
+                            high = RoundUp.hypot_pos b (fmax (-. c) d) }
+    else if b <= 0. then
+      if 0. <= c then {low = RoundDown.hypot_pos (-. b) c;
+                      high = RoundUp.hypot_pos (-. a) d}
+      else if d <= 0. then {low = RoundDown.hypot_pos (-. b) (-. d);
+                           high = RoundUp.hypot_pos (-. a) (-. c)}
+      else (* c < 0 < d *) {low = -. b;
+                            high = RoundUp.hypot_pos (-. a) (fmax (-. c) d) }
+    else (* a < 0 < b *)
+      if 0. <= c then {low = c;
+                      high = RoundUp.hypot_pos (fmax (-. a) b) d}
+      else if d <= 0. then {low = -. d;
+                           high = RoundUp.hypot_pos (fmax (-. a) b) (-. c)}
+      else (* c < 0 < d *)
+        {low = 0.;
+         high = RoundUp.hypot_pos (fmax (-. a) b) (fmax (-. c) d) }
+
 
   (* Infix aliases *)
   let ( = ) = equal

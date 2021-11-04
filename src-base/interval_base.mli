@@ -336,6 +336,9 @@ module type T = sig
 
   val sqrt : t -> t
   (** [sqrt x] returns an enclosure for the square root of [x]. *)
+
+  val hypot : t -> t -> t
+  (** [hypot x y] returns an enclosure of [sqrt(x *. x + y *. y)]. *)
 end
 
 
@@ -472,6 +475,10 @@ module type DIRECTED = sig
 
   val sqrt : t -> t
   (** [sqrt x] return the square root of [x] rounded up/down. *)
+
+  val hypot : t -> t -> t
+  (** [hypot x y] returns [sqrt(x *. x + y *. y)] rounded up/down.
+      Returns NaN if any of the arguments is NaN. *)
 end
 
 

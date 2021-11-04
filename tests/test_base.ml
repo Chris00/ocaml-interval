@@ -34,3 +34,10 @@ let () =
   assert(RoundDown.sqrt 2.  = 0x1.6A09E667F3BCC);
   assert(I.sqrt(I.v (-1.) 1.) = I.v 0. 1.)
 
+let () =
+  assert(RoundUp.hypot infinity infinity = infinity);
+  assert(RoundDown.hypot infinity infinity = infinity);
+  assert(RoundUp.hypot (-3.) 4. = 5.);
+  assert(RoundDown.hypot 3. (-4.) = 5.);
+  assert(RoundUp.hypot (-1.) (-1.) = RoundUp.sqrt 2.);
+  assert(RoundDown.hypot 1. 1. = RoundDown.sqrt 2.)
