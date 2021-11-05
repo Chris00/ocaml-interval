@@ -24,7 +24,7 @@
 let[@inline] fmin (a: float) (b: float) = if a <= b then a else b
 let[@inline] fmax (a: float) (b: float) = if a <= b then b else a
 
-type t = Interval_base.t = { low: float;  high: float }
+type t = Interval_base.interval = { low: float;  high: float }
 
 module type DIRECTED = sig
   include Interval_base.DIRECTED with type t = float

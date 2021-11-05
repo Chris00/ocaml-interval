@@ -25,7 +25,7 @@ type test_mode = Exact | In | Mod2pi
 
 type test_infos = {
     mode: test_mode;
-    res_I: Interval_base.t;
+    res_I: Interval_base.interval;
     msg: string;
     mutable res_low: float;
     mutable res_high: float;
@@ -52,8 +52,9 @@ end
 
 module type FLOAT_INTERVAL = sig
   val name : string
-  include Interval_base.T with type number = float and type t = Interval_base.t
-  include TRIGS with type t := Interval_base.t
+  include Interval_base.T with type number = float
+                           and type t = Interval_base.interval
+  include TRIGS with type t := Interval_base.interval
 end
 
 module type DIRECTED = sig

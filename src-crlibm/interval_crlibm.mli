@@ -33,7 +33,7 @@
 
 (** {2 Interval sub-module} *)
 
-type t = Interval_base.t = {
+type t = Interval_base.interval = {
     low: float; (** lower bound, possibly = -∞ *)
     high: float (** higher bound, possibly = +∞ *)
   }

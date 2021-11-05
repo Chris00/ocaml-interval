@@ -18,9 +18,11 @@
    License along with the ocaml branch-and-bound library.  If not, see
    <http://www.gnu.org/licenses/>.  *)
 
+open Interval_base
+
 val branch_and_bound :
   (float array -> float) ->
-  (Interval_base.t array -> Interval_base.t) ->
-  Interval_base.t array ->
+  (I.t array -> I.t) ->
+  I.t array ->
   float ->
-  float -> Interval_base.t array * Interval_base.t * float array * float
+  float -> I.t array * I.t * float array * float

@@ -353,7 +353,7 @@ end
    write [let a = I.(inv(v 3. 3.))] because rounding will then be
    properly handled by {!I.inv} and the resulting interval will indeed
    contain the exact value of 1/3. *)
-type t = {
+type interval = {
     low: float; (** lower bound, possibly = -∞ *)
     high: float (** higher bound, possibly = +∞ *)
   }
@@ -370,7 +370,7 @@ exception Domain_error of string [@@warn_on_literal_pattern]
    e.g. [I.(...)] — to redefine classical arithmetic operators for
    interval arithmetic. *)
 module I : sig
-  include T with type number = float and type t = t
+  include T with type number = float and type t = interval
 
   val low : t -> number   [@@deprecated "Use I.inf"]
   (** [low t] returns the lower bound of the interval. *)
@@ -500,9 +500,6 @@ module RoundUp : sig
   module U = I.U
 end
 
-module Low = RoundDown [@@deprecated "Use Interval.RoundDown"]
-module High = RoundUp [@@deprecated "Use Interval.RoundUp"]
-
 
 (** {2 Changing the rounding mode (DANGEROUS)} *)
 
@@ -543,3 +540,11 @@ val set_round_up: unit -> unit
 
 val set_round_nearest: unit -> unit
 (** Sets the rounding mod to NEAREST (default mode) *)
+
+
+(**/**)
+
+module Low = RoundDown [@@deprecated "Use Interval.RoundDown"]
+module High = RoundUp [@@deprecated "Use Interval.RoundUp"]
+
+type t = interval [@@deprecated "Use Interval_base.I.t instead"]

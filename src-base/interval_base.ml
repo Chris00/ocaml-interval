@@ -307,9 +307,6 @@ module RoundUp = struct
   let pow_i = pow_i_up
 end
 
-module Low = RoundDown
-module High = RoundUp
-
 module type DIRECTED = sig
   type t
   val zero : t
@@ -331,14 +328,13 @@ module type DIRECTED = sig
 end
 
 
-type t = {low: float; high: float}
+type interval = {low: float; high: float}
 
 exception Division_by_zero
 exception Domain_error of string
 
 module I = struct
   type number = float
-  type interval = t
   type t = interval
   (* Invariants (enforced by [I.v]:
      - -∞ ≤ low ≤ high ≤ +∞.  In particular, no bound is NaN.
@@ -726,3 +722,8 @@ end
 external set_round_dw: unit -> unit = "ocaml_set_low" [@@noalloc]
 external set_round_up: unit -> unit = "ocaml_set_high" [@@noalloc]
 external set_round_nearest: unit -> unit = "ocaml_set_nearest" [@@noalloc]
+
+
+module Low = RoundDown
+module High = RoundUp
+type t = interval
