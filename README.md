@@ -8,24 +8,25 @@ This is an [interval arithmetic][] library for OCaml.  Here is a small
 example in the REPL:
 
 ```ocaml
-# #require "interval_intel";;
-~/.opam/4.06.1/lib/interval_base: added to search path
-~/.opam/4.06.1/lib/interval_base/interval.cma: loaded
-~/.opam/4.06.1/lib/interval_intel: added to search path
-~/.opam/4.06.1/lib/interval_intel/interval_intel.cma: loaded
-# open Interval_intel;;
-# let v = I.v 1. 1.;;
-val v : Interval.t = {Interval.low = 1.; high = 1.}
+# #require "interval.top";;
+...
+# open Interval_crlibm;;
+# let v = I.singleton 1.;;
+val v : Interval_crlibm.I.t = [1, 1]
 # I.sin v;;
-- : Interval_intel.t =
-{low = 0.841470984807896505; high = 0.841470984807896616}
+- : Interval_crlibm.I.t = [0.841471, 0.841471]
+# I.Precision.set (Some 16);;
+- : unit = ()
+# I.sin v;;
+- : Interval_crlibm.I.t = [0.8414709848078965, 0.8414709848078966]
 ```
 
 Several [OPAM][] packages are provided by this repository:
 
 - `interval_base`: basic interval library that defines the datatype
   `Interval.t` and uses Intel assembly if possible or C99 instructions
-  to perform arithmetic operations.
+  to perform arithmetic operations
+  (module [Interval](src-base/interval_base.mli)).
 
 - `interval_crlibm`: relies on [crlibm][] to implement the interval
   operations.  CRlibm provides *proved* correctly-rounded operations,
@@ -41,7 +42,8 @@ Several [OPAM][] packages are provided by this repository:
   The package has been developed for Linux systems but works on
   MacOSX and Windows when compiled with GCC.
 
-- `interval` is a meta-package installing all the packages above.
+- `interval` is a meta-package installing all the packages above.  It
+  also provides `interval.top` used above.
 
 Note that `ocamlopt` does float constant propagation in *round to the
 nearest* mode which may invalidate interval computations.  Use the
