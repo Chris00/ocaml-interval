@@ -472,7 +472,7 @@ module I = struct
   let width_low = width_dw
   let width_high = width_up
 
-  let diam = width_high
+  let diam = width_up
   let size = width
   let size_low = width_low
   let size_high = width_high
