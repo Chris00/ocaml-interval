@@ -147,6 +147,8 @@ SQRT(HIGH)
 #elif __STDC_VERSION__ >= 199901L
 /* Not INTEL_ARCH, use C99 ------------------------------------------- */
 
+#include <math.h>
+
 CAMLexport void ocaml_set_nearest() {
   fesetround(FE_TONEAREST);
 }
