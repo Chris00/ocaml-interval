@@ -39,17 +39,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Cache
-        uses: actions/cache@v2
-        with:
-          path: ~/.opam
-          # An explicit key for restoring and saving the cache
-          key: ${{ matrix.os }}-${{ matrix.ocaml-version }}-${{ hashFiles('*.opam') }}-build
       - name: Set up OCaml ${{ matrix.ocaml-version }}
+        # For dependencies on Windows:
+        continue-on-error: true
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: ${{ matrix.ocaml-version }}
 
+      - run: opam pin add crlibm.dev https://github.com/Chris00/ocaml-crlibm.git
+        if: matrix.os == 'windows-latest'
       - run: opam install . --deps-only --with-test
       - run: opam exec -- dune build @install @examples
       - name: run test suite
