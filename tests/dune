@@ -17,7 +17,7 @@
  ; Do not run "tests.exe" (too long), use "make tests" for that.
  (action (run %{exe:accuracy.exe})))
 
-; Do not run "tests_spees.exe" (slow), use "make test-speed" for that.
+; Do not run "tests_speed.exe" (slow), use "make test-speed" for that.
 (executable
  (name      tests_speed)
  (modules   tests_speed)
