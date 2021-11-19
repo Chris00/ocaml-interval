@@ -111,7 +111,7 @@ let x = I.(v 0.5 1. + sin(v 3. 3.125))
    write [let a = I.(inv(v 3. 3.))] because rounding will then be
    properly handled by {!I.inv} and the resulting interval will indeed
    contain the exact value of 1/3. *)
-type t = Interval_base.interval = {
+type interval = Interval_base.interval = {
     low: float; (** lower bound, possibly = -∞ *)
     high: float (** higher bound, possibly = +∞ *)
   }
@@ -277,196 +277,212 @@ module High = RoundUp  [@@deprecated "Use Interval_intel.RoundUp"]
 (** The functions below are the ones of the older versions of
    [Interval].  They will soon be removed. *)
 
-type interval = t [@@deprecated "Use Interval.t instead"]
-(** @deprecated Alias of {!Interval.t}. *)
+type t = interval
+     [@@deprecated "Use Interval.interval or better I.t instead"]
 
 (** Neutral element for addition *)
-val zero_I : t [@@deprecated "Use I.zero instead"]
+val zero_I : interval [@@deprecated "Use I.zero instead"]
 
 (** Neutral element for multiplication *)
-val one_I : t [@@deprecated "Use I.one instead"]
+val one_I : interval [@@deprecated "Use I.one instead"]
 
 (** [pi] with bounds properly rounded *)
-val pi_I: t [@@deprecated "Use I.pi instead"]
+val pi_I: interval [@@deprecated "Use I.pi instead"]
 
 (** [e] with bounds properly rounded *)
-val e_I: t [@@deprecated "Use I.e instead"]
+val e_I: interval [@@deprecated "Use I.euler instead"]
 
 (** Prints an interval with the same format applied to both
    endpoints.  Formats follow the same specification than the one
    used for the regular printf function *)
-val printf_I : (float -> string, unit, string) format -> t -> unit
+val printf_I : (float -> string, unit, string) format -> interval -> unit
   [@@deprecated "Use I.pr or I.fmt instead"]
 
 (** Prints an interval into an out_channel with the same format
    applied to both endpoints *)
 val fprintf_I :
-  out_channel -> (float -> string, unit, string) format -> t -> unit
+  out_channel -> (float -> string, unit, string) format -> interval -> unit
   [@@deprecated "Use I.pr ot I.fmt instead"]
 
 (** Returns a string holding the interval printed with the same
    format applied to both endpoints *)
-val sprintf_I: (float -> string, unit, string) format -> t -> string
+val sprintf_I: (float -> string, unit, string) format -> interval -> string
   [@@deprecated "Use I.to_string instead"]
 
 (** Returns the interval containing the float conversion of an
    integer *)
-val float_i: int -> t  [@@deprecated "Use I.of_int instead"]
+val float_i: int -> interval  [@@deprecated "Use I.of_int instead"]
 
 (**  [compare_I_f a x] returns [1] if [a.high<x],
      [0] if [a.low<=x<=a.high] and [-1] if  [x<a.low]  *)
-val compare_I_f: t -> float -> int  [@@deprecated "Use I.compare_f instead"]
+val compare_I_f: interval -> float -> int
+                 [@@deprecated "Use I.compare_f instead"]
 
 (** [size_I a] returns [a.high-a.low] *)
-val size_I: t -> float  [@@deprecated "Use I.size_up instead"]
+val size_I: interval -> float  [@@deprecated "Use I.size_up instead"]
 
 (** [sgn a] returns [{low=float (compare a.low 0.);high=float
    (compare a.high 0.)}] *)
-val sgn_I: t -> t  [@@deprecated "Use I.sgn instead"]
+val sgn_I: interval -> interval  [@@deprecated "Use I.sgn instead"]
 
 (** [truncate_I a] returns [{low=floor a.low;high=ceil a.high}] *)
-val truncate_I: t -> t  [@@deprecated "Use I.truncate instead"]
+val truncate_I: interval -> interval  [@@deprecated "Use I.truncate instead"]
 
 (** [abs_I a] returns [{low=a.low;high=a.high}] if [a.low>=0.],
    [{low=-a.high;high=-a.low}] if [a.high<=0.], and
    [{low=0.;high=max -a.low a.high}] otherwise *)
-val abs_I: t -> t  [@@deprecated "Use I.abs instead"]
+val abs_I: interval -> interval  [@@deprecated "Use I.abs instead"]
 
 (** [union_I_I a b] returns [{low=min a.low b.low; high=max a.high b.high}] *)
-val union_I_I: t -> t -> t  [@@deprecated "Use I.hull instead"]
+val union_I_I: interval -> interval -> interval
+               [@@deprecated "Use I.hull instead"]
 
 (** [max_I_I a b] returns [{low=max a.low b.low; high=max a.high b.high}] *)
-val max_I_I: t -> t -> t  [@@deprecated "Use I.max instead"]
+val max_I_I: interval -> interval -> interval
+             [@@deprecated "Use I.max instead"]
 
 (** [min_I_I a b] returns [{low=min a.low b.low; high=min a.high b.high}] *)
-val min_I_I: t -> t -> t  [@@deprecated "Use I.min instead"]
+val min_I_I: interval -> interval -> interval
+             [@@deprecated "Use I.min instead"]
 
 (** [a +$ b] returns [{low=a.low+.b.low;high=a.high+.b.high}] *)
-val (+$): t -> t -> t  [@@deprecated "Use I.( + ) instead"]
+val (+$): interval -> interval -> interval  [@@deprecated "Use I.( + ) instead"]
 
 (** [a +$. x] returns [{low=a.low+.x;high=a.high+.x}] *)
-val (+$.): t -> float -> t  [@@deprecated "Use I.( +. ) instead"]
+val (+$.): interval -> float -> interval  [@@deprecated "Use I.( +. ) instead"]
 
 (** [x +.$ a] returns [{low=a.low+.x;high=a.high+.x}] *)
-val (+.$): float -> t -> t  [@@deprecated "Use I.( +: ) instead"]
+val (+.$): float -> interval -> interval  [@@deprecated "Use I.( +: ) instead"]
 
 (** [a -$ b] returns [{low=a.low-.b.high;high=a.high-.b.low}] *)
-val (-$): t -> t -> t  [@@deprecated "Use I.( - ) instead"]
+val (-$): interval -> interval -> interval  [@@deprecated "Use I.( - ) instead"]
 
 (** [a -$. x] returns [{low=a.low-.x;high=a.high-.x}] *)
-val (-$.): t -> float -> t  [@@deprecated "Use I.( -. ) instead"]
+val (-$.): interval -> float -> interval  [@@deprecated "Use I.( -. ) instead"]
 
 (** [x -.$ a] returns [{low=x-.a.high;high=x-.a.low}] *)
-val (-.$): float -> t -> t  [@@deprecated "Use I.( -: ) instead"]
+val (-.$): float -> interval -> interval  [@@deprecated "Use I.( -: ) instead"]
 
 (** [~-$ a] returns [{low=-a.high;high=-a.low}] *)
-val (~-$): t -> t  [@@deprecated "Use I.( ~- ) instead"]
+val (~-$): interval -> interval  [@@deprecated "Use I.( ~- ) instead"]
 
 (** [a *$. x] multiplies [a] by [x] according to interval arithmetic
    and returns the proper result.  If [x=0.] then [zero_I] is
    returned *)
-val ( *$.): t -> float -> t  [@@deprecated "Use I.( *: ) instead"]
+val ( *$.): interval -> float -> interval  [@@deprecated "Use I.( *: ) instead"]
 
 (** [x *$. a] multiplies [a] by [x] according to interval arithmetic
    and returns the proper result.  If [x=0.] then [zero_I] is
    returned.  *)
-val ( *.$): float -> t -> t  [@@deprecated "Use I.( *. ) instead"]
+val ( *.$): float -> interval -> interval
+            [@@deprecated "Use I.( *. ) instead"]
 
 (** [a *$ b] multiplies [a] by [b] according to interval arithmetic
    and returns the proper result.  If [a=zero_I] or [b=zero_I] then
    [zero_I] is returned*)
-val ( *$): t -> t -> t  [@@deprecated "Use I.( * ) instead"]
+val ( *$): interval -> interval -> interval
+           [@@deprecated "Use I.( * ) instead"]
 
 (** [a /$. x] divides [a] by [x] according to interval arithmetic
    and returns the proper result.  Raise [Failure "/$."] if [x=0.] *)
-val (/$.): t -> float -> t  [@@deprecated "Use I.( /. ) instead and adjust exn"]
+val (/$.): interval -> float -> interval
+           [@@deprecated "Use I.( /. ) instead and adjust exn"]
 
 (** [x /.$ a] divides [x] by [a] according to interval arithmetic
    and returns the result.  Raise [Failure "/.$"] if [a=zero_I] *)
-val (/.$): float -> t -> t  [@@deprecated "Use I.( /: ) instead and adjust exn"]
+val (/.$): float -> interval -> interval
+           [@@deprecated "Use I.( /: ) instead and adjust exn"]
 
 (** [a /$ b] divides the first interval by the second according to
    interval arithmetic and returns the proper result.  Raise
    [Failure "/$"] if [b=zero_I] *)
-val (/$): t -> t -> t  [@@deprecated "Use I.( / ) instead and adjust exn"]
+val (/$): interval -> interval -> interval
+          [@@deprecated "Use I.( / ) instead and adjust exn"]
 
 (** [mod_I_f a f] returns [a] mod [f] according to interval
    arithmetic et OCaml mod_float definition.  Raise [Failure
    "mod_I_f"] if [f=0.] *)
-val mod_I_f: t -> float -> t
+val mod_I_f: interval -> float -> interval
   [@@deprecated "Use I.mod_f instead and adjust exn"]
 
 (** [inv_I a] returns [1. /.$ a].
     Raise [Failure "inv_I"] if [a=zero_I] *)
-val inv_I: t -> t  [@@deprecated "Use I.inv instead and adjust exn"]
+val inv_I: interval -> interval
+           [@@deprecated "Use I.inv instead and adjust exn"]
 
 (** [sqrt_I a] returns [{low=sqrt a;high=sqrt b}] if [a>=0.],
     [{low=0.;high=sqrt b}] if [a<0.<=b].
     Raise [Failure "sqrt_I"] if [b<0.] *)
-val sqrt_I: t -> t  [@@deprecated "Use I.sqrt instead and adjust exn"]
+val sqrt_I: interval -> interval
+            [@@deprecated "Use I.sqrt instead and adjust exn"]
 
 (** [Pow_I_i a n] with [n] integer returns interval [a] raised to
    nth power according to interval arithmetic.  If [n=0] then
    [{low=1.;high=1.}] is returned. Raise [Failure "pow_I_f"] if
    [n<=0] and [a=zero_I].  Computed with exp-log in base2. *)
-val pow_I_i: t -> int -> t  [@@deprecated "Use I.( ** ) instead and adjust exn"]
+val pow_I_i: interval -> int -> interval
+             [@@deprecated "Use I.( ** ) instead and adjust exn"]
 
 (** [a **$. f] returns interval [a] raised to f power according to
     interval arithmetic.  If [f=0.] then [{low=1.;high=1.}] is returned.
     Raise [Failure "**$."] if [f<=0. and a=zero_I]
     or if [f is not an integer value and a.high<0.].
     Computed with exp-log in base2. *)
-val ( **$.): t -> float -> t
-  [@@deprecated "Use I.( **. ) instead and adjust exn"]
+val ( **$.): interval -> float -> interval
+             [@@deprecated "Use I.( **. ) instead and adjust exn"]
 
 (** [a **$ b] returns interval [a] raised to [b] power according to
    interval arithmetic, considering the restriction of x power y to
    x >= 0.  Raise [Failure "**$"] if [a.high < 0] or [(a.high=0. and
    b.high<=0.)] *)
-val ( **$): t -> t -> t  [@@deprecated "Use I.( *** ) instead and adjust exn"]
+val ( **$): interval -> interval -> interval
+            [@@deprecated "Use I.( *** ) instead and adjust exn"]
 
 (** [x **.$ a] returns float [x] raised to interval [a] power
    according to interval arithmetic, considering the restiction of x
    power y to x >= 0.
    Raise [Failure "**.$"] if [x < 0] and [a.high <= 0]*)
-val ( **.$): float -> t -> t
+val ( **.$): float -> interval -> interval
   [@@deprecated "Use I.( **: ) instead and adjust exn"]
 
 (** [log_I a] returns [{low=log a.low; high=log a.high}] if [a.low>0.],
     [{low=neg_infinity; high=log a.high}] if [a.low<0<=a.high].
     Raise [Failure "log_I"] if [a.high<=0.] *)
-val log_I: t -> t  [@@deprecated "Use I.log instead and adjust exn"]
+val log_I: interval -> interval
+           [@@deprecated "Use I.log instead and adjust exn"]
 
 (** [exp_I a] returns [{low=exp a.high;high=exp b.high}] *)
-val exp_I: t -> t  [@@deprecated "Use I.exp instead"]
+val exp_I: interval -> interval  [@@deprecated "Use I.exp instead"]
 
 (** [cos_I a]  returns the proper extension of cos to arithmetic interval
     Returns \[-1,1\] if one of the bounds is greater or lower than +/-2**53 *)
-val cos_I: t -> t  [@@deprecated "Use I.cos instead"]
+val cos_I: interval -> interval  [@@deprecated "Use I.cos instead"]
 
 (** [sin_I a]  returns the proper extension of sin to arithmetic interval
     Returns \[-1,1\] if one of the bounds is greater or lower than +/-2**53 *)
-val sin_I: t -> t  [@@deprecated "Use I.sin instead"]
+val sin_I: interval -> interval  [@@deprecated "Use I.sin instead"]
 
 (** [tan_I a]  returns the proper extension of tan to arithmetic interval
     Returns \[-Inf,Inf\] if one of the bounds is greater or lower
     than +/-2**53 *)
-val tan_I: t -> t  [@@deprecated "Use I.tan instead"]
+val tan_I: interval -> interval  [@@deprecated "Use I.tan instead"]
 
 (** [acos_I a] raise [Failure "acos_I"] if [a.low>1. or a.high<-1.],
     else returns [{low=if a.high<1. then acos a.high else 0;
     high=if a.low>-1. then acos a.low else pi}].
     All values are in \[0,pi\].*)
-val acos_I: t -> t  [@@deprecated "Use I.acos instead and adjust exn"]
+val acos_I: interval -> interval
+            [@@deprecated "Use I.acos instead and adjust exn"]
 
 (** [asin_I a] raise [Failure "asin_I"] if [a.low>1. or a.high<-1.]
     else returns [{low=if a.low>-1. then asin a.low else -pi/2;
     high=if a.low<1. then asin a.high else pi/2}].
     All values are in \[-pi/2,pi/2\]. *)
-val asin_I: t -> t  [@@deprecated "Use I.asin instead and adjust exn"]
+val asin_I: interval -> interval
+            [@@deprecated "Use I.asin instead and adjust exn"]
 
 (** [atan_I a]  returns [{low=atan a.low;high=atan a.high}] *)
-val atan_I: t -> t  [@@deprecated "Use I.atan instead"]
+val atan_I: interval -> interval  [@@deprecated "Use I.atan instead"]
 
 (** [atan2mod_I_I y x] returns the proper extension of interval
    arithmetic to atan2 but with values in \[-pi,2 pi\] instead of
@@ -475,67 +491,74 @@ val atan_I: t -> t  [@@deprecated "Use I.atan instead"]
    x.high;high=(atan2 y.low x.high)+2 pi}]. This preserves the best
    inclusion function possible but is not compatible with the
    standard definition of atan2 *)
-val atan2mod_I_I: t -> t -> t  [@@deprecated "Use I.atan2mod instead"]
+val atan2mod_I_I: interval -> interval -> interval
+                  [@@deprecated "Use I.atan2mod instead"]
 
 (** Same function as above but when y.low<0 and y.high>0 and
    x.high<0 the returned interval is \[-pi,pi\].  This does not
    preserve the best inclusion function but is compatible with the
    atan2 regular definition *)
-val atan2_I_I: t -> t -> t  [@@deprecated "Use I.atan2 instead"]
+val atan2_I_I: interval -> interval -> interval
+               [@@deprecated "Use I.atan2 instead"]
 
 (** cosh_I is the proper extension of interval arithmetic to cosh *)
-val cosh_I: t -> t  [@@deprecated "Use I.cosh instead"]
+val cosh_I: interval -> interval  [@@deprecated "Use I.cosh instead"]
 
 (** sinh_I is the proper extension of interval arithmetic to sinh *)
-val sinh_I: t -> t  [@@deprecated "Use I.sinh instead"]
+val sinh_I: interval -> interval  [@@deprecated "Use I.sinh instead"]
 
 (** tanh_I is the proper extension of interval arithmetic to tanh *)
-val tanh_I: t -> t  [@@deprecated "Use I.tanh instead"]
+val tanh_I: interval -> interval  [@@deprecated "Use I.tanh instead"]
 
 (** Computes the size of the largest interval of the interval vector *)
-val size_max_X: t array -> float  [@@deprecated "Use I.Arr.size_max instead"]
+val size_max_X: interval array -> float
+                [@@deprecated "Use I.Arr.size_max instead"]
 
 (** Computes the mean of the size of intervals of the interval vector *)
-val size_mean_X: t array -> float  [@@deprecated "Use I.Arr.size_mean instead"]
+val size_mean_X: interval array -> float
+                 [@@deprecated "Use I.Arr.size_mean instead"]
 
 (** Prints an interval vector with the same format applied to all
    endpoints. *)
 val printf_X : (float -> string, unit, string) format ->
-               t array -> unit
+               interval array -> unit
   [@@deprecated "Use I.Arr.pr or I.Arr.fmt instead"]
 
 (** Prints an interval vector into an out_channel
     with the same format applied to all endpoints *)
 val fprintf_X : out_channel -> (float -> string, unit, string) format ->
-                t array -> unit
+                interval array -> unit
   [@@deprecated "Use I.Arr.pr or I.Arr.fmt instead"]
 
 (** Returns a string holding the interval vector printed with the
    same format applied to all endpoints *)
 val sprintf_X: (float -> string, unit, string) format ->
-               t array -> string
+               interval array -> string
   [@@deprecated "Use I.Arr.to_string instead"]
 
 (** Deprecated *)
-val print_X: t array -> unit  [@@deprecated "Use I.Arr.pr instead"]
+val print_X: interval array -> unit  [@@deprecated "Use I.Arr.pr instead"]
 
 (** Deprecated *)
-val print_I: t -> unit  [@@deprecated "Use I.pr instead"]
+val print_I: interval -> unit  [@@deprecated "Use I.pr instead"]
 
 (** Deprecated *)
-val size_X: t array -> float  [@@deprecated "Use I.Arr.size_max instead"]
+val size_X: interval array -> float  [@@deprecated "Use I.Arr.size_max instead"]
 
 (** Deprecated *)
-val size2_X: t array -> float  [@@deprecated "Use I.Arr.size_mean instead"]
+val size2_X: interval array -> float
+             [@@deprecated "Use I.Arr.size_mean instead"]
 
 (** Deprecated *)
-val (<$.): t -> float -> int  [@@deprecated "Use I.compare_f instead"]
+val (<$.): interval -> float -> int  [@@deprecated "Use I.compare_f instead"]
 
 (** Deprecated *)
-val pow_I_f : t -> float -> t  [@@deprecated "Use I.( **. ) instead"]
+val pow_I_f : interval -> float -> interval
+              [@@deprecated "Use I.( **. ) instead"]
 
 (** Deprecated *)
-val pow_I_I : t -> t -> t  [@@deprecated "Use I.( *** ) instead"]
+val pow_I_I : interval -> interval -> interval
+              [@@deprecated "Use I.( *** ) instead"]
 
 
 

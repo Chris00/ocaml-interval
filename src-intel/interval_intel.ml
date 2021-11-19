@@ -25,7 +25,7 @@ module RoundUp = Fpu.RoundUp
 module Low = RoundDown
 module High = RoundUp
 
-type t = Interval_base.interval = {low: float; high: float}
+type interval = Interval_base.interval = {low: float; high: float}
 
 exception Division_by_zero = Interval_base.Division_by_zero
 exception Domain_error = Interval_base.Domain_error
@@ -371,4 +371,4 @@ let pow_I_I = ( **$ )
 let pow_I_f = ( **$. )
 
 
-type interval = t [@@deprecated]
+type t = interval [@@deprecated]
