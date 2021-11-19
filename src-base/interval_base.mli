@@ -48,7 +48,8 @@ module type T = sig
   (** π/2 with bounds properly rounded. *)
 
   val euler: t
-  (** Euler's constant with bounds properly rounded. *)
+  (** Euler's constant with bounds properly rounded.
+      @since 1.6 *)
 
   val entire : t
   (** The entire set of {!number}s.
@@ -65,15 +66,18 @@ module type T = sig
      \[-∞,-∞\] or \[+∞,+∞\] or one of the bounds is NaN. *)
 
   val inf : t -> number
-  (** [inf t] returns the lower bound of the interval. *)
+  (** [inf t] returns the lower bound of the interval.
+      @since 1.6 *)
 
   val sup : t -> number
-  (** [sup t] returns the higher bound of the interval. *)
+  (** [sup t] returns the higher bound of the interval.
+      @since 1.6 *)
 
   val singleton : number -> t
   (** [singleton x] returns the same as [{!v} x x] except that checks
      on [x] are only performed once and infinite values of [x] work
-     according to the specification of intervals. *)
+     according to the specification of intervals.
+     @since 1.6 *)
 
   val of_int : int -> t
   (** Returns the interval containing the conversion of an integer to
@@ -200,7 +204,8 @@ module type T = sig
 
   val dist : t -> t -> t
   (** [dist x y] is the Hausdorff distance between [x] and [y].
-      It is equal to max\{ |[inf x] - [inf y]|, |[sup x] - [sup y]| \}. *)
+      It is equal to max\{ |[inf x] - [inf y]|, |[sup x] - [sup y]| \}.
+      @since 1.6 *)
 
   val dist_up : t -> t -> number
   (** [dist_up x y] is the Hausdorff distance between [x] and [y],
