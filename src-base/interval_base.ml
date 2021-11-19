@@ -49,6 +49,7 @@ module type T = sig
 
   val compare_f: t -> number -> int
   val belong : number -> t -> bool
+  val is_singleton : t -> bool
   val is_bounded : t -> bool
   val is_entire : t -> bool
   val equal : t -> t -> bool
@@ -430,6 +431,8 @@ module I = struct
     if b < x then 1 else if a <= x then 0 else -1
 
   let belong x {low; high} = low <= x && x <= high
+
+  let is_singleton {low; high} = (low = high)
 
   let is_bounded {low; high} =
     neg_infinity < low && high < infinity

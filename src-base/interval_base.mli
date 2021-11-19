@@ -117,6 +117,11 @@ module type T = sig
   val belong : number -> t -> bool
   (** [belong x a] returns whether [x] ∈ [a]. *)
 
+  val is_singleton : t -> bool
+  (** [is_singleton x] says whether [x] is a ingleton i.e., the two
+     bounds of [x] are equal.
+     @since 1.6 *)
+
   val is_bounded : t -> bool
   (** [is_bounded x] says whether the interval is bounded, i.e.,
       -∞ < [inf(x)] and [sup(x)] < ∞.
