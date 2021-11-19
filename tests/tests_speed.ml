@@ -85,7 +85,11 @@ let () =
       ("x^2", (fun x -> x**2.), Some(fun x -> Fpu.fpow x 2.),
        I.(fun x -> x**2), None)
     ];
-  printf "\n       |   Float  |    Fpu        | *_crlibm       |  *_intel\n%!";
+  let t_create1 = time_of2 n (fun x y -> {low = x;  high = y}) in
+  let t_create2 = time_of2 n I.v in
+  printf "Create: {...}: %f  I.v: %f %.1f×\n\n%!"
+    t_create1 t_create2 (t_create2 /. t_create1);
+  printf "       |   Float  |    Fpu        | *_crlibm       |  *_intel\n%!";
   List.iter (speed_cmp1 n) [
       ("sin", sin, Some Fpu.fsin, Cr.sin, Some It.sin);
       ("sinpi", (fun x -> sin(Float.pi *. x)), None, Cr.sinpi, None);
