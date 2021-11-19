@@ -49,48 +49,48 @@ let speed_cmp1 ?pos n (name, f1, f2, f3, f4) =
   printf "%8f | " t1;
   (match f2 with Some f2 -> let t2 = time_of1 n f2 in
                             printf "%8f %.1f×" t2 (t2 /. t1)
-               | None -> printf "            ");
+               | None -> printf "             ");
   let t3 = time_of1_I ?pos n f3 in
-  printf " | %8f %.1f× | " t3 (t3 /. t1);
+  printf " | %8f %.1f×" t3 (t3 /. t1);
   (match f4 with Some f4 -> let t4 = time_of1_I ?pos n f4 in
-                            printf "%8f %.1f×\n" t4 (t4 /. t1)
+                            printf " | %8f %.1f×\n%!" t4 (t4 /. t1)
                | None -> printf "\n%!")
 
 
-let speed_cmp2 n (name, f1, f2, f3, f4) =
+let speed_cmp2 n (name, f1, f2, f3) =
   printf "%6s | %!" name;
   let t1 = time_of2 n f1 in
   let t2 = time_of2 n f2 in
   printf "%8f | %8f %.1f× | " t1 t2 (t2 /. t1);
   (match f3 with Some f3 -> let t3 = time_of2_I n f3 in
-                            printf "%8f %.1f× | " t3 (t3 /. t1)
-               | None -> printf "              | ");
-  (match f4 with Some f4 -> let t4 = time_of2_I n f4 in
-                            printf "%8f %.1f×\n" t4 (t4 /. t1)
+                            printf "%8f %.1f×\n%!" t3 (t3 /. t1)
                | None -> printf "\n%!")
 
 let () =
   let n = 10_000 in
   printf "# Calls: %d\n" (n * Array.length rnd_values_I);
-  printf "       |   Float  |    Fpu        |  Crlibm       |   Intel\n%!";
+  printf "       |   Float  |    Fpu        |  *_base\n%!";
   let module Fpu = Interval_intel.Fpu in
   let module Cr = Interval_crlibm.I in
   let module It = Interval_intel.I in
   List.iter (speed_cmp2 n) [
-      ("+", ( +. ),  Fpu.fadd, Some Cr.( + ),  Some It.( + ));
-      ("-", ( -. ),  Fpu.fsub, Some Cr.( - ),  Some It.( - ));
-      ("*", ( *. ),  Fpu.fmul, Some Cr.( * ),  Some It.( * ));
-      ("/", ( /. ),  Fpu.fdiv, Some Cr.( / ),  Some It.( / ));
-      ("**", ( ** ), Fpu.fpow, None, None);
-      ("mod", mod_float, Fpu.fmod, None, None);
+      ("+", ( +. ),  Fpu.fadd, Some I.( + ));
+      ("-", ( -. ),  Fpu.fsub, Some I.( - ));
+      ("*", ( *. ),  Fpu.fmul, Some I.( * ));
+      ("/", ( /. ),  Fpu.fdiv, Some I.( / ));
+      ("**", ( ** ), Fpu.fpow, None);
+      ("mod", mod_float, Fpu.fmod, None);
     ];
   List.iter (speed_cmp1 n) [
-      ("x^2", (fun x -> x**2.), Some (fun x -> Fpu.fpow x 2.),
-       Cr.(fun x -> x**2), None);
+      ("x^2", (fun x -> x**2.), Some(fun x -> Fpu.fpow x 2.),
+       I.(fun x -> x**2), None)
     ];
+  printf "\n       |   Float  |    Fpu        | *_crlibm       |  *_intel\n%!";
   List.iter (speed_cmp1 n) [
       ("sin", sin, Some Fpu.fsin, Cr.sin, Some It.sin);
+      ("sinpi", (fun x -> sin(Float.pi *. x)), None, Cr.sinpi, None);
       ("cos", cos, Some Fpu.fcos, Cr.cos, Some It.cos);
+      ("cospi", (fun x -> cos(Float.pi *. x)), None, Cr.cospi, None);
       ("tan", tan, Some Fpu.ftan, Cr.tan, Some It.tan);
       ("exp", exp, Some Fpu.fexp, Cr.exp, Some It.exp);
       ("expm1", expm1, None, Cr.expm1, None);
