@@ -459,6 +459,11 @@ module type DIRECTED = sig
   (** When [t = float], the float function is exact on 32 bits machine
      but not on 64 bits machine with ints larger than 53 bits. *)
 
+  val dist : t -> t -> t
+  (** [dist x y] return the distance between [x] and [y] (i.e., |x-y|)
+     rounded up or down according to the module.
+     @since 1.6 *)
+
   val ( +. ) : t -> t -> t
   val ( -. ) : t -> t -> t
   val ( *. ) : t -> t -> t

@@ -316,6 +316,7 @@ module type DIRECTED = sig
   val half_pi : t
   val euler: t
   val float: int -> t
+  val dist: t -> t -> t
   val ( +. ) : t -> t -> t
   val ( -. ) : t -> t -> t
   val ( *. ) : t -> t -> t
