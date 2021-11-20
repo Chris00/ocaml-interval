@@ -7,6 +7,6 @@
  (synopsis  "Interval arithmetic library for Intel processors"))
 
 (rule
- (targets interval_intel.h)
- (deps    ../src-base/interval_intel.h)
+ (targets interval_base.h)
+ (deps    ../src-base/interval_base.h)
  (action  (copy %{deps} %{targets})))

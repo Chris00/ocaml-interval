@@ -125,17 +125,17 @@ module RD = struct
   let euler   = 0x1.5bf0a8b145769p1
 
   external float: (int [@untagged]) -> (float [@unboxed])
-    = "ocaml_low_float_byte" "ocaml_low_float"
+    = "ocaml_float_RD_byte" "ocaml_float_RD"
   external ( +. ): float -> float -> float
-    = "ocaml_LOW_add_byte" "ocaml_LOW_add" [@@unboxed]
+    = "ocaml_add_RD_byte" "ocaml_add_RD" [@@unboxed]
   external ( -. ): float -> float -> float
-    = "ocaml_LOW_sub_byte" "ocaml_LOW_sub" [@@unboxed]
+    = "ocaml_sub_RD_byte" "ocaml_sub_RD" [@@unboxed]
   external ( *. ): float -> float -> float
-    = "ocaml_LOW_mul_byte" "ocaml_LOW_mul" [@@unboxed]
+    = "ocaml_mul_RD_byte" "ocaml_mul_RD" [@@unboxed]
   external ( /. ): float -> float -> float
-    = "ocaml_LOW_div_byte" "ocaml_LOW_div" [@@unboxed]
+    = "ocaml_div_RD_byte" "ocaml_div_RD" [@@unboxed]
   external sqrt: float -> float
-    = "ocaml_LOW_sqrt_byte" "ocaml_LOW_sqrt" [@@unboxed]
+    = "ocaml_sqrt_RD_byte" "ocaml_sqrt_RD" [@@unboxed]
 
   let[@inline] sqr x = x *. x
 
@@ -188,17 +188,17 @@ module RU = struct
   let euler   = 0x1.5bf0a8b14576Ap1
 
   external float: (int [@untagged]) -> (float [@unboxed]) =
-    "ocaml_high_float_byte" "ocaml_high_float"
+    "ocaml_float_RU_byte" "ocaml_float_RU"
   external ( +. ) : float -> float -> float
-    = "ocaml_HIGH_add_byte" "ocaml_HIGH_add" [@@unboxed]
+    = "ocaml_add_RU_byte" "ocaml_add_RU" [@@unboxed]
   external ( -. ): float -> float -> float
-    = "ocaml_HIGH_sub_byte" "ocaml_HIGH_sub" [@@unboxed]
+    = "ocaml_sub_RU_byte" "ocaml_sub_RU" [@@unboxed]
   external ( *. ): float -> float -> float
-    = "ocaml_HIGH_mul_byte" "ocaml_HIGH_mul" [@@unboxed]
+    = "ocaml_mul_RU_byte" "ocaml_mul_RU" [@@unboxed]
   external ( /. ): float -> float -> float
-    = "ocaml_HIGH_div_byte" "ocaml_HIGH_div" [@@unboxed]
+    = "ocaml_div_RU_byte" "ocaml_div_RU" [@@unboxed]
   external sqrt: float -> float
-    = "ocaml_HIGH_sqrt_byte" "ocaml_HIGH_sqrt" [@@unboxed]
+    = "ocaml_sqrt_RU_byte" "ocaml_sqrt_RU" [@@unboxed]
 
   let[@inline] sqr x = x *. x
 
@@ -723,8 +723,8 @@ module I = struct
 end
 
 
-external set_round_dw: unit -> unit = "ocaml_set_low" [@@noalloc]
-external set_round_up: unit -> unit = "ocaml_set_high" [@@noalloc]
+external set_round_dw: unit -> unit = "ocaml_set_RD" [@@noalloc]
+external set_round_up: unit -> unit = "ocaml_set_RU" [@@noalloc]
 external set_round_nearest: unit -> unit = "ocaml_set_nearest" [@@noalloc]
 
 

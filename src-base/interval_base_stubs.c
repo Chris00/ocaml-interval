@@ -29,29 +29,29 @@
 #ifdef INTEL_ARCH
 /* Intel architecture ------------------------------------------------ */
 
-#include "interval_intel.h"
+#include "interval_base.h"
 
 CAMLexport void ocaml_set_nearest() {
   asm __volatile__(SET_NEAREST(%0)
                    :"=m"(cw));
 }
 
-CAMLexport void ocaml_set_low() {
-  asm __volatile__(SET_LOW(%0)
+CAMLexport void ocaml_set_RD() {
+  asm __volatile__(SET_RD(%0)
                    :"=m"(cw));
 }
 
-CAMLexport void ocaml_set_high() {
-  asm __volatile__(SET_HIGH(%0)
+CAMLexport void ocaml_set_RU() {
+  asm __volatile__(SET_RU(%0)
                    :"=m"(cw));
 }
 
 /* Int -> float conversions */
 
-static double low_float(long int a) {
+static double float_RD(long int a) {
   double res;
   tmp = a;
-  asm __volatile__(SET_LOW(%0)
+  asm __volatile__(SET_RD(%0)
                    :"=m"(cw)
                    :"m"(tmp)
                    :"memory");
@@ -66,17 +66,17 @@ static double low_float(long int a) {
   return(res);
 }
 
-CAMLexport double ocaml_low_float(intnat a)
+CAMLexport double ocaml_float_RD(intnat a)
 {
-  return(low_float(a));
+  return(float_RD(a));
 }
 
 
-static double high_float(long int a) {
+static double float_RU(long int a) {
   double res;
 
   tmp = a;
-  asm __volatile__(SET_HIGH(%0)
+  asm __volatile__(SET_RU(%0)
                    :"=m"(cw)
                    :"m"(tmp)
                    :"memory");
@@ -91,15 +91,15 @@ static double high_float(long int a) {
   return(res);
 }
 
-CAMLexport double ocaml_high_float(intnat a)
+CAMLexport double ocaml_float_RU(intnat a)
 {
-  return(high_float(a));
+  return(float_RU(a));
 }
 
 /* Arithmetic operations */
 
 #define ARITH_OP(op, rounding)                                          \
-  CAMLexport double ocaml_##rounding##_##op(double a, double b) {       \
+  CAMLexport double ocaml_##op##_##rounding(double a, double b) {       \
     volatile double res;                                                \
                                                                         \
     asm __volatile__(SET_##rounding(%3)                                 \
@@ -115,19 +115,19 @@ CAMLexport double ocaml_high_float(intnat a)
     return(res);                                                        \
   }
 
-ARITH_OP(add, LOW)
-ARITH_OP(add, HIGH)
-ARITH_OP(sub, LOW)
-ARITH_OP(sub, HIGH)
-ARITH_OP(mul, LOW)
-ARITH_OP(mul, HIGH)
-ARITH_OP(div, LOW)
-ARITH_OP(div, HIGH)
+ARITH_OP(add, RD)
+ARITH_OP(add, RU)
+ARITH_OP(sub, RD)
+ARITH_OP(sub, RU)
+ARITH_OP(mul, RD)
+ARITH_OP(mul, RU)
+ARITH_OP(div, RD)
+ARITH_OP(div, RU)
 
 /* sqrt */
 
 #define SQRT(rounding) \
-  CAMLexport double ocaml_##rounding##_sqrt(double x) { \
+  CAMLexport double ocaml_sqrt_##rounding(double x) { \
     volatile double res;                                \
     asm __volatile__(SET_##rounding(%2)                 \
                      "fsqrt\n\t"                        \
@@ -141,8 +141,8 @@ ARITH_OP(div, HIGH)
     return(res);                                        \
   }
 
-SQRT(LOW)
-SQRT(HIGH)
+SQRT(RD)
+SQRT(RU)
 
 #elif __STDC_VERSION__ >= 199901L
 /* Not INTEL_ARCH, use C99 ------------------------------------------- */
@@ -153,15 +153,15 @@ CAMLexport void ocaml_set_nearest() {
   fesetround(FE_TONEAREST);
 }
 
-CAMLexport void ocaml_set_low() {
+CAMLexport void ocaml_set_RD() {
   fesetround(FE_DOWNWARD);
 }
 
-CAMLexport void ocaml_set_high() {
+CAMLexport void ocaml_set_RU() {
   fesetround(FE_UPWARD);
 }
 
-CAMLexport double ocaml_low_float(intnat a)
+CAMLexport double ocaml_float_RD(intnat a)
 {
   volatile double r;
   fesetround(FE_DOWNWARD);
@@ -170,7 +170,7 @@ CAMLexport double ocaml_low_float(intnat a)
   return(r);
 }
 
-CAMLexport double ocaml_high_float(intnat a)
+CAMLexport double ocaml_float_RU(intnat a)
 {
   volatile double r;
   fesetround(FE_UPWARD);
@@ -189,14 +189,14 @@ CAMLexport double ocaml_high_float(intnat a)
     return(r);                                          \
   }
 
-BIN_OP(LOW_add,  FE_DOWNWARD, x + y)
-BIN_OP(HIGH_add, FE_UPWARD,   x + y)
-BIN_OP(LOW_sub,  FE_DOWNWARD, x - y)
-BIN_OP(HIGH_sub, FE_UPWARD,   x - y)
-BIN_OP(LOW_mul,  FE_DOWNWARD, x * y)
-BIN_OP(HIGH_mul, FE_UPWARD,   x * y)
-BIN_OP(LOW_div,  FE_DOWNWARD, x / y)
-BIN_OP(HIGH_div, FE_UPWARD,   x / y)
+BIN_OP(add_RD, FE_DOWNWARD, x + y)
+BIN_OP(add_RU, FE_UPWARD,   x + y)
+BIN_OP(sub_RD, FE_DOWNWARD, x - y)
+BIN_OP(sub_RU, FE_UPWARD,   x - y)
+BIN_OP(mul_RD, FE_DOWNWARD, x * y)
+BIN_OP(mul_RU, FE_UPWARD,   x * y)
+BIN_OP(div_RD, FE_DOWNWARD, x / y)
+BIN_OP(div_RU, FE_UPWARD,   x / y)
 
 #define SQRT(name, round)                                   \
   CAMLexport double ocaml_##name(double x) {                \
@@ -207,8 +207,8 @@ BIN_OP(HIGH_div, FE_UPWARD,   x / y)
     return(r);                                              \
   }
 
-SQRT(LOW_sqrt, FE_DOWNWARD)
-SQRT(HIGH_sqrt, FE_UPWARD)
+SQRT(sqrt_RD, FE_DOWNWARD)
+SQRT(sqrt_RU, FE_UPWARD)
 
 #else  /* Not INTEL_ARCH, nor C99 */
 #error "An Intel architecture or a C99 standard library is required"
@@ -224,24 +224,24 @@ SQRT(HIGH_sqrt, FE_UPWARD)
     return(caml_copy_double(ocaml_##name(of_val(a))));   \
   }
 
-UNARY_BYTE(low_float,  Long_val)
-UNARY_BYTE(high_float, Long_val)
-UNARY_BYTE(LOW_sqrt,  Double_val)
-UNARY_BYTE(HIGH_sqrt, Double_val)
+UNARY_BYTE(float_RD, Long_val)
+UNARY_BYTE(float_RU, Long_val)
+UNARY_BYTE(sqrt_RD,  Double_val)
+UNARY_BYTE(sqrt_RU,  Double_val)
 
 #define BIN_BYTE(name) \
   CAMLexport value ocaml_##name##_byte(value a, value b) {              \
     return caml_copy_double(ocaml_##name(Double_val(a), Double_val(b))); \
   }
 
-BIN_BYTE(LOW_add)
-BIN_BYTE(HIGH_add)
-BIN_BYTE(LOW_sub)
-BIN_BYTE(HIGH_sub)
-BIN_BYTE(LOW_mul)
-BIN_BYTE(HIGH_mul)
-BIN_BYTE(LOW_div)
-BIN_BYTE(HIGH_div)
+BIN_BYTE(add_RD)
+BIN_BYTE(add_RU)
+BIN_BYTE(sub_RD)
+BIN_BYTE(sub_RU)
+BIN_BYTE(mul_RD)
+BIN_BYTE(mul_RU)
+BIN_BYTE(div_RD)
+BIN_BYTE(div_RU)
 
 /* Printing ---------------------------------------------------------- */
 

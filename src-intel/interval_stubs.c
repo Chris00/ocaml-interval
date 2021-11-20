@@ -51,7 +51,7 @@ static double ffloat(long int a) {
 static double to_low(long double a) {
   double res;
 
-  asm __volatile__(SET_LOW(%0)
+  asm __volatile__(SET_RD(%0)
 		   :"=m"(cw)
 		   :"m"(res),"m"(a)
 		   :"memory"
@@ -68,7 +68,7 @@ static double to_low(long double a) {
 static double to_high(long double a) {
   double res;
 
-  asm __volatile__(SET_HIGH(%0)
+  asm __volatile__(SET_RU(%0)
 		   :"=m"(cw)
 		   :"m"(res),"m"(a)
 		   :"memory");
@@ -109,7 +109,7 @@ static long double fadd_low_l(long double a, long double b) {
 
   long double res;
 
-  asm __volatile__(SET_LOW(%3)
+  asm __volatile__(SET_RD(%3)
 		   "fadd %%st(1),%%st(0)\n\t"
 		   SET_NEAREST(%3)
 		   :"=t"(res)
@@ -123,7 +123,7 @@ static long double fadd_high_l(long double a, long double b) {
 
   long double res;
 
-  asm __volatile__(SET_HIGH(%3)
+  asm __volatile__(SET_RU(%3)
 		   "fadd %%st(1),%%st(0)\n\t"
 		   SET_NEAREST(%3)
 		   :"=t"(res)
@@ -160,7 +160,7 @@ static long double fsub_low_l(long double a, long double b) {
 
   long double res;
 
-  asm __volatile__(SET_LOW(%3)
+  asm __volatile__(SET_RD(%3)
 		   "fsub %%st(1),%%st(0)\n\t"
 		   SET_NEAREST(%3)
 		   :"=t"(res)
@@ -174,7 +174,7 @@ static long double fsub_high_l(long double a, long double b) {
 
   long double res;
 
-  asm __volatile__(SET_HIGH(%3)
+  asm __volatile__(SET_RU(%3)
 		   "fsub %%st(1),%%st(0)\n\t"
 		   SET_NEAREST(%3)
 		   :"=t"(res)
@@ -211,7 +211,7 @@ static long double fmul_low_l(long double a, long double b) {
 
   long double res;
 
-  asm __volatile__(SET_LOW(%3)
+  asm __volatile__(SET_RD(%3)
 		   "fmul %%st(1),%%st(0)\n\t"
 		   SET_NEAREST(%3)
 		   :"=t"(res)
@@ -225,7 +225,7 @@ static long double fmul_high_l(long double a, long double b) {
 
   long double res;
 
-  asm __volatile__(SET_HIGH(%3)
+  asm __volatile__(SET_RU(%3)
 		   "fmul %%st(1),%%st(0)\n\t"
 		   SET_NEAREST(%3)
 		   :"=t"(res)
@@ -262,7 +262,7 @@ static long double fdiv_low_l(long double a, long double b) {
 
   long double res;
 
-  asm __volatile__(SET_LOW(%3)
+  asm __volatile__(SET_RD(%3)
 		   "fdiv %%st(1),%%st(0)\n\t"
 		   SET_NEAREST(%3)
 		   :"=t"(res)
@@ -276,7 +276,7 @@ static long double fdiv_high_l(long double a, long double b) {
 
   long double res;
 
-  asm __volatile__(SET_HIGH(%3)
+  asm __volatile__(SET_RU(%3)
 		   "fdiv %%st(1),%%st(0)\n\t"
 		   SET_NEAREST(%3)
 		   :"=t"(res)
@@ -348,7 +348,7 @@ double flog(double a) {
 static long double flog_low_l(long double a) {
   long double res;
 
-  asm __volatile__(SET_LOW(%2)
+  asm __volatile__(SET_RD(%2)
 		   "fldln2\n\t"
 		   "fxch\n\t"
 		   "fyl2x\n\t"
@@ -371,7 +371,7 @@ double flog_low(double a) {
 static long double flog_high_l(long double a) {
   long double res;
 
-  asm __volatile__(SET_HIGH(%2)
+  asm __volatile__(SET_RU(%2)
 		   "fldln2\n\t"
 		   "fxch\n\t"
 		   "fyl2x\n\t"
@@ -431,7 +431,7 @@ static long double fexp_low_l(long double a) {
   if (a == infinity) {return infinity;}
   else if (a == neg_infinity) {return 0.;}
   else if (0.0 <= a) {
-    asm __volatile__(SET_LOW(%2)
+    asm __volatile__(SET_RD(%2)
 		     "fldl2e\n\t"
 		     "fmulp   %%st, %%st(1)\n\t"
 		     "fld     %%st(0)\n\t"
@@ -452,9 +452,9 @@ static long double fexp_low_l(long double a) {
 		     );
   }
   else {
-    asm __volatile__(SET_HIGH(%2)
+    asm __volatile__(SET_RU(%2)
 		     "fldl2e\n\t"
-		     SET_LOW(%2)
+		     SET_RD(%2)
 		     "fmulp   %%st, %%st(1)\n\t"
 		     "fld     %%st(0)\n\t"
 		     "frndint\n\t"
@@ -487,7 +487,7 @@ static long double fexp_high_l(long double a) {
   if (a == infinity) {return infinity;}
   else if (a == neg_infinity) {return 0.;}
   else if (0.0 <= a) {
-    asm __volatile__(SET_HIGH(%2)
+    asm __volatile__(SET_RU(%2)
 		     "fldl2e\n\t"
 		     "fmulp   %%st, %%st(1)\n\t"
 		     "fld     %%st(0)\n\t"
@@ -508,9 +508,9 @@ static long double fexp_high_l(long double a) {
 		     );
   }
   else {
-    asm __volatile__(SET_LOW(%2)
+    asm __volatile__(SET_RD(%2)
 		     "fldl2e\n\t"
-		     SET_HIGH(%2)
+		     SET_RU(%2)
 		     "fmulp   %%st, %%st(1)\n\t"
 		     "fld     %%st(0)\n\t"
 		     "frndint\n\t"
@@ -570,12 +570,12 @@ static long double flog_pow_low_l(long double a, long double b) {
 
   long double res;
 
-  asm __volatile__(SET_LOW(%3)
+  asm __volatile__(SET_RD(%3)
 		   "fyl2x\n\t"
 		   "fld %%st(0)\n\t"
 		   SET_NEAREST(%3)
 		   "frndint\n\t"
-		   SET_LOW(%3)
+		   SET_RD(%3)
 		   "fsubr %%st,%%st(1)\n\t"
 		   "fxch\n\t"
 		   "f2xm1\n\t"
@@ -602,12 +602,12 @@ static long double flog_pow_high_l(long double a, long double b) {
   long double res;
 
 
-  asm __volatile__(SET_HIGH(%3)
+  asm __volatile__(SET_RU(%3)
 		   "fyl2x\n\t"
 		   "fld %%st(0)\n\t"
 		   SET_NEAREST(%3)
 		   "frndint\n\t"
-		   SET_HIGH(%3)
+		   SET_RU(%3)
 		   "fsubr %%st,%%st(1)\n\t"
 		   "fxch\n\t"
 		   "f2xm1\n\t"
@@ -666,19 +666,19 @@ double facos(double a) {
 static long double facos_low_l(long double a) {
   long double res;
 
- asm __volatile__(SET_LOW(%2)
+ asm __volatile__(SET_RD(%2)
 		  "fld %%st(0)\n\t"          /* a a */
 		  "fld1\n\t"                 /* 1 a a */
 		  "fsubp\n\t"                /* a-1 a */
 		  "fxch\n\t"                 /* a a-1 */
 		  "fld1\n\t"                 /* 1 a a-1 */
-		  SET_HIGH(%2)               /* HIGH */
+		  SET_RU(%2)                 /* ROUND UPWARD */
 		  "faddp\n\t"                /* a+1 a-1 */
 		  "fdivp\n\t"                /* (a+1)/(a-1) */
 		  "fsqrt\n\t"                /* sqrt((a+1)/(a-1)) */
 		  "fld1\n\t"                 /* 1 sqrt((a+1)/(a-1)) */
 		  "fxch\n\t"                 /* sqrt((a+1)/(a-1)) 1 */
-		  SET_LOW(%2)                /* LOW */
+		  SET_RD(%2)                 /* ROUND DOWNWARD */
 		  "fpatan\n\t"               /* atan(1/sqrt((a+1)/(a-1)) */
 		  "fld1\n\t"                 /* 1 atan(1/sqrt((a+1)/(a-1)) */
 		  "fadd %%st(0),%%st(0)\n\t" /* 2 atan(1/sqrt((a+1)/(a-1)) */
@@ -703,19 +703,19 @@ static long double facos_high_l(long double a) {
   long double res;
 
 
- asm __volatile__(SET_HIGH(%2) /* HIGH */
+ asm __volatile__(SET_RU(%2) /* ROUND UPWARD */
 		  "fld %%st(0)\n\t"          /* a a */
 		  "fld1\n\t"                 /* 1 a a */
 		  "fsubp\n\t"                /* a-1 a */
 		  "fxch\n\t"                 /* a a-1 */
 		  "fld1\n\t"                 /* 1 a a-1 */
-		  SET_LOW(%2)                /* LOW */
+		  SET_RD(%2)                 /* ROUND DOWNWARD */
 		  "faddp\n\t"                /* a+1 a-1 */
 		  "fdivp\n\t"                /* (a+1)/(a-1) */
 		  "fsqrt\n\t"                /* sqrt((a+1)/(a-1)) */
 		  "fld1\n\t"                 /* 1 sqrt((a+1)/(a-1)) */
 		  "fxch\n\t"                 /* sqrt((a+1)/(a-1)) 1 */
-		  SET_HIGH(%2)               /* HIGH */
+		  SET_RU(%2)                 /* ROUND UPWARD */
 		  "fpatan\n\t"               /* atan(1/sqrt((a+1)/(a-1)) */
 		  "fld1\n\t"                 /* 1 atan(1/sqrt((a+1)/(a-1)) */
 		  "fadd %%st(0),%%st(0)\n\t" /* 2 atan(1/sqrt((a+1)/(a-1)) */
@@ -762,14 +762,14 @@ static long double fasin_low_l(long double a) {
   long double res;
 
   if (a>0) {
-    asm __volatile__(SET_LOW(%2)
+    asm __volatile__(SET_RD(%2)
 		     "fld %%st(0)\n\t"
 		     "fmul %%st(1),%%st(0)\n\t"
-		     SET_HIGH(%2)
+		     SET_RU(%2)
 		     "fld1\n\t"
 		     "fsubp\n\t"
 		     "fsqrt\n\t"
-		     SET_LOW(%2)
+		     SET_RD(%2)
 		     "fpatan\n\t"
 		     SET_NEAREST(%2)
 		     :"=t"(res)
@@ -781,10 +781,10 @@ static long double fasin_low_l(long double a) {
     return(res);
   }
   else {
-    asm __volatile__(SET_HIGH(%2)
+    asm __volatile__(SET_RU(%2)
 		     "fld %%st(0)\n\t"
 		     "fmul %%st(1),%%st(0)\n\t"
-		     SET_LOW(%2)
+		     SET_RD(%2)
 		     "fld1\n\t"
 		     "fsubp\n\t"
 		     "fsqrt\n\t"
@@ -809,14 +809,14 @@ static long double fasin_high_l(long double a) {
   long double res;
 
   if (a>0)  {
-    asm __volatile__(SET_HIGH(%2)
+    asm __volatile__(SET_RU(%2)
 		     "fld %%st(0)\n\t"
 		     "fmul %%st(1),%%st(0)\n\t"
-		     SET_LOW(%2)
+		     SET_RD(%2)
 		     "fld1\n\t"
 		     "fsubp\n\t"
 		     "fsqrt\n\t"
-		     SET_HIGH(%2)
+		     SET_RU(%2)
 		     "fpatan\n\t"
 		     SET_NEAREST(%2)
 		     :"=t"(res)
@@ -828,10 +828,10 @@ static long double fasin_high_l(long double a) {
     return(res);
   }
   else {
-    asm __volatile__(SET_LOW(%2)
+    asm __volatile__(SET_RD(%2)
 		     "fld %%st(0)\n\t"
 		     "fmul %%st(1),%%st(0)\n\t"
-		     SET_HIGH(%2)
+		     SET_RU(%2)
 		     "fld1\n\t"
 		     "fsubp\n\t"
 		     "fsqrt\n\t"
@@ -866,7 +866,7 @@ double fatan(double a, double b) {
 static long double fatan_low_l(long double a, long double b) {
   long double res;
 
-  asm __volatile__(SET_LOW(%3)
+  asm __volatile__(SET_RD(%3)
 		   "fpatan\n\t"
 		   SET_NEAREST(%3)
 		   :"=t"(res)
@@ -883,7 +883,7 @@ double fatan2_low(double y, double x) {
 static long double fatan_high_l(long double a, long double b) {
   long double res;
 
-  asm __volatile__(SET_HIGH(%3)
+  asm __volatile__(SET_RU(%3)
 		   "fpatan\n\t"
 		   SET_NEAREST(%3)
 		   :"=t"(res)
@@ -1261,7 +1261,7 @@ long double fexm1_low_l(long double a) {
     return(fsub_low_l(fexp_low_l(a), 1.0));
   }
   else if (0.0 <= a) {
-    asm __volatile__(SET_LOW(%2)
+    asm __volatile__(SET_RD(%2)
 		     "fldl2e\n\t"
 		     "fmulp   %%st, %%st(1)\n\t"
 		     "f2xm1\n\t"
@@ -1275,9 +1275,9 @@ long double fexm1_low_l(long double a) {
     return(res);
   }
   else {
-    asm __volatile__(SET_HIGH(%2)
+    asm __volatile__(SET_RU(%2)
 		     "fldl2e\n\t"
-		     SET_LOW(%2)
+		     SET_RD(%2)
 		     "fmulp   %%st, %%st(1)\n\t"
 		     "f2xm1\n\t"
 		     SET_NEAREST(%2)
@@ -1298,7 +1298,7 @@ long double fexm1_high_l(long double a) {
     return(fsub_high_l(fexp_high_l(a), 1.0));
   }
   else if (0.0 <= a) {
-    asm __volatile__(SET_HIGH(%2)
+    asm __volatile__(SET_RU(%2)
 		     "fldl2e\n\t"
 		     "fmulp   %%st, %%st(1)\n\t"
 		     "f2xm1\n\t"
@@ -1312,9 +1312,9 @@ long double fexm1_high_l(long double a) {
     return(res);
   }
   else {
-    asm __volatile__(SET_LOW(%2)
+    asm __volatile__(SET_RD(%2)
 		     "fldl2e\n\t"
-		     SET_HIGH(%2)
+		     SET_RU(%2)
 		     "fmulp   %%st, %%st(1)\n\t"
 		     "f2xm1\n\t"
 		     SET_NEAREST(%2)

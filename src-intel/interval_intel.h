@@ -36,17 +36,7 @@
 #ifndef _INTERVAL_INTEL_H
 #define _INTERVAL_INTEL_H 1
 
-#if defined _MSC_BUILD
-#error "MSVC inline assembly is not supported at the moment.  Please contribute."
-#elif !(defined __GNUC__)
-#define asm __asm__
-#define __volatile__
-#endif
-
-/* Set the processor to different rounding modes */
-#define SET_LOW(ref) "fstcw "#ref"\n\t andw $0xf3ff,"#ref"\n\t orw $0x0400,"#ref"\n\t fldcw "#ref"\n\t"
-#define SET_HIGH(ref) "fstcw "#ref"\n\t andw $0xf3ff,"#ref"\n\t orw $0x0800,"#ref"\n\t fldcw "#ref"\n\t"
-#define SET_NEAREST(ref) "fstcw "#ref"\n\t andw $0xf3ff,"#ref"\n\t fldcw "#ref"\n\t"
+#include "interval_base.h"
 
 /* Set the processor to use full 64+16 bits.  Useful with long double,
    but VERY dangerous with ordinary doubles because optimization of
@@ -62,11 +52,6 @@
 
 /* Set the processor to use 24+8 bits. IEEE-754 standard for float. */
 #define SET_24(ref) "fstcw "#ref"\n\t andw $0xfcff,"#ref"\n\t fldcw "#ref"\n\t"
-
-static short int cw;
-static long long int tmp;
-
-#define FILDQ(ref) "fildq "#ref"\n\t"
 
 
 #endif  /* <interval_intel.h> included */
