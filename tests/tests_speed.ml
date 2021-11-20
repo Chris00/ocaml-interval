@@ -76,21 +76,24 @@ let speed_cmp2 n (name, f1, f2, f3) =
 let () =
   let n = 10_000 in
   printf "# Calls: %d\n" (n * Array.length rnd_values_I);
-  printf "       |   Float  |    Fpu        |  *_base\n%!";
+  printf "       |   Float  |  RoundUp      |  *_base.I\n%!";
   let module Fpu = Interval_intel.Fpu in
   let module Cr = Interval_crlibm.I in
   let module It = Interval_intel.I in
   List.iter (speed_cmp2 n) [
-      ("+", ( +. ),  Fpu.fadd, Some I.( + ));
-      ("-", ( -. ),  Fpu.fsub, Some I.( - ));
-      ("*", ( *. ),  Fpu.fmul, Some I.( * ));
-      ("/", ( /. ),  Fpu.fdiv, Some I.( / ));
-      ("**", ( ** ), Fpu.fpow, None);
-      ("mod", mod_float, Fpu.fmod, None);
+      ("+", ( +. ),  RoundUp.( +. ), Some I.( + ));
+      ("-", ( -. ),  RoundUp.( -. ), Some I.( - ));
+      ("*", ( *. ),  RoundUp.( *. ), Some I.( * ));
+      ("/", ( /. ),  RoundUp.( /. ), Some I.( / ));
+      ("hypot", hypot, RoundUp.hypot, Some I.hypot);
     ];
   List.iter (speed_cmp1 n) [
-      ("x^2", (fun x -> x**2.), Some(fun x -> Fpu.fpow x 2.),
-       I.(fun x -> x**2), None)
+      ("x^2", (fun x -> x**2.), Some(fun x -> RoundUp.pow_i x 2),
+       I.(fun x -> x**2), None);
+      ("x^3", (fun x -> x**3.), Some(fun x -> RoundUp.pow_i x 3),
+       I.(fun x -> x**3), None);
+      ("x^4", (fun x -> x**4.), Some(fun x -> RoundUp.pow_i x 4),
+       I.(fun x -> x**4), None);
     ];
   let t_create1 = time_of2 n (fun x y -> {low = x;  high = y}) in
   let t_create2 = time_of2 n I.v ~incr:true in
@@ -98,19 +101,21 @@ let () =
   printf "Create: {...}: %f  I.v: %f %.1f×  I.v: %f %.1f×\n\n%!"
     t_create1 t_create2 (t_create2 /. t_create1)
     t_create3 (t_create3 /. t_create1);
-  printf "       |   Float  |    Fpu        | *_crlibm       |  *_intel\n%!";
+  printf "       |   Float  |  RoundUp      | *_crlibm.I    | *_intel.I\n%!";
   List.iter (speed_cmp1 n) [
-      ("sin", sin, Some Fpu.fsin, Cr.sin, Some It.sin);
-      ("sinpi", (fun x -> sin(Float.pi *. x)), None, Cr.sinpi, None);
-      ("cos", cos, Some Fpu.fcos, Cr.cos, Some It.cos);
-      ("cospi", (fun x -> cos(Float.pi *. x)), None, Cr.cospi, None);
-      ("tan", tan, Some Fpu.ftan, Cr.tan, Some It.tan);
-      ("exp", exp, Some Fpu.fexp, Cr.exp, Some It.exp);
-      ("expm1", expm1, None, Cr.expm1, None);
+      ("sin", sin, Some Crlibm.RoundUp.sin, Cr.sin, Some It.sin);
+      ("sinpi", (fun x -> sin(Float.pi *. x)), Some Crlibm.RoundUp.sinpi,
+                Cr.sinpi, None);
+      ("cos", cos, Some Crlibm.RoundUp.cos, Cr.cos, Some It.cos);
+      ("cospi", (fun x -> cos(Float.pi *. x)), Some Crlibm.RoundUp.cospi,
+                Cr.cospi, None);
+      ("tan", tan, Some Crlibm.RoundUp.tan, Cr.tan, Some It.tan);
+      ("exp", exp, Some Crlibm.RoundUp.exp, Cr.exp, Some It.exp);
+      ("expm1", expm1, Some Crlibm.RoundUp.expm1, Cr.expm1, None);
     ];
   List.iter (speed_cmp1 ~pos:true n) [
-      ("log",   log,   Some Fpu.flog, Cr.log,   Some It.log);
-      ("log1p", log1p, None,          Cr.log1p, None);
+      ("log",   log,   Some Crlibm.RoundUp.log,   Cr.log,   Some It.log);
+      ("log1p", log1p, Some Crlibm.RoundUp.log1p, Cr.log1p, None);
     ]
 
 
