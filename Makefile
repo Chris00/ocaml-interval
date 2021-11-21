@@ -20,7 +20,7 @@ tests: all
 	if [ $$C -gt 0 ]; then \
 	  echo "Tests: $$C errors (see _build/default/tests/tests.log)"; \
 	  grep -B 3 -A 2 DEFINED tests.log; \
-	else echo "All tests passed successfully"; fi
+	else echo "All tests passed successfully."; fi
 
 test-speed:
 	dune exec tests/tests_speed.exe

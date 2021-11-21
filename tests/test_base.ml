@@ -39,6 +39,49 @@ let () =
   assert(RoundDown.sqrt x = 1.97575470537268771e-77)
 
 let () =
+  (* Test the rounding of elementary operations. *)
+  let s = I.singleton in
+  let pred1 = 0x1.fffffffffffffp-1 (* 1 - 2⁻⁵³ *) in
+  let succ1 = 0x1.0000000000001 (* 1 + 2⁻⁵² *) in
+  let ppred1 = 0x1.ffffffffffffep-1 (* 1 - 2⁻⁵² *) in
+  let ssucc1 = 0x1.0000000000002 (* 1 + 2⁻⁵¹ *) in
+  assert I.(s 1.   + s 0x1p-53 = v 1. succ1);
+  assert I.(s 1.   + s 0x1p-54 = v 1. succ1);
+  assert I.(s(-1.) + s 0x1p-55 = v (-1.) (-. pred1));
+  assert I.(s 1.   + s(-0x1p-53) = s pred1);
+  assert I.(s 1.   + s(-0x1p-55) = v pred1 1.);
+  assert I.(s(-1.) + s(-0x1p-54) = v U.(-. succ1) (-1.));
+  assert I.(s 1.   +. 0x1p-53 = v 1. succ1);
+  assert I.(s 1.   +. 0x1p-54 = v 1. succ1);
+  assert I.(s(-1.) +. 0x1p-55 = v (-1.) (-. pred1));
+  assert I.(-0x1p-53 +: s 1. = s pred1);
+  assert I.(-0x1p-55 +: s 1. = v pred1 1.);
+  assert I.(-0x1p-54 +: s(-1.) = v U.(-. succ1) (-1.));
+
+  assert I.(s 1. - s(-0x1p-53) = v 1. succ1);
+  assert I.(s 1. - s(-0x1p-54) = v 1. succ1);
+  assert I.(s(-1.) - s(-0x1p-55) = v (-1.) (-. pred1));
+  assert I.(s 1. - s 0x1p-53 = s pred1);
+  assert I.(s 1. - s 0x1p-55 = v pred1 1.);
+  assert I.(s(-1.) - s 0x1p-54 = v (-. succ1) (-1.));
+
+  let y = I.v ssucc1 0x1.0000000000003 in
+  assert I.(s succ1 * s succ1 = y);
+  assert I.(s succ1 **2 = y);
+  assert I.(s succ1 * s U.(-. succ1) = - y);
+  assert I.(succ1 *. s succ1 = y);
+  assert I.(succ1 *. s U.(-. succ1) = - y);
+  assert I.(s succ1 *: succ1 = y);
+  assert I.(s succ1 *: U.(-. succ1) = - y);
+
+  assert I.(s 1. / s pred1 = v 1. succ1);
+  assert I.(s 1. / s ppred1 = v succ1 ssucc1);
+  assert I.(1. /: s pred1 = v 1. succ1);
+  assert I.(1. /: s ppred1 = v succ1 ssucc1);
+  (* √(1+ε) = 1 + ½ ε + (small negative) with ε = 3 ulp(1). *)
+  assert I.(sqrt (s 0x1.0000000000003) = v succ1 ssucc1)
+
+let () =
   assert(I.(v 2. 2. ** 3 = v 8. 8.));
   assert(I.(v 2. 2. ** (-2) = v 0.25 0.25));
   assert(I.(v 0. 0. ** 0 = one));
