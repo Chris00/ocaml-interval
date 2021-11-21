@@ -218,6 +218,10 @@ module type T = sig
   val mig : t -> number
   (** [mig x] returns the mignitude of [x], that is inf\{ |x| : x ∈ [x] \}. *)
 
+  val mid : t -> number
+  (** [mid x] returns a finite number belonging to [x] which is close
+     to the midpoint of [x].  If {!is_entire} [x], zero is returned. *)
+
   val sgn: t -> t
   (** [sgn a] returns the sign of each bound, e.g., for floats
       \[[float (compare (inf a) 0.)], [float (compare (sup a) 0.)]\]. *)

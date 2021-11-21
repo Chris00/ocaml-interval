@@ -51,6 +51,14 @@ let () =
   assert(I.(inter (v 0. 1.) (v 2. 3.)) = None)
 
 let () =
+  assert(I.(mid entire) = 0.);
+  assert(I.(mid (v neg_infinity 1.)) = -. Float.max_float);
+  assert(I.(mid (v 1. infinity)) = Float.max_float);
+  assert(I.mid (I.v (-1.) 1.) = 0.);
+  assert(I.mid (I.v (-1e300) 1e300) = 0.);
+  assert(Float.is_finite (I.mid (I.v 1e300 1e305)))
+
+let () =
   (* √2 = 0x1.6A09E667F3BCC_908B2F... *)
   assert(RoundUp.sqrt 2. = 0x1.6A09E667F3BCD);
   assert(RoundDown.sqrt 2.  = 0x1.6A09E667F3BCC);

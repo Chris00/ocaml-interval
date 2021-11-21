@@ -72,6 +72,7 @@ module type T = sig
   val dist_up : t -> t -> number
   val mag : t -> number
   val mig : t -> number
+  val mid : t -> number
   val sgn: t -> t
   val truncate: t -> t
   val abs: t -> t
@@ -493,6 +494,18 @@ module I = struct
   let mig x = if x.low >= 0. then x.low
               else if x.high <= 0. then -. x.high
               else (* x.low < 0 < x.high *) 0.
+
+  (* See: F. Goualard, “How do you compute the midpoint of an
+     interval?,” ACM Trans. Math. Softw., vol. 40, no. 2, pp. 1–25,
+     Feb. 2014, doi: 10.1145/2493882. *)
+  let mid {low = a; high = b} =
+    if a = neg_infinity then
+      if b = infinity then 0. else min_neg_float
+    else if b = infinity then Float.max_float
+    else
+      let m = 0.5 *. (a +. b) in
+      if Float.is_finite m then m
+      else 0.5 *. a +. 0.5 *. b
 
   let abs ({low = a; high = b} as x) =
     if 0. <= a then x
