@@ -31,7 +31,7 @@ exception Division_by_zero = Interval_base.Division_by_zero
 exception Domain_error = Interval_base.Domain_error
 
 module I = struct
-  include Interval_base.I       (* Redefines =, <=,... *)
+  include Interval_base.I       (* Redefines =, <=,..., floor,... *)
   include Generic
 
   (* Redefine ( ** ) from Interval_base to keep the version of the
@@ -78,7 +78,7 @@ module I = struct
     if sn = 0 then if a = 0. && b = 0. then raise(Domain_error "**.")
                    else one
     else if sb < 0 then
-      if floor nf <> nf then raise(Domain_error "**.")
+      if Float.floor nf <> nf then raise(Domain_error "**.")
       else if mod2 nf = 0. then
         if 0 < sn then {low = RoundDown.pow (-.b) nf; high = pow_h (-.a)}
         else {low = pow_l (-.a); high = RoundUp.pow (-.b) nf}
@@ -87,7 +87,7 @@ module I = struct
     else if 0 < sa then
       if 0 < sn then {low = RoundDown.pow a nf; high = pow_h b}
       else {low = pow_l b; high = RoundUp.pow a nf}
-    else if floor nf <> nf then
+    else if Float.floor nf <> nf then
       if 0 < sn then {low = 0.; high = if sb = 0 then 0. else pow_h b}
       else if sb = 0 then raise(Domain_error "**.")
       else {low = pow_l b; high = infinity}
@@ -149,7 +149,7 @@ module I = struct
   let mod_f {low = a; high = b} y =
     (* assume that the result of fmod is exact *)
     let sy = Stdlib.compare y 0. in
-    let y = if U.(sy = 0) then raise Division_by_zero else abs_float y in
+    let y = if U.(sy = 0) then raise Division_by_zero else Float.abs y in
     if U.(0. <= a) then
       if U.(RoundUp.(b -. a) < y) then (
         let ma = Fpu.fmod a y and mb = Fpu.fmod b y in

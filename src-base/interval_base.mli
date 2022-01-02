@@ -230,6 +230,14 @@ module type T = sig
   (** [truncate a] returns the integer interval containing [a], that is
       \[[floor(inf a)], [ceil(sup a)]\]. *)
 
+  val floor: t -> t
+  (** [floor a] returns the floor of [a], that is
+      \[[floor(inf a)], [floor(sup a)]\]. *)
+
+  val ceil: t -> t
+  (** [ceil a] returns the ceil of [a], that is
+      \[[ceil(inf a)], [ceil(sup a)]\]. *)
+
   val abs: t -> t
   (** [abs a] returns the absolute value of the interval, that is
       - [a] if [inf a] ≥ [0.],

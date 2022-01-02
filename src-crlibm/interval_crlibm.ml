@@ -74,8 +74,8 @@ module I = struct
 
   let cos { low = a; high = b } =
     let open U in
-    let k = floor RoundDown.(a /. RoundUp.pi) in
-    let l = floor RoundUp.(b /. RoundDown.pi) in
+    let k = Float.floor RoundDown.(a /. RoundUp.pi) in
+    let l = Float.floor RoundUp.(b /. RoundDown.pi) in
     if is_odd k then
       if l = k then
         (* It is guaranteed that kπ ≤ a ≤ b ≤ (k+1)π. *)
@@ -92,8 +92,8 @@ module I = struct
 
   let cospi { low = a; high = b } =
     let open U in
-    let k = floor a in
-    let l = floor b in
+    let k = Float.floor a in
+    let l = Float.floor b in
     if is_odd k then
       if l = k then
         (* It is guaranteed that k ≤ a ≤ b ≤ k+1. *)
@@ -108,10 +108,11 @@ module I = struct
         {low = -1.;  high = fmax (RoundUp.cospi a) (RoundUp.cospi b)}
       else mone_one
 
-  let sin { low = a; high = b } =
+  let sin ({ low = a; high = b } as x) =
+    let x_normalized = floor(x / pi -. 0.5) in
     let open U in
-    let k = floor RoundDown.(a /. RoundUp.pi -. 0.5) in
-    let l = floor RoundUp.(b /. RoundDown.pi -. 0.5) in
+    let k = x_normalized.low in
+    let l = x_normalized.high in
     if is_odd k then
       if l = k then {low = RoundDown.sin a;
                      high = RoundUp.sin b} (* increasing *)
@@ -127,8 +128,8 @@ module I = struct
 
   let sinpi { low = a; high = b } =
     let open U in
-    let k = floor RoundDown.(a -. 0.5) in
-    let l = floor RoundUp.(b -. 0.5) in
+    let k = Float.floor RoundDown.(a -. 0.5) in
+    let l = Float.floor RoundUp.(b -. 0.5) in
     if is_odd k then
       if l = k then {low = RoundDown.sinpi a;
                      high = RoundUp.sinpi b} (* increasing *)

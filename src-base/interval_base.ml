@@ -75,6 +75,8 @@ module type T = sig
   val mid : t -> number
   val sgn: t -> t
   val truncate: t -> t
+  val floor: t -> t
+  val ceil: t -> t
   val abs: t -> t
   val hull: t -> t -> t
   val inter_exn : t -> t -> t
@@ -517,6 +519,12 @@ module I = struct
 
   let truncate x =
     {low = floor x.low; high = ceil x.high}
+
+  let floor x =
+    {low = floor x.low; high = floor x.high}
+
+  let ceil x =
+    {low = ceil x.low; high = ceil x.high}
 
   let hull x y = {low = fmin x.low y.low; high = fmax x.high y.high}
 
