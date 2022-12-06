@@ -2,8 +2,6 @@ PACKAGES = $(basename $(wildcard *.opam))
 PKGVERSION = $(shell git describe --always)
 
 all build:
-	dune external-lib-deps --missing --workspace dune-workspace.dev \
-	  @install @examples
 	dune build --workspace dune-workspace.dev @install @examples
 	dune build --workspace dune-workspace.dev @runtest --force
 
