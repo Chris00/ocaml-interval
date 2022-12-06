@@ -2,7 +2,7 @@
  (name        interval_crlibm)
  (public_name interval_crlibm)
  (ocamlopt_flags :standard -no-float-const-prop)
- (c_names     interval_crlibm_stubs)
+ (foreign_stubs (language c) (names interval_crlibm_stubs))
  (libraries   interval_base crlibm)
  (synopsis "An interval library for OCaml (crlibm version)"))
 

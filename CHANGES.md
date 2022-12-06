@@ -17,6 +17,7 @@
   record fields).
 - Add functions `RoundDown.dist` and `RoundUp.dist` (downward/upward
   rounded distance).
+- Use Dune 2.0.
 
 1.5.1 2019-05-01
 ----------------

@@ -3,8 +3,9 @@
  (public_name interval_base)
  (install_c_headers interval_base)
  (ocamlopt_flags :standard -no-float-const-prop)
- (c_names     interval_base_stubs)
- (c_flags     :standard (:include c_flags.sexp))
+ (foreign_stubs (language c)
+  (names interval_base_stubs)
+  (flags     :standard (:include c_flags.sexp)))
  (synopsis "Interval arithmetic library (base)"))
 
 (rule
