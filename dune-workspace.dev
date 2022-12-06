@@ -1,5 +1,5 @@
 (lang dune 1.0)
 
 (context default)
-(context (opam (switch 5.0.0~beta2)))
+(context (opam (switch 5.0.0~rc1)))
 
