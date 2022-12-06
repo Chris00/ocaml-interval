@@ -1,3 +1,23 @@
+1.6 2022-12-06
+--------------
+
+- Use the standard `inf` and `sup` for the bounds of the interval.
+- Prefer `..._up` and `..._dw` to mark the rounding of functions and
+  `RoundUp` and `RoundDown` for the modules.  Crlibm was updated
+  accordingly.
+- Rename `Interval` as `Interval_base` as it conflicted with the
+  `Interval` module in compiler libs (provoking a collision when this
+  library was used in the REPL).
+- Add functions `mag` (magnitude) and `mig` (mignitude), `mid`
+  (midpoint), `singleton` (creation of intervals containing a single
+  value), `is_singleton`, `diam` (diameter), `belong` (x ∈ I), `floor`,
+  `ceil` and `hypot`.
+- Renamed `Interval_*.t` as `Interval_*.interval` as to not import the
+  short type `t` into the namespace (but still have access to the
+  record fields).
+- Add functions `RoundDown.dist` and `RoundUp.dist` (downward/upward
+  rounded distance).
+
 1.5.1 2019-05-01
 ----------------
 
