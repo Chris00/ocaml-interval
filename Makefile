@@ -32,10 +32,8 @@ clean:
 
 doc:
 	dune build @doc
-	sed -e 's/%%VERSION%%/$(PKGVERSION)/' --in-place \
-	  _build/default/_doc/_html/interval_base/Interval/index.html \
-	  _build/default/_doc/_html/interval_intel/Interval_intel/index.html \
-	  _build/default/_doc/_html/interval_crlibm/Interval_crlibm/index.html
+	find _build/ -name index.html \
+	  -exec sed -e 's/%%VERSION%%/$(PKGVERSION)/' --in-place {} \;
 
 pin:
 #	Installation in the right order
